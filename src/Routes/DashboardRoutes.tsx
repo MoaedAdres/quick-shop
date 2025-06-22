@@ -5,7 +5,7 @@ export const dashboardRoutes: RouteObject[] = [
     id: "home",
     path: "home",
     lazy: async () => {
-      const module = await import("@/Views/Dashboard/Home");
+      const module = await import("@/Views/Dashboard/Home/Home");
       return { element: <module.default /> };
     },
   },
