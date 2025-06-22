@@ -8,7 +8,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Toaster } from "sonner";
 
 const App = () => {
-  console.log("hellllo")
+  console.log("hellllo");
   useEffect(() => {
     document.querySelector("html")?.setAttribute("data-theme", "dark");
   }, []);
@@ -23,7 +23,7 @@ const App = () => {
           id: "dashboard",
           path: "/dashboard",
           lazy: async () => {
-            const module = await import("@/Layouts/DashboardLayout");
+            const module = await import("@/Layouts/DashboardLayout.tsx");
             return { element: <module.default /> };
           },
           children: dashboardRoutes,
@@ -38,7 +38,7 @@ const App = () => {
   ]);
   return (
     <>
-      <main className="flex h-screen dark">
+      <main id="first div" className="flex h-screen dark">
         <RouterProvider router={router} />
       </main>
       <Toaster />
