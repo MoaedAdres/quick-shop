@@ -4,14 +4,14 @@ import { icons } from "@/Constants/icons";
 import { useProductsStore } from "@/Stores/products.store";
 import { mockProducts, mockCategories, mockHeroBanners } from "@/data/mock-data";
 import RFlex from "@/RComponents/RFlex";
-import RSearchInput from "@/RComponents/RSearchInput";
+// import RSearchInput from "@/RComponents/RSearchInput";
 import TopBar from "@/Views/Dashboard/Home/TopBar";
 import ProductCard from "@/components/ui/product-card";
 import CategoryCard from "@/components/ui/category-card";
 import HeroBanner from "@/components/ui/hero-banner";
 
 const Home = () => {
-  const { setProducts, setCategories, getFilteredProducts, setSearchQuery } = useProductsStore();
+  const { setProducts, setCategories, getFilteredProducts } = useProductsStore();
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
   // Initialize data
@@ -31,9 +31,9 @@ const Home = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
+  // const handleSearch = (query: string) => {
+  //   setSearchQuery(query);
+  // };
 
   const filteredProducts = getFilteredProducts();
   const featuredProducts = filteredProducts.filter(product => product.isFeatured);
@@ -44,7 +44,7 @@ const Home = () => {
       <TopBar />
 
       {/* Search Bar */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+      {/* <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
         <div className="p-4">
           <RSearchInput
             searchData=""
@@ -54,7 +54,7 @@ const Home = () => {
             className="w-full"
           />
         </div>
-      </div>
+      </div> */}
 
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto">
