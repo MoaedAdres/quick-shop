@@ -2,11 +2,18 @@ import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { mockUser } from "@/data/mock-data";
 import RFlex from "@/RComponents/RFlex";
+import { useAuthStore } from "@/Stores/auth.store";
 
 const Profile = () => {
+  const { user, logout } = useAuthStore();
+
+  // Use Telegram user data if available
+  const displayName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : mockUser.name;
+  const avatar = user?.photo_url || mockUser.avatar;
+  const email = user?.username ? `@${user.username}` : mockUser.email;
+
   const handleLogout = () => {
-    // Handle logout logic
-    console.log("Logging out...");
+    logout();
   };
 
   const formatDate = (dateString: string) => {
@@ -86,16 +93,18 @@ const Profile = () => {
           >
             <div className="flex items-center gap-4 mb-6">
               <img
-                src={mockUser.avatar}
-                alt={mockUser.name}
+                src={avatar}
+                alt={displayName}
                 className="w-16 h-16 rounded-full object-cover"
               />
               <div>
                 <h2 className="text-xl font-semibold text-foreground">
-                  {mockUser.name}
+                  {displayName}
                 </h2>
-                <p className="text-muted-foreground">{mockUser.email}</p>
-                <p className="text-sm text-muted-foreground">{mockUser.phone}</p>
+                <p className="text-muted-foreground">{email}</p>
+                {user?.language_code && (
+                  <p className="text-sm text-muted-foreground">{user.language_code}</p>
+                )}
               </div>
             </div>
 

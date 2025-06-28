@@ -5,7 +5,7 @@ import RFlex from "@/RComponents/RFlex";
 import CartItem from "@/components/ui/cart-item";
 
 const Cart = () => {
-  const { cart, clearCart, getCartTotal } = useCartStore();
+  const { cart, clearCart } = useCartStore();
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
