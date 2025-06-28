@@ -9,4 +9,28 @@ export const dashboardRoutes: RouteObject[] = [
       return { element: <module.default /> };
     },
   },
+  {
+    id: "cart",
+    path: "cart",
+    lazy: async () => {
+      const module = await import("@/Views/Dashboard/Cart/Cart");
+      return { element: <module.default /> };
+    },
+  },
+  {
+    id: "profile",
+    path: "profile",
+    lazy: async () => {
+      const module = await import("@/Views/Dashboard/Profile/Profile");
+      return { element: <module.default /> };
+    },
+  },
+  {
+    id: "wallet",
+    path: "wallet",
+    lazy: async () => {
+      const module = await import("@/Views/Dashboard/Wallet/Wallet");
+      return { element: <module.default /> };
+    },
+  },
 ];

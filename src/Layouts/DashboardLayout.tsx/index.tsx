@@ -3,6 +3,7 @@ import RFlex from "@/RComponents/RFlex";
 import { createContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router-dom";
+
 export interface DashboardContextType {
   theme: string;
   toggleTheme: (newTheme: string) => void;
@@ -23,7 +24,7 @@ const DashboardLayout = () => {
     localStorage.getItem("lang") || "en"
   );
   const [theme, setTheme] = useState<string>(
-    localStorage.getItem("theme") || "green 1"
+    localStorage.getItem("theme") || "dark"
   ); // Default theme
 
   const toggleTheme = (newTheme: string) => {
@@ -40,6 +41,7 @@ const DashboardLayout = () => {
   };
 
   const { i18n } = useTranslation();
+  
   useEffect(() => {
     const language = localStorage.getItem("lang");
     if (language) {
@@ -47,12 +49,18 @@ const DashboardLayout = () => {
       i18n.changeLanguage(language);
     }
   }, []);
+
   return (
     <DashboardContext.Provider
       value={{ theme, toggleTheme, activeLanguage, switchLanguage }}
     >
-      <RFlex id="dashboard container" className="flex-col h-screen w-full">
-        <Outlet />
+      <RFlex 
+        id="dashboard container" 
+        className="flex-col h-screen w-full bg-background"
+      >
+        <div className="flex-1 overflow-hidden">
+          <Outlet />
+        </div>
         <BottomNavbar />
       </RFlex>
     </DashboardContext.Provider>
