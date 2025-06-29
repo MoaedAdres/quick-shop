@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
-import { useCartStore } from "@/Stores/cart.store";
+import { useDeleteCartItem } from "@/Api/queriesAndMutations";
 import type { CartItem as CartItemType } from "@/Types/types";
 
 interface CartItemProps {
@@ -9,21 +9,21 @@ interface CartItemProps {
 }
 
 const CartItem = ({ item, className = "" }: CartItemProps) => {
-  const { updateQuantity, removeFromCart } = useCartStore();
-
-  const handleQuantityChange = (newQuantity: number) => {
-    updateQuantity(item.productId, newQuantity);
-  };
+  const deleteCartItemMutation = useDeleteCartItem();
 
   const handleRemove = () => {
-    removeFromCart(item.productId);
+    deleteCartItemMutation.mutate(item.id);
   };
 
-  const formatPrice = (price: number) => {
+  const formatPrice = (price: string) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
-    }).format(price);
+    }).format(parseFloat(price));
+  };
+
+  const calculateTotalPrice = () => {
+    return parseFloat(item.product.price) * item.quantity;
   };
 
   return (
@@ -34,13 +34,11 @@ const CartItem = ({ item, className = "" }: CartItemProps) => {
       className={`bg-card rounded-lg p-4 border border-border ${className}`}
     >
       <div className="flex gap-3">
-        {/* Product Image */}
+        {/* Product Image - Using a placeholder since API doesn't provide image */}
         <div className="flex-shrink-0">
-          <img
-            src={item.product.image}
-            alt={item.product.name}
-            className="w-16 h-16 rounded-md object-cover"
-          />
+          <div className="w-16 h-16 rounded-md bg-muted flex items-center justify-center">
+            <i className={`${icons.shoppingBag} text-2xl text-muted-foreground`} />
+          </div>
         </div>
 
         {/* Product Info */}
@@ -49,52 +47,31 @@ const CartItem = ({ item, className = "" }: CartItemProps) => {
             {item.product.name}
           </h3>
           <p className="text-xs text-muted-foreground mb-2">
-            {item.product.category}
+            {item.product.supplier.name}
           </p>
           
           {/* Price */}
           <div className="flex items-center gap-2 mb-3">
             <span className="font-semibold text-primary">
-              {formatPrice(item.price)}
+              {formatPrice(item.product.price)}
             </span>
-            {item.product.originalPrice && item.product.originalPrice > item.price && (
-              <span className="text-xs text-muted-foreground line-through">
-                {formatPrice(item.product.originalPrice)}
-              </span>
-            )}
           </div>
 
-          {/* Quantity Controls */}
+          {/* Quantity Display */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={() => handleQuantityChange(item.quantity - 1)}
-                disabled={item.quantity <= 1}
-                className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-muted/80 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <i className={`${icons.remove} text-xs`} />
-              </motion.button>
-              
+              <span className="text-sm text-muted-foreground">Qty:</span>
               <span className="w-8 text-center text-sm font-medium text-foreground">
                 {item.quantity}
               </span>
-              
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={() => handleQuantityChange(item.quantity + 1)}
-                disabled={item.quantity >= item.product.stockCount}
-                className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-muted/80 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <i className={`${icons.add} text-xs`} />
-              </motion.button>
             </div>
 
             {/* Remove Button */}
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={handleRemove}
-              className="text-red-500 hover:text-red-600 p-1"
+              disabled={deleteCartItemMutation.isPending}
+              className="text-red-500 hover:text-red-600 p-1 disabled:opacity-50"
             >
               <i className={`${icons.delete} text-sm`} />
             </motion.button>
@@ -104,7 +81,7 @@ const CartItem = ({ item, className = "" }: CartItemProps) => {
         {/* Total Price */}
         <div className="flex-shrink-0 text-right">
           <div className="font-semibold text-primary">
-            {formatPrice(item.totalPrice)}
+            {formatPrice(calculateTotalPrice().toString())}
           </div>
         </div>
       </div>

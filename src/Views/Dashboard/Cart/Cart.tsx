@@ -1,11 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { icons } from "@/Constants/icons";
-import { useCartStore } from "@/Stores/cart.store";
+import { useGetCart } from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import CartItem from "@/components/ui/cart-item";
 
 const Cart = () => {
-  const { cart, clearCart } = useCartStore();
+  const { data: cartData, isLoading, error } = useGetCart();
+  const cart = cartData?.data;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -14,12 +15,52 @@ const Cart = () => {
     }).format(price);
   };
 
+  const calculateCartTotals = () => {
+    if (!cart?.items) return { subtotal: 0, shipping: 0, tax: 0, total: 0 };
+    
+    const subtotal = cart.items.reduce((sum, item) => sum + parseFloat(item.product.price) * item.quantity, 0);
+    const shipping = subtotal > 50 ? 0 : 5.99; // Free shipping over $50
+    const tax = subtotal * 0.08; // 8% tax
+    const total = subtotal + shipping + tax;
+
+    return { subtotal, shipping, tax, total };
+  };
+
   const handleCheckout = () => {
     // Handle checkout logic
     console.log("Proceeding to checkout...");
   };
 
-  if (cart.items.length === 0) {
+  if (isLoading) {
+    return (
+      <RFlex className="flex-col h-full pb-20 md:pb-0">
+        <div className="bg-card border-b border-border p-4">
+          <h1 className="text-xl font-semibold text-foreground">Shopping Cart</h1>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <i className={`${icons.spinner} text-2xl text-primary`} />
+        </div>
+      </RFlex>
+    );
+  }
+
+  if (error) {
+    return (
+      <RFlex className="flex-col h-full pb-20 md:pb-0">
+        <div className="bg-card border-b border-border p-4">
+          <h1 className="text-xl font-semibold text-foreground">Shopping Cart</h1>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <i className={`${icons.error} text-3xl text-red-500 mb-2`} />
+            <p className="text-muted-foreground">Failed to load cart</p>
+          </div>
+        </div>
+      </RFlex>
+    );
+  }
+
+  if (!cart || cart.items.length === 0) {
     return (
       <RFlex className="flex-col h-full pb-20 md:pb-0">
         {/* Header */}
@@ -57,20 +98,17 @@ const Cart = () => {
     );
   }
 
+  const totals = calculateCartTotals();
+
   return (
     <RFlex className="flex-col h-full pb-20 md:pb-0">
       {/* Header */}
       <div className="bg-card border-b border-border p-4">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold text-foreground">Shopping Cart</h1>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={clearCart}
-            className="text-red-500 hover:text-red-600 text-sm font-medium"
-          >
-            Clear All
-          </motion.button>
+          <span className="text-sm text-muted-foreground">
+            {cart.items.length} item{cart.items.length !== 1 ? 's' : ''}
+          </span>
         </div>
       </div>
 
@@ -91,28 +129,28 @@ const Cart = () => {
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Subtotal</span>
-            <span className="text-foreground">{formatPrice(cart.subtotal)}</span>
+            <span className="text-foreground">{formatPrice(totals.subtotal)}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Shipping</span>
             <span className="text-foreground">
-              {cart.shipping === 0 ? "Free" : formatPrice(cart.shipping)}
+              {totals.shipping === 0 ? "Free" : formatPrice(totals.shipping)}
             </span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Tax</span>
-            <span className="text-foreground">{formatPrice(cart.tax)}</span>
+            <span className="text-foreground">{formatPrice(totals.tax)}</span>
           </div>
           <div className="border-t border-border pt-2">
             <div className="flex justify-between font-semibold">
               <span className="text-foreground">Total</span>
-              <span className="text-primary">{formatPrice(cart.total)}</span>
+              <span className="text-primary">{formatPrice(totals.total)}</span>
             </div>
           </div>
         </div>
 
         {/* Free Shipping Progress */}
-        {cart.subtotal < 50 && (
+        {totals.subtotal < 50 && (
           <div className="bg-muted rounded-lg p-3">
             <div className="flex items-center gap-2 mb-2">
               <i className={`${icons.truck} text-primary`} />
@@ -123,12 +161,12 @@ const Cart = () => {
             <div className="w-full bg-background rounded-full h-2">
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: `${(cart.subtotal / 50) * 100}%` }}
+                animate={{ width: `${(totals.subtotal / 50) * 100}%` }}
                 className="bg-primary h-2 rounded-full"
               />
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Add {formatPrice(50 - cart.subtotal)} more for free shipping
+              Add {formatPrice(50 - totals.subtotal)} more for free shipping
             </p>
           </div>
         )}
@@ -140,7 +178,7 @@ const Cart = () => {
           onClick={handleCheckout}
           className="w-full bg-primary text-primary-foreground py-4 rounded-lg font-semibold text-lg"
         >
-          Checkout - {formatPrice(cart.total)}
+          Checkout - {formatPrice(totals.total)}
         </motion.button>
 
         {/* Continue Shopping */}

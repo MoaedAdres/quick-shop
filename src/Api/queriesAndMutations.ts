@@ -1,6 +1,7 @@
 import { backApis } from "./endpoints";
 import { useFetchData } from "@/hooks/use-fetch-data";
 import { useInfiniteData } from "@/hooks/use-infinit-data";
+import { useMutateData } from "@/hooks/use-mutate-data";
 import type {
   ProductsResponse,
   CategoriesResponse,
@@ -8,6 +9,9 @@ import type {
   SearchProductsResponse,
   SearchParams,
   RecommendedProductsParams,
+  CartResponse,
+  AddToCartPayload,
+  ShippingAddress,
 } from "@/Types/types";
 
 // Query Keys
@@ -54,9 +58,9 @@ export const useGetRecommendedProductsInfinite = (
   return useInfiniteData<ProductsResponse>({
     queryKey: queryKeys.products.recommended({ ...params, page: 1 }),
     queryFn: async ({ pageParam }: { pageParam?: unknown }) => {
-      const response = await backApis.getRecommendedProducts({ 
-        ...params, 
-        page: (pageParam as number) ?? 1
+      const response = await backApis.getRecommendedProducts({
+        ...params,
+        page: (pageParam as number) ?? 1,
       });
       return response.data;
     },
@@ -105,38 +109,31 @@ export const useGetCategories = () => {
 
 // ------------------------------ Cart Queries & Mutations ---------------------------------------------
 
-// TODO: Add when you provide cart endpoints
-// export const useGetCart = () => {
-//   return useFetchData<CartResponse>({
-//     queryKey: queryKeys.cart.all,
-//     queryFn: () => backApis.getCart(),
-//   });
-// };
+export const useGetCart = () => {
+  return useFetchData<CartResponse>({
+    queryKey: queryKeys.cart.all,
+    queryFn: async () => {
+      const response = await backApis.getCart();
+      return response.data;
+    },
+  });
+};
 
-// export const useAddToCart = () => {
-//   return useMutateData({
-//     mutationFn: (payload: AddToCartPayload) => backApis.addToCart(payload),
-//     invalidateKeys: [queryKeys.cart.all],
-//     displaySuccess: true,
-//   });
-// };
+export const useAddToCart = () => {
+  return useMutateData({
+    mutationFn: (payload: AddToCartPayload) => backApis.addToCart(payload),
+    invalidateKeys: [{ queryKey: queryKeys.cart.all }],
+    displaySuccess: true,
+  });
+};
 
-// export const useUpdateCartItem = () => {
-//   return useMutateData({
-//     mutationFn: ({ itemId, payload }: { itemId: string; payload: UpdateCartItemPayload }) =>
-//       backApis.updateCartItem(itemId, payload),
-//     invalidateKeys: [queryKeys.cart.all],
-//     displaySuccess: true,
-//   });
-// };
-
-// export const useRemoveFromCart = () => {
-//   return useMutateData({
-//     mutationFn: (itemId: string) => backApis.removeFromCart(itemId),
-//     invalidateKeys: [queryKeys.cart.all],
-//     displaySuccess: true,
-//   });
-// };
+export const useDeleteCartItem = () => {
+  return useMutateData({
+    mutationFn: (itemId: number) => backApis.removeFromCart(itemId),
+    invalidateKeys: [{ queryKey: queryKeys.cart.all }],
+    displaySuccess: true,
+  });
+};
 
 // ------------------------------ Authentication Mutations ---------------------------------------------
 
@@ -210,3 +207,11 @@ export const useGetCategories = () => {
 //     displaySuccess: true,
 //   });
 // };
+
+// Shipping Mutations
+export const useShippingPreview = () => {
+  return useMutateData({
+    mutationFn: (payload: ShippingAddress) => backApis.shippingPreview(payload),
+    displaySuccess: false,
+  });
+};

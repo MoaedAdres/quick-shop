@@ -1,5 +1,5 @@
-import { get } from "@/Config/axios";
-import type { SearchParams, RecommendedProductsParams } from "@/Types/types";
+import { get, post, destroy } from "@/Config/axios";
+import type { SearchParams, RecommendedProductsParams, AddToCartPayload, ShippingAddress } from "@/Types/types";
 
 export const backApis = {
   // ------------------------------ Products ---------------------------------------------
@@ -16,11 +16,12 @@ export const backApis = {
   getCategories: () => get("products/categories"),
 
   // ------------------------------ Cart ---------------------------------------------
-  // TODO: Add cart endpoints when you provide them
-  // getCart: () => get("cart"),
-  // addToCart: (payload: AddToCartPayload) => post("cart/add", payload),
-  // updateCartItem: (itemId: string, payload: UpdateCartItemPayload) => put(`cart/items/${itemId}`, payload),
-  // removeFromCart: (itemId: string) => destroy(`cart/items/${itemId}`),
+  getCart: () => get("orders/cart"),
+  addToCart: (payload: AddToCartPayload) => post("orders/cart/items", payload),
+  removeFromCart: (itemId: number) => destroy(`orders/cart/items/${itemId}`),
+
+  // ------------------------------ Shipping ---------------------------------------------
+  shippingPreview: (payload: ShippingAddress) => post("orders/shipping-preview", payload),
 
   // ------------------------------ Authentication ---------------------------------------------
   // TODO: Add auth endpoints when you provide them

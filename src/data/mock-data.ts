@@ -1,43 +1,60 @@
 import type { Product, Category, HeroBanner, User } from "@/Types/types";
-import { icons } from "@/Constants/icons";
 
 // Mock Categories
 export const mockCategories: Category[] = [
   {
-    id: "electronics",
+    id: 1,
     name: "Electronics",
-    icon: icons.electronics,
-    productCount: 45,
+    sub_categories: [
+      { id: 1, name: "Smartphones" },
+      { id: 2, name: "Laptops" },
+      { id: 3, name: "Accessories" },
+    ],
   },
   {
-    id: "apparel",
+    id: 2,
     name: "Apparel",
-    icon: icons.apparel,
-    productCount: 32,
+    sub_categories: [
+      { id: 4, name: "Men's Clothing" },
+      { id: 5, name: "Women's Clothing" },
+      { id: 6, name: "Kids' Clothing" },
+    ],
   },
   {
-    id: "home-decor",
+    id: 3,
     name: "Home & Decor",
-    icon: icons.homeDecor,
-    productCount: 28,
+    sub_categories: [
+      { id: 7, name: "Furniture" },
+      { id: 8, name: "Kitchen" },
+      { id: 9, name: "Lighting" },
+    ],
   },
   {
-    id: "beauty",
+    id: 4,
     name: "Beauty",
-    icon: icons.beauty,
-    productCount: 19,
+    sub_categories: [
+      { id: 10, name: "Skincare" },
+      { id: 11, name: "Makeup" },
+      { id: 12, name: "Haircare" },
+    ],
   },
   {
-    id: "sports",
+    id: 5,
     name: "Sports",
-    icon: icons.sports,
-    productCount: 23,
+    sub_categories: [
+      { id: 13, name: "Fitness" },
+      { id: 14, name: "Outdoor" },
+      { id: 15, name: "Team Sports" },
+    ],
   },
   {
-    id: "books",
+    id: 6,
     name: "Books",
-    icon: icons.books,
-    productCount: 15,
+    sub_categories: [
+      { id: 16, name: "Fiction" },
+      { id: 17, name: "Non-Fiction" },
+      { id: 18, name: "Educational" },
+    ],
   },
 ];
 
@@ -77,186 +94,189 @@ export const mockHeroBanners: HeroBanner[] = [
 // Mock Products
 export const mockProducts: Product[] = [
   {
-    id: "1",
-    name: "Wireless Bluetooth Headphones",
-    description:
-      "High-quality wireless headphones with noise cancellation and long battery life.",
-    price: 89.99,
-    originalPrice: 129.99,
-    image:
+    title: "Wireless Bluetooth Headphones",
+    product_id: "1005005965122809",
+    main_image:
       "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
-    images: [
+    small_images: [
       "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
       "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=400&h=400&fit=crop",
     ],
-    category: "electronics",
-    tags: ["wireless", "bluetooth", "noise-cancellation"],
-    rating: 4.5,
-    reviewCount: 128,
-    inStock: true,
-    stockCount: 25,
-    isFeatured: true,
-    isOnSale: true,
-    discountPercentage: 31,
-    createdAt: "2024-01-15T10:00:00Z",
-    updatedAt: "2024-01-15T10:00:00Z",
+    category: {
+      id: 1,
+      name: "Electronics",
+    },
+    second_level_category: {
+      id: 1,
+      name: "Smartphones",
+    },
+    sale_price: "89.99",
+    sale_price_currency: "USD",
+    original_price: "129.99",
+    original_price_currency: "USD",
+    original_price_target: "129.99",
+    original_price_target_currency: "USD",
+    discount: "31",
   },
   {
-    id: "2",
-    name: "Premium Cotton T-Shirt",
-    description:
-      "Comfortable and stylish cotton t-shirt perfect for everyday wear.",
-    price: 24.99,
-    originalPrice: 34.99,
-    image:
+    title: "Premium Cotton T-Shirt",
+    product_id: "1005005965122810",
+    main_image:
       "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
-    images: [
+    small_images: [
       "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
     ],
-    category: "apparel",
-    tags: ["cotton", "comfortable", "casual"],
-    rating: 4.2,
-    reviewCount: 89,
-    inStock: true,
-    stockCount: 50,
-    isFeatured: false,
-    isOnSale: true,
-    discountPercentage: 29,
-    createdAt: "2024-01-10T10:00:00Z",
-    updatedAt: "2024-01-10T10:00:00Z",
+    category: {
+      id: 2,
+      name: "Apparel",
+    },
+    second_level_category: {
+      id: 4,
+      name: "Men's Clothing",
+    },
+    sale_price: "24.99",
+    sale_price_currency: "USD",
+    original_price: "34.99",
+    original_price_currency: "USD",
+    original_price_target: "34.99",
+    original_price_target_currency: "USD",
+    discount: "29",
   },
   {
-    id: "3",
-    name: "Smart LED Desk Lamp",
-    description:
-      "Modern LED desk lamp with adjustable brightness and color temperature.",
-    price: 59.99,
-    image:
+    title: "Smart LED Desk Lamp",
+    product_id: "1005005965122811",
+    main_image:
       "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400&h=400&fit=crop",
-    images: [
+    small_images: [
       "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400&h=400&fit=crop",
     ],
-    category: "home-decor",
-    tags: ["led", "adjustable", "modern"],
-    rating: 4.7,
-    reviewCount: 156,
-    inStock: true,
-    stockCount: 15,
-    isFeatured: true,
-    isOnSale: false,
-    createdAt: "2024-01-20T10:00:00Z",
-    updatedAt: "2024-01-20T10:00:00Z",
+    category: {
+      id: 3,
+      name: "Home & Decor",
+    },
+    second_level_category: {
+      id: 9,
+      name: "Lighting",
+    },
+    sale_price: "59.99",
+    sale_price_currency: "USD",
+    original_price: "59.99",
+    original_price_currency: "USD",
+    discount: "0",
   },
   {
-    id: "4",
-    name: "Organic Face Cream",
-    description: "Natural and organic face cream for all skin types.",
-    price: 34.99,
-    image:
+    title: "Organic Face Cream",
+    product_id: "1005005965122812",
+    main_image:
       "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=400&fit=crop",
-    images: [
+    small_images: [
       "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=400&fit=crop",
     ],
-    category: "beauty",
-    tags: ["organic", "natural", "face-cream"],
-    rating: 4.3,
-    reviewCount: 67,
-    inStock: true,
-    stockCount: 30,
-    isFeatured: false,
-    isOnSale: false,
-    createdAt: "2024-01-12T10:00:00Z",
-    updatedAt: "2024-01-12T10:00:00Z",
+    category: {
+      id: 4,
+      name: "Beauty",
+    },
+    second_level_category: {
+      id: 10,
+      name: "Skincare",
+    },
+    sale_price: "34.99",
+    sale_price_currency: "USD",
+    original_price: "34.99",
+    original_price_currency: "USD",
+    discount: "0",
   },
   {
-    id: "5",
-    name: "Yoga Mat Premium",
-    description:
-      "Non-slip yoga mat perfect for home workouts and studio sessions.",
-    price: 29.99,
-    originalPrice: 39.99,
-    image:
+    title: "Yoga Mat Premium",
+    product_id: "1005005965122813",
+    main_image:
       "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=400&fit=crop",
-    images: [
+    small_images: [
       "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=400&fit=crop",
     ],
-    category: "sports",
-    tags: ["yoga", "non-slip", "workout"],
-    rating: 4.6,
-    reviewCount: 94,
-    inStock: true,
-    stockCount: 40,
-    isFeatured: false,
-    isOnSale: true,
-    discountPercentage: 25,
-    createdAt: "2024-01-18T10:00:00Z",
-    updatedAt: "2024-01-18T10:00:00Z",
+    category: {
+      id: 5,
+      name: "Sports",
+    },
+    second_level_category: {
+      id: 13,
+      name: "Fitness",
+    },
+    sale_price: "29.99",
+    sale_price_currency: "USD",
+    original_price: "39.99",
+    original_price_currency: "USD",
+    original_price_target: "39.99",
+    original_price_target_currency: "USD",
+    discount: "25",
   },
   {
-    id: "6",
-    name: "Bestseller Novel",
-    description: "Award-winning novel that has captured readers worldwide.",
-    price: 19.99,
-    image:
+    title: "Bestseller Novel",
+    product_id: "1005005965122814",
+    main_image:
       "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=400&fit=crop",
-    images: [
+    small_images: [
       "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=400&fit=crop",
     ],
-    category: "books",
-    tags: ["bestseller", "award-winning", "fiction"],
-    rating: 4.8,
-    reviewCount: 203,
-    inStock: false,
-    stockCount: 0,
-    isFeatured: true,
-    isOnSale: false,
-    createdAt: "2024-01-05T10:00:00Z",
-    updatedAt: "2024-01-05T10:00:00Z",
+    category: {
+      id: 6,
+      name: "Books",
+    },
+    second_level_category: {
+      id: 16,
+      name: "Fiction",
+    },
+    sale_price: "19.99",
+    sale_price_currency: "USD",
+    original_price: "19.99",
+    original_price_currency: "USD",
+    discount: "0",
   },
   {
-    id: "7",
-    name: "Wireless Charging Pad",
-    description:
-      "Fast wireless charging pad compatible with all Qi-enabled devices.",
-    price: 49.99,
-    originalPrice: 69.99,
-    image:
+    title: "Wireless Charging Pad",
+    product_id: "1005005965122815",
+    main_image:
       "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=400&fit=crop",
-    images: [
+    small_images: [
       "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=400&fit=crop",
     ],
-    category: "electronics",
-    tags: ["wireless", "charging", "qi-enabled"],
-    rating: 4.4,
-    reviewCount: 78,
-    inStock: true,
-    stockCount: 20,
-    isFeatured: false,
-    isOnSale: true,
-    discountPercentage: 29,
-    createdAt: "2024-01-22T10:00:00Z",
-    updatedAt: "2024-01-22T10:00:00Z",
+    category: {
+      id: 1,
+      name: "Electronics",
+    },
+    second_level_category: {
+      id: 3,
+      name: "Accessories",
+    },
+    sale_price: "49.99",
+    sale_price_currency: "USD",
+    original_price: "69.99",
+    original_price_currency: "USD",
+    original_price_target: "69.99",
+    original_price_target_currency: "USD",
+    discount: "29",
   },
   {
-    id: "8",
-    name: "Denim Jacket Classic",
-    description: "Timeless denim jacket perfect for any casual occasion.",
-    price: 79.99,
-    image:
+    title: "Denim Jacket Classic",
+    product_id: "1005005965122816",
+    main_image:
       "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&h=400&fit=crop",
-    images: [
+    small_images: [
       "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&h=400&fit=crop",
     ],
-    category: "apparel",
-    tags: ["denim", "jacket", "classic"],
-    rating: 4.1,
-    reviewCount: 45,
-    inStock: true,
-    stockCount: 35,
-    isFeatured: false,
-    isOnSale: false,
-    createdAt: "2024-01-14T10:00:00Z",
-    updatedAt: "2024-01-14T10:00:00Z",
+    category: {
+      id: 2,
+      name: "Apparel",
+    },
+    second_level_category: {
+      id: 4,
+      name: "Men's Clothing",
+    },
+    sale_price: "79.99",
+    sale_price_currency: "USD",
+    original_price: "79.99",
+    original_price_currency: "USD",
+    discount: "0",
   },
 ];
 

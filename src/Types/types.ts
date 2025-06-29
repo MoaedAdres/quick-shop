@@ -1,4 +1,11 @@
-import type { InfiniteData, MutationFunction, MutationKey, InvalidateQueryFilters, QueryKey, QueryObserverSuccessResult } from "@tanstack/react-query";
+import type {
+  InfiniteData,
+  MutationFunction,
+  MutationKey,
+  InvalidateQueryFilters,
+  QueryKey,
+  QueryObserverSuccessResult,
+} from "@tanstack/react-query";
 import type { CSSProperties, ReactNode } from "react";
 
 export type BreadCrumbObject = {
@@ -143,22 +150,81 @@ export interface RecommendedProductsParams extends PaginationParams {
 }
 
 // Cart Types
+export interface CartProduct {
+  id: number;
+  name: string;
+  price: string;
+  supplier: {
+    name: string;
+    code: string;
+  };
+  product_id: string;
+  sku_id?: string;
+  sku_attr?: string;
+}
+
 export interface CartItem {
-  id: string;
-  productId: string;
-  product: Product;
+  id: number;
+  product: CartProduct;
   quantity: number;
-  price: number;
-  totalPrice: number;
 }
 
 export interface Cart {
+  id: number;
+  user: number;
   items: CartItem[];
-  totalItems: number;
-  subtotal: number;
-  shipping: number;
-  tax: number;
-  total: number;
+  created_at: string;
+}
+
+export interface AddToCartPayload {
+  source: string;
+  product: {
+    product_id: string;
+    name: string;
+    sku_id: string;
+    sku_attr: string;
+    price: number;
+  };
+  quantity: number;
+}
+
+// Shipping Types
+export interface ShippingAddress {
+  address: string;
+  address2?: string;
+  city: string;
+  province: string;
+  country: string;
+  zip: string;
+  contact_person: string;
+  full_name: string;
+  mobile_no: string;
+  phone_country: string;
+  order_comment?: string;
+}
+
+export interface ShippingPreview {
+  total_shipping_fee: number;
+  currency: string;
+  estimated_delivery_min_days: number;
+  estimated_delivery_max_days: number;
+  shipping_companies: string[];
+}
+
+export interface ShippingPreviewResponse {
+  data: ShippingPreview;
+  message: string;
+}
+
+// API Response Types
+export interface CartResponse {
+  data: Cart;
+  message: string | null;
+}
+
+export interface ShippingPreviewResponse {
+  data: ShippingPreview;
+  message: string;
 }
 
 // User Types
@@ -288,7 +354,7 @@ export type UseInfiniteDataParams<TQueryFnData, TError, TSelected> = {
 export type UseMutateDataOptions<
   TData = any,
   TVariables = any,
-  TError = any,
+  TError = any
 > = {
   mutationFn: MutationFunction<TData, TVariables>;
   mutationKey?: MutationKey;

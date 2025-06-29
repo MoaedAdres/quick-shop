@@ -1,5 +1,5 @@
 import { icons } from "@/Constants/icons";
-import { useCartStore } from "@/Stores/cart.store";
+import { useGetCart } from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
@@ -40,8 +40,8 @@ const CustomNavItem = ({
 };
 
 const BottomNavbar = () => {
-  const { getCartItemCount } = useCartStore();
-  const cartItemCount = getCartItemCount();
+  const { data: cartData } = useGetCart();
+  const cartItemCount = cartData?.data?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   return (
     <RFlex
