@@ -7,7 +7,6 @@ class TelegramService {
     if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
       this.webApp = window.Telegram.WebApp;
       this.webApp.ready();
-      this.setupTheme();
       return true;
     }
     return false;

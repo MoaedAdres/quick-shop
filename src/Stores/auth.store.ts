@@ -31,7 +31,7 @@ export const useAuthStore = create<AuthState>()(
     devtools(
       (set, get) => ({
         ...initState,
-        
+
         initTelegramAuth: () => {
           const isTelegramApp = telegramService.init();
           if (isTelegramApp) {
@@ -71,6 +71,7 @@ export const useAuthStore = create<AuthState>()(
       name: "auth-storage",
       partialize: (state) => ({
         user: state.user,
+        token: state.token,
         isTelegramApp: state.isTelegramApp,
         isAuthenticated: state.isAuthenticated,
       }),
