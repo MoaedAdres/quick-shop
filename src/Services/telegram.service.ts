@@ -88,6 +88,12 @@ class TelegramService {
     if (!this.webApp) return;
     this.webApp.HapticFeedback.impactOccurred(style);
   }
+  logInitData() {
+    if (!this.webApp) return;
+    
+    console.log('telegram log: initDataUnsafe:', this.webApp.initDataUnsafe);
+    console.log('telegram log: initData:', this.webApp.initData);
+  }
 }
 
 export const telegramService = new TelegramService(); 
