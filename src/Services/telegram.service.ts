@@ -88,7 +88,7 @@ class TelegramService {
     if (!this.webApp) return;
     this.webApp.HapticFeedback.impactOccurred(style);
   }
-  logInitData() {
+  logData() {
     if (!this.webApp) return;
     
     console.log('telegram log: initDataUnsafe:', this.webApp.initDataUnsafe);

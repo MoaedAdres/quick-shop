@@ -46,6 +46,7 @@ export const useAuthStore = create<AuthState>()(
               });
               telegramService.setupTheme();
             }
+            telegramService.logData();
           }
         },
 
