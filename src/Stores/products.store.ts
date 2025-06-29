@@ -1,21 +1,36 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { Product, Category, SearchFilters } from "@/Types/types";
+import type { Product, Category } from "@/Types/types";
+import ApiService from "@/Services/api.service";
 
 interface ProductsState {
   products: Product[];
   categories: Category[];
-  featuredProducts: Product[];
   searchQuery: string;
-  filters: SearchFilters;
-  isLoading: boolean;
+  loading: boolean;
+  error: string | null;
+  pagination: {
+    currentPage: number;
+    totalProducts: number;
+    pageSize: number;
+    isFinished: boolean;
+  };
+  
+  // Actions
   setProducts: (products: Product[]) => void;
   setCategories: (categories: Category[]) => void;
   setSearchQuery: (query: string) => void;
-  setFilters: (filters: Partial<SearchFilters>) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  setPagination: (pagination: Partial<ProductsState['pagination']>) => void;
+  
+  // API calls
+  fetchRecommendedProducts: (page?: number, pageSize?: number) => Promise<void>;
+  fetchCategories: () => Promise<void>;
+  searchProducts: (query: string, page?: number) => Promise<void>;
+  
+  // Computed
   getFilteredProducts: () => Product[];
-  getProductsByCategory: (categoryId: string) => Product[];
-  getProductById: (id: string) => Product | undefined;
 }
 
 export const useProductsStore = create<ProductsState>()(
@@ -23,109 +38,103 @@ export const useProductsStore = create<ProductsState>()(
     (set, get) => ({
       products: [],
       categories: [],
-      featuredProducts: [],
       searchQuery: "",
-      filters: {},
-      isLoading: false,
-
-      setProducts: (products: Product[]) => {
-        const featuredProducts = products.filter((product) => product.isFeatured);
-        set({ products, featuredProducts });
+      loading: false,
+      error: null,
+      pagination: {
+        currentPage: 1,
+        totalProducts: 0,
+        pageSize: 20,
+        isFinished: false,
       },
 
-      setCategories: (categories: Category[]) => {
-        set({ categories });
+      setProducts: (products) => set({ products }),
+      setCategories: (categories) => set({ categories }),
+      setSearchQuery: (query) => set({ searchQuery: query }),
+      setLoading: (loading) => set({ loading }),
+      setError: (error) => set({ error }),
+      setPagination: (pagination) => set((state) => ({
+        pagination: { ...state.pagination, ...pagination }
+      })),
+
+      fetchRecommendedProducts: async (page = 1, pageSize = 20) => {
+        try {
+          set({ loading: true, error: null });
+          const response = await ApiService.getRecommendedProducts({
+            page,
+            page_size: pageSize,
+            type: 'GLOBAL_TOPSELLERS'
+          });
+          
+          set({
+            products: response.data.products,
+            pagination: {
+              currentPage: page,
+              totalProducts: response.data.total_products_count,
+              pageSize,
+              isFinished: response.data.is_finished,
+            },
+            loading: false,
+          });
+        } catch (error) {
+          set({ 
+            loading: false, 
+            error: error instanceof Error ? error.message : 'Failed to fetch products' 
+          });
+        }
       },
 
-      setSearchQuery: (searchQuery: string) => {
-        set({ searchQuery });
+      fetchCategories: async () => {
+        try {
+          set({ loading: true, error: null });
+          const response = await ApiService.getCategories();
+          set({ categories: response.data, loading: false });
+        } catch (error) {
+          set({ 
+            loading: false, 
+            error: error instanceof Error ? error.message : 'Failed to fetch categories' 
+          });
+        }
       },
 
-      setFilters: (filters: Partial<SearchFilters>) => {
-        set((state) => ({
-          filters: { ...state.filters, ...filters },
-        }));
+      searchProducts: async (query: string, page = 1) => {
+        try {
+          set({ loading: true, error: null });
+          const response = await ApiService.searchProducts({
+            search: query,
+            page,
+            page_size: 20,
+            local: 'en_US',
+            country: 'US',
+            currency: 'USD'
+          });
+          
+          set({
+            products: response.data.products,
+            searchQuery: query,
+            pagination: {
+              currentPage: response.data.page,
+              totalProducts: response.data.total_products,
+              pageSize: response.data.page_size,
+              isFinished: false, // Search doesn't provide this info
+            },
+            loading: false,
+          });
+        } catch (error) {
+          set({ 
+            loading: false, 
+            error: error instanceof Error ? error.message : 'Failed to search products' 
+          });
+        }
       },
 
       getFilteredProducts: () => {
-        const { products, searchQuery, filters } = get();
-        let filtered = [...products];
-
-        // Search by name or description
-        if (searchQuery) {
-          const query = searchQuery.toLowerCase();
-          filtered = filtered.filter(
-            (product) =>
-              product.name.toLowerCase().includes(query) ||
-              product.description.toLowerCase().includes(query) ||
-              product.tags.some((tag) => tag.toLowerCase().includes(query))
-          );
-        }
-
-        // Filter by category
-        if (filters.category) {
-          filtered = filtered.filter(
-            (product) => product.category === filters.category
-          );
-        }
-
-        // Filter by price range
-        if (filters.priceRange) {
-          filtered = filtered.filter(
-            (product) =>
-              product.price >= filters.priceRange!.min &&
-              product.price <= filters.priceRange!.max
-          );
-        }
-
-        // Filter by rating
-        if (filters.rating) {
-          filtered = filtered.filter(
-            (product) => product.rating >= filters.rating!
-          );
-        }
-
-        // Filter by stock
-        if (filters.inStock !== undefined) {
-          filtered = filtered.filter(
-            (product) => product.inStock === filters.inStock
-          );
-        }
-
-        // Sort products
-        if (filters.sortBy) {
-          filtered.sort((a, b) => {
-            const order = filters.sortOrder === "desc" ? -1 : 1;
-            
-            switch (filters.sortBy) {
-              case "price":
-                return (a.price - b.price) * order;
-              case "rating":
-                return (a.rating - b.rating) * order;
-              case "newest":
-                return (
-                  new Date(a.createdAt).getTime() -
-                  new Date(b.createdAt).getTime()
-                ) * order;
-              case "popular":
-                return (a.reviewCount - b.reviewCount) * order;
-              default:
-                return 0;
-            }
-          });
-        }
-
-        return filtered;
-      },
-
-      getProductsByCategory: (categoryId: string) => {
-        const { products } = get();
-        return products.filter((product) => product.category === categoryId);
-      },
-
-      getProductById: (id: string) => {
-        const { products } = get();
-        return products.find((product) => product.id === id);
+        const { products, searchQuery } = get();
+        if (!searchQuery.trim()) return products;
+        
+        return products.filter(product =>
+          product.title.toLowerCase().includes(searchQuery.toLowerCase())
+        );
       },
     }),
     { name: "products-devtools" }

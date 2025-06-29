@@ -1,28 +1,31 @@
-import { useAuthStore } from "@/Stores/auth.store";
 import axios from "axios";
-export const online = false;
 
-const apiClient = axios.create({
-  baseURL: online
-    ? import.meta.env.VITE_BACKEND_CLIENT
-    : import.meta.env.VITE_BACKEND_DEVLOPER,
+// Replace this URL when backend is deployed
+const API_BASE_URL = 'https://your-backend-url.com'; // TODO: Replace with actual backend URL
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
   headers: {
-    // Accept: "application/json",
-    // "Content-Type": "application/json",
-    "Accept-Language": localStorage.getItem("lang") ?? "en",
+    'Content-Type': 'application/json',
   },
 });
 
-apiClient.interceptors.request.use(
+// Request interceptor to add telegram_id to all requests
+api.interceptors.request.use(
   (config) => {
-    config.headers["Authorization"] = `Bearer ${useAuthStore.getState().token}`;
-    config.headers["lang"] = localStorage.getItem("lang");
-    // if (config.formData) {
-    // 	config.data = ObjToFormData(config.data);
-    // 	// Set Content-Type to undefined to let Axios set it automatically for FormData
-    // 	delete config.headers["Content-Type"];
-    // }
-
+    // Get telegram_id from localStorage or auth store
+    const authData = localStorage.getItem('auth-storage');
+    if (authData) {
+      try {
+        const parsed = JSON.parse(authData);
+        if (parsed.state?.user?.id) {
+          config.headers['telegram_id'] = parsed.state.user.id;
+        }
+      } catch (error) {
+        console.error('Error parsing auth data:', error);
+      }
+    }
     return config;
   },
   (error) => {
@@ -30,30 +33,16 @@ apiClient.interceptors.request.use(
   }
 );
 
-apiClient.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+// Response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
   (error) => {
-    if (error.response) {
-      // console.log("error.response", error.response.data);
-      if (error.response.status === 401) {
-      } else {
-        // Handle other response errors
-        console.error("Response error:", error.response);
-      }
-    } else if (error.request) {
-      // Handle request error
-      console.error("Request error:", error?.request);
-    } else {
-      // Handle other errors
-      console.error("Error:", error.message);
-    }
-    return Promise.reject(error?.response?.data);
+    console.error('API Error:', error);
+    return Promise.reject(error);
   }
 );
 
-const { get, post, put, patch, delete: destroy } = apiClient;
+const { get, post, put, patch, delete: destroy } = api;
 export { get, post, put, destroy, patch };
 
-export default apiClient;
+export default api;
