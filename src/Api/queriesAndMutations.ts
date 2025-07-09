@@ -64,11 +64,20 @@ export const useGetRecommendedProductsInfinite = (
       });
       return response.data;
     },
+    initialPageParam: 1,
     getNextPageParam: (lastPage: ProductsResponse) => {
       if (lastPage?.data?.is_finished) {
         return undefined;
       }
-      return (lastPage as any)?.nextPage ?? undefined;
+      // Calculate next page based on current products count and total
+      const currentCount = lastPage?.data?.current_products_count || 0;
+      const totalCount = lastPage?.data?.total_products_count || 0;
+      const pageSize = 20; // Assuming default page size, adjust if needed
+      
+      if (currentCount < totalCount) {
+        return Math.floor(currentCount / pageSize) + 1;
+      }
+      return undefined;
     },
   });
 };
