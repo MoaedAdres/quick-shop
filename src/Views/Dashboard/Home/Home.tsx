@@ -44,7 +44,7 @@ const Home = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-blue-50 p-4 rounded-lg">
               <h3 className="font-semibold text-blue-800">Products</h3>
-              <p className="text-blue-600">Browse our catalog</p>
+              <p className="text-blue-600">Browse our  catalog</p>
             </div>
             <div className="bg-purple-50 p-4 rounded-lg">
               <h3 className="font-semibold text-purple-800">Cart</h3>
