@@ -4,16 +4,16 @@ import type { SearchParams, RecommendedProductsParams, AddToCartPayload, Shippin
 export const backApis = {
   // ------------------------------ Products ---------------------------------------------
   getRecommendedProducts: (params: RecommendedProductsParams) =>
-    get("products", { params }),
+    get("products/aliexpress/recommended", { params }),
 
-  searchProducts: (params: SearchParams) =>
-    get("products/products", { params }),
+  getProductsWithSearch: (params: SearchParams) =>
+    get("products/aliexpress/products", { params }),
 
   getProductDetails: (productId: string | number) =>
-    get(`products/${productId}`),
+    get(`products/aliexpress/products/${productId}`),
 
   // ------------------------------ Categories ---------------------------------------------
-  getCategories: () => get("products/categories"),
+  getCategories: () => get("products/aliexpress/categories"),
 
   // ------------------------------ Cart ---------------------------------------------
   getCart: () => get("orders/cart"),

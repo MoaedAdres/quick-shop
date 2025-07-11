@@ -86,7 +86,7 @@ export const useSearchProducts = (params: SearchParams) => {
   return useFetchData<SearchProductsResponse>({
     queryKey: queryKeys.products.search(params),
     queryFn: async () => {
-      const response = await backApis.searchProducts(params);
+      const response = await backApis.getProductsWithSearch(params);
       return response.data;
     },
     enableCondition: !!params.search.trim(), // Only run if search query exists
