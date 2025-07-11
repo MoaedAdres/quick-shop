@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Replace this URL when backend is deployed
-const API_BASE_URL = 'http://hashbel.io/api/v1/'; // TODO: Replace with actual backend URL
+const API_BASE_URL = 'https://hashbel.io/api/v1/'; // TODO: Replace with actual backend URL
 
 const api = axios.create({
   baseURL: API_BASE_URL,
