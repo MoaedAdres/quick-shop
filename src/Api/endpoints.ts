@@ -1,5 +1,12 @@
 import { get, post, destroy } from "@/Config/axios";
-import type { SearchParams, RecommendedProductsParams, AddToCartPayload, ShippingAddress } from "@/Types/types";
+import type {
+  SearchParams,
+  RecommendedProductsParams,
+  AddToCartPayload,
+  ShippingAddress,
+  TelegramLoginPayload,
+  RefreshTokenPayload,
+} from "@/Types/types";
 
 export const backApis = {
   // ------------------------------ Products ---------------------------------------------
@@ -21,9 +28,15 @@ export const backApis = {
   removeFromCart: (itemId: number) => destroy(`orders/cart/items/${itemId}`),
 
   // ------------------------------ Shipping ---------------------------------------------
-  shippingPreview: (payload: ShippingAddress) => post("orders/shipping-preview", payload),
+  shippingPreview: (payload: ShippingAddress) =>
+    post("orders/shipping-preview", payload),
 
   // ------------------------------ Authentication ---------------------------------------------
+  telegramLogin: (payload: TelegramLoginPayload) =>
+    post("users/telegram-login", payload),
+
+  refreshToken: (payload: RefreshTokenPayload) =>
+    post("users/refresh", payload),
   // TODO: Add auth endpoints when you provide them
   // login: (payload: LoginPayload) => post("auth/login", payload),
   // register: (payload: RegisterPayload) => post("auth/register", payload),

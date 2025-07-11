@@ -12,6 +12,10 @@ import type {
   CartResponse,
   AddToCartPayload,
   ShippingAddress,
+  TelegramLoginPayload,
+  TelegramLoginResponse,
+  RefreshTokenPayload,
+  RefreshTokenResponse,
 } from "@/Types/types";
 
 // Query Keys
@@ -73,7 +77,7 @@ export const useGetRecommendedProductsInfinite = (
       const currentCount = lastPage?.data?.current_products_count || 0;
       const totalCount = lastPage?.data?.total_products_count || 0;
       const pageSize = 20; // Assuming default page size, adjust if needed
-      
+
       if (currentCount < totalCount) {
         return Math.floor(currentCount / pageSize) + 1;
       }
@@ -146,33 +150,25 @@ export const useDeleteCartItem = () => {
 
 // ------------------------------ Authentication Mutations ---------------------------------------------
 
-// TODO: Add when you provide auth endpoints
-// export const useLogin = () => {
-//   return useMutateData({
-//     mutationFn: (payload: LoginPayload) => backApis.login(payload),
-//     displaySuccess: true,
-//     onSuccessFn: (data) => {
-//       // Handle successful login
-//       // Store tokens, update user state, etc.
-//     },
-//   });
-// };
+export const useTelegramLogin = () => {
+  return useMutateData<TelegramLoginResponse, TelegramLoginPayload>({
+    mutationFn: async (payload) => {
+      const response = await backApis.telegramLogin(payload);
+      return response?.data;
+    },
+    displaySuccess: true,
+  });
+};
 
-// export const useRegister = () => {
-//   return useMutateData({
-//     mutationFn: (payload: RegisterPayload) => backApis.register(payload),
-//     displaySuccess: true,
-//   });
-// };
-
-// export const useLogout = () => {
-//   return useMutateData({
-//     mutationFn: () => backApis.logout(),
-//     onSuccessFn: () => {
-//       // Clear user state, tokens, etc.
-//     },
-//   });
-// };
+export const useRefreshToken = () => {
+  return useMutateData<RefreshTokenResponse, RefreshTokenPayload>({
+    mutationFn: async (payload) => {
+      const response = await backApis.refreshToken(payload);
+      return response?.data;
+    },
+    displaySuccess: false,
+  });
+};
 
 // ------------------------------ User Profile Queries & Mutations ---------------------------------------------
 

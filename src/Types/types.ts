@@ -369,3 +369,39 @@ export type UseMutateDataOptions<
   mimeType?: string;
   fileName?: string;
 };
+
+export interface TelegramLoginPayload {
+  telegram_id: string;
+  first_name: string;
+  last_name: string;
+  username: string;
+  photo_url: string;
+  auth_date: string;
+  hash: string;
+  referral_code?: string;
+}
+
+export interface TelegramLoginResponse {
+  data: {
+    user: {
+      id: number;
+      telegram_id: string;
+      firstname: string;
+      lastname: string;
+      picture_url: string;
+      referral_code: string;
+    };
+    access_token: string;
+    refresh_token: string;
+  };
+  message: string | null;
+}
+
+export interface RefreshTokenPayload {
+  refresh: string;
+}
+
+export interface RefreshTokenResponse {
+  access: string;
+  refresh: string;
+}
