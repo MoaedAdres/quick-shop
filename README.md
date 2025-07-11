@@ -14,6 +14,53 @@ A modern e-commerce mini app built for Telegram with React, TypeScript, and Tail
 - 🌙 **Dark/Light Theme** - Automatic theme detection from Telegram
 - ⚡ **React Query** - Efficient data fetching and caching
 
+## Telegram Authentication
+
+The app implements a comprehensive Telegram authentication system:
+
+### How it Works
+
+1. **Automatic Detection**: The app automatically detects if it's running within Telegram Web App
+2. **User Data Extraction**: Extracts user information from Telegram's `initDataUnsafe.user`
+3. **Backend Authentication**: Sends user data to backend API for authentication
+4. **Token Management**: Stores access and refresh tokens for API requests
+5. **Fallback Support**: Falls back to basic Telegram auth if backend is unavailable
+
+### Authentication Flow
+
+```typescript
+// 1. Initialize Telegram WebApp
+const isTelegramApp = telegramService.init();
+
+// 2. Extract user data
+const user = telegramService.getUser();
+const initData = telegramService.getInitData();
+
+// 3. Create login payload
+const loginPayload: TelegramLoginPayload = {
+  telegram_id: user.id.toString(),
+  first_name: user.first_name,
+  last_name: user.last_name || '',
+  username: user.username || '',
+  photo_url: user.photo_url || '',
+  auth_date: webApp?.initDataUnsafe?.auth_date?.toString() || '',
+  hash: webApp?.initDataUnsafe?.hash || '',
+  referral_code: webApp?.initDataUnsafe?.start_param,
+};
+
+// 4. Authenticate with backend
+const response = await backApis.telegramLogin(loginPayload);
+
+// 5. Store tokens
+set({
+  user,
+  isTelegramApp: true,
+  isAuthenticated: true,
+  token: response.data.access_token,
+  refreshToken: response.data.refresh_token,
+});
+```
+
 ## API Integration
 
 The app is now integrated with a backend API using React Query v5 for efficient data management.
@@ -58,6 +105,8 @@ The app uses the following API endpoints:
 - `GET /products/categories` - Get all categories
 - `GET /products/products?search=query&local=en_US&country=US&currency=USD&page=1&page_size=20` - Search products
 - `GET /products/{product_id}` - Get product details
+- `POST /users/telegram-login` - Authenticate with Telegram data
+- `POST /users/refresh` - Refresh access token
 
 ## React Query Integration
 
@@ -90,10 +139,6 @@ const { data, isLoading, error } = useSearchProducts({
 // Get categories
 const { data, isLoading, error } = useGetCategories();
 ```
-
-## Authentication
-
-The app automatically authenticates users through Telegram's Web App API. The `telegram_id` is automatically included in all API requests.
 
 ## Development
 

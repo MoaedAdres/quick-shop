@@ -22,14 +22,14 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  const { initTelegramAuth, isTelegramApp } = useAuthStore();
+  const { login, isTelegramApp } = useAuthStore();
 
   useEffect(() => {
-    // Initialize Telegram authentication
-    initTelegramAuth();
+    // Perform Telegram login authentication
+    login();
     // Set dark theme by default
     document.querySelector("html")?.setAttribute("data-theme", "dark");
-  }, [initTelegramAuth]);
+  }, [login]);
 
   const router = createBrowserRouter([
     ...publicRoutes,

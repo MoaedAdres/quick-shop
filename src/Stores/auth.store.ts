@@ -2,7 +2,9 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import { telegramService } from "@/Services/telegram.service";
+import { backApis } from "@/Api/endpoints";
 import type { TelegramUser } from "@/Types/telegram";
+import type { TelegramLoginPayload, TelegramLoginResponse } from "@/Types/types";
 
 interface AuthState {
   token: string | null;
@@ -10,9 +12,9 @@ interface AuthState {
   user: TelegramUser | null;
   isTelegramApp: boolean;
   isAuthenticated: boolean;
-  login: () => void;
+  isLoading: boolean;
+  login: () => Promise<void>;
   logout: () => void;
-  initTelegramAuth: () => void;
 }
 
 const initState: AuthState = {
@@ -21,9 +23,9 @@ const initState: AuthState = {
   user: null,
   isTelegramApp: false,
   isAuthenticated: false,
-  login: () => {},
+  isLoading: false,
+  login: async () => {},
   logout: () => {},
-  initTelegramAuth: () => {},
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -32,9 +34,73 @@ export const useAuthStore = create<AuthState>()(
       (set, get) => ({
         ...initState,
 
-        initTelegramAuth: () => {
-          const isTelegramApp = telegramService.init();
-          if (isTelegramApp) {
+        login: async () => {
+          set({ isLoading: true });
+          
+          try {
+            // Initialize Telegram service
+            const isTelegramApp = telegramService.init();
+            
+            if (!isTelegramApp) {
+              console.error('Not running in Telegram Web App');
+              set({ isLoading: false });
+              return;
+            }
+
+            const user = telegramService.getUser();
+            const initData = telegramService.getInitData();
+            
+            if (!user || !initData) {
+              console.error('No user data or init data available');
+              set({ isLoading: false });
+              return;
+            }
+
+            // Extract referral code from start parameter if available
+            const webApp = telegramService.getWebApp();
+            const referralCode = webApp?.initDataUnsafe?.start_param;
+
+            // Create login payload
+            const loginPayload: TelegramLoginPayload = {
+              telegram_id: user.id.toString(),
+              first_name: user.first_name,
+              last_name: user.last_name || '',
+              username: user.username || '',
+              photo_url: user.photo_url || '',
+              auth_date: webApp?.initDataUnsafe?.auth_date?.toString() || '',
+              hash: webApp?.initDataUnsafe?.hash || '',
+              referral_code: referralCode,
+            };
+
+            // Call backend API for authentication
+            const response = await backApis.telegramLogin(loginPayload);
+            const loginResponse: TelegramLoginResponse = response.data;
+
+            // Store authentication data
+            set({
+              user,
+              isTelegramApp: true,
+              isAuthenticated: true,
+              token: loginResponse.data.access_token,
+              refreshToken: loginResponse.data.refresh_token,
+              isLoading: false,
+            });
+
+            // Setup Telegram theme
+            telegramService.setupTheme();
+            
+            console.log('Login successful:', loginResponse);
+            
+          } catch (error) {
+            console.error('Login failed:', error);
+            set({ 
+              isLoading: false,
+              isAuthenticated: false,
+              token: null,
+              refreshToken: null,
+            });
+            
+            // If API call fails, fall back to basic Telegram auth
             const user = telegramService.getUser();
             const initData = telegramService.getInitData();
             if (user && initData) {
@@ -42,16 +108,11 @@ export const useAuthStore = create<AuthState>()(
                 user,
                 isTelegramApp: true,
                 isAuthenticated: true,
-                token: initData, // Use initData as token for Telegram auth
+                token: initData,
               });
               telegramService.setupTheme();
             }
-            telegramService.logData();
           }
-        },
-
-        login: () => {
-          get().initTelegramAuth();
         },
 
         logout: () => {
@@ -60,6 +121,7 @@ export const useAuthStore = create<AuthState>()(
             refreshToken: null,
             user: null,
             isAuthenticated: false,
+            isLoading: false,
           });
           if (get().isTelegramApp) {
             telegramService.close();
@@ -73,6 +135,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         token: state.token,
+        refreshToken: state.refreshToken,
         isTelegramApp: state.isTelegramApp,
         isAuthenticated: state.isAuthenticated,
       }),
