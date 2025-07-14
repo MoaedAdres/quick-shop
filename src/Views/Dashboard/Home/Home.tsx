@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { useAuthStore } from "@/Stores/auth.store";
-import { telegramService } from "@/Services/telegram.service";
 import {
   useGetRecommendedProducts,
   useGetCategories,
@@ -18,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 const Home = () => {
-  const { user, login, isLoading, isAuthenticated } = useAuthStore();
+  const { login, isLoading, isAuthenticated } = useAuthStore();
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -75,14 +74,14 @@ const Home = () => {
     setSearchQuery(query);
   };
 
-  const handleDebug = () => {
-    telegramService.showAlert(`User Debug Info:
-Telegram ID: ${user?.id || "N/A"}
-Name: ${user?.first_name || "N/A"} ${user?.last_name || ""}
-Username: ${user?.username || "N/A"}
-Language: ${user?.language_code || "N/A"}
-Premium: ${user?.is_premium || false}`);
-  };
+  //   const handleDebug = () => {
+  //     telegramService.showAlert(`User Debug Info:
+  // Telegram ID: ${user?.id || "N/A"}
+  // Name: ${user?.first_name || "N/A"} ${user?.last_name || ""}
+  // Username: ${user?.username || "N/A"}
+  // Language: ${user?.language_code || "N/A"}
+  // Premium: ${user?.is_premium || false}`);
+  //   };
 
   const handleCategoryClick = (category: any) => {
     console.log("Selected category:", category);
@@ -119,16 +118,6 @@ Premium: ${user?.is_premium || false}`);
     <RFlex className="flex-col h-full pb-20 md:pb-0 relative">
       {/* Top Bar */}
       <TopBar />
-
-      {/* Debug Button - Remove in production */}
-      <div className="p-4 bg-red-100 border-b">
-        <button
-          onClick={handleDebug}
-          className="bg-red-500 text-white px-4 py-2 rounded text-sm"
-        >
-          🐛 Show User Info
-        </button>
-      </div>
 
       {/* Search Bar */}
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
