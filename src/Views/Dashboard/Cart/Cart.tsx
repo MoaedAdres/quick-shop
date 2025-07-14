@@ -5,13 +5,18 @@ import { useGetCart } from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import CartItem from "@/components/ui/cart-item";
 import ShippingPreviewForm from "@/components/ui/shipping-preview-form";
-import type { ShippingPreviewSuccess, ShippingPreviewError } from "@/Types/types";
+import type {
+  ShippingPreviewSuccess,
+  ShippingPreviewError,
+} from "@/Types/types";
 
 const Cart = () => {
   const { data: cartData, isLoading, error } = useGetCart();
-  const cart = cartData?.data;
-  const [shippingPreview, setShippingPreview] = useState<ShippingPreviewSuccess | null>(null);
-  const [shippingError, setShippingError] = useState<ShippingPreviewError | null>(null);
+  const cart = cartData;
+  const [shippingPreview, setShippingPreview] =
+    useState<ShippingPreviewSuccess | null>(null);
+  const [shippingError, setShippingError] =
+    useState<ShippingPreviewError | null>(null);
   const [showShippingForm, setShowShippingForm] = useState(false);
 
   const formatPrice = (price: number) => {
@@ -23,8 +28,11 @@ const Cart = () => {
 
   const calculateCartTotals = () => {
     if (!cart?.items) return { subtotal: 0, shipping: 0, tax: 0, total: 0 };
-    
-    const subtotal = cart.items.reduce((sum, item) => sum + parseFloat(item.product.price) * item.quantity, 0);
+
+    const subtotal = cart.items.reduce(
+      (sum, item) => sum + parseFloat(item.product.price) * item.quantity,
+      0
+    );
     const shipping = shippingPreview?.data.total_shipping_fee ?? 0;
     const tax = subtotal * 0.08; // 8% tax
     const total = subtotal + shipping + tax;
@@ -56,10 +64,14 @@ const Cart = () => {
     return (
       <RFlex className="flex-col h-full pb-20 md:pb-0">
         <div className="bg-card border-b border-border p-4">
-          <h1 className="text-xl font-semibold text-foreground">Shopping Cart</h1>
+          <h1 className="text-xl font-semibold text-foreground">
+            Shopping Cart
+          </h1>
         </div>
         <div className="flex-1 flex items-center justify-center">
-          <i className={`${icons.spinner} text-2xl text-primary animate-spin`} />
+          <i
+            className={`${icons.spinner} text-2xl text-primary animate-spin`}
+          />
         </div>
       </RFlex>
     );
@@ -69,7 +81,9 @@ const Cart = () => {
     return (
       <RFlex className="flex-col h-full pb-20 md:pb-0">
         <div className="bg-card border-b border-border p-4">
-          <h1 className="text-xl font-semibold text-foreground">Shopping Cart</h1>
+          <h1 className="text-xl font-semibold text-foreground">
+            Shopping Cart
+          </h1>
         </div>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -86,7 +100,9 @@ const Cart = () => {
       <RFlex className="flex-col h-full pb-20 md:pb-0">
         {/* Header */}
         <div className="bg-card border-b border-border p-4">
-          <h1 className="text-xl font-semibold text-foreground">Shopping Cart</h1>
+          <h1 className="text-xl font-semibold text-foreground">
+            Shopping Cart
+          </h1>
         </div>
 
         {/* Empty Cart */}
@@ -126,9 +142,11 @@ const Cart = () => {
       {/* Header */}
       <div className="bg-card border-b border-border p-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-foreground">Shopping Cart</h1>
+          <h1 className="text-xl font-semibold text-foreground">
+            Shopping Cart
+          </h1>
           <span className="text-sm text-muted-foreground">
-            {cart.items.length} item{cart.items.length !== 1 ? 's' : ''}
+            {cart.items.length} item{cart.items.length !== 1 ? "s" : ""}
           </span>
         </div>
       </div>
@@ -153,7 +171,9 @@ const Cart = () => {
             animate={{ opacity: 1, y: 0 }}
             className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4"
           >
-            <h3 className="text-red-700 font-medium mb-2">Shipping Not Available</h3>
+            <h3 className="text-red-700 font-medium mb-2">
+              Shipping Not Available
+            </h3>
             <p className="text-red-600 text-sm mb-3">{shippingError.message}</p>
             <div className="space-y-2">
               {shippingError.data.unshippable_products.map((item) => (
@@ -172,11 +192,23 @@ const Cart = () => {
             animate={{ opacity: 1, y: 0 }}
             className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4"
           >
-            <h3 className="text-green-700 font-medium mb-2">Shipping Information</h3>
+            <h3 className="text-green-700 font-medium mb-2">
+              Shipping Information
+            </h3>
             <div className="space-y-2 text-sm text-green-600">
-              <p>Estimated Delivery: {shippingPreview.data.estimated_delivery_min_days}-{shippingPreview.data.estimated_delivery_max_days} days</p>
-              <p>Shipping Companies: {shippingPreview.data.shipping_companies.join(", ")}</p>
-              <p>Shipping Fee: {formatPrice(shippingPreview.data.total_shipping_fee)}</p>
+              <p>
+                Estimated Delivery:{" "}
+                {shippingPreview.data.estimated_delivery_min_days}-
+                {shippingPreview.data.estimated_delivery_max_days} days
+              </p>
+              <p>
+                Shipping Companies:{" "}
+                {shippingPreview.data.shipping_companies.join(", ")}
+              </p>
+              <p>
+                Shipping Fee:{" "}
+                {formatPrice(shippingPreview.data.total_shipping_fee)}
+              </p>
             </div>
           </motion.div>
         )}
@@ -245,7 +277,9 @@ const Cart = () => {
           onClick={handleCheckout}
           className="w-full bg-primary text-primary-foreground py-4 rounded-lg font-semibold text-lg"
         >
-          {!shippingPreview ? "Calculate Shipping" : `Checkout - ${formatPrice(totals.total)}`}
+          {!shippingPreview
+            ? "Calculate Shipping"
+            : `Checkout - ${formatPrice(totals.total)}`}
         </motion.button>
 
         {/* Continue Shopping */}
@@ -262,4 +296,4 @@ const Cart = () => {
   );
 };
 
-export default Cart; 
+export default Cart;
