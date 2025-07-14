@@ -9,7 +9,11 @@ interface ProductCardProps {
   className?: string;
 }
 
-const ProductCard = ({ product, onClick, className = "" }: ProductCardProps) => {
+const ProductCard = ({
+  product,
+  onClick,
+  className = "",
+}: ProductCardProps) => {
   const navigate = useNavigate();
   const {
     title,
@@ -25,6 +29,7 @@ const ProductCard = ({ product, onClick, className = "" }: ProductCardProps) => 
   const handleClick = () => {
     if (onClick) {
       onClick();
+      navigate(`/dashboard/product/${product_id}`);
     } else {
       navigate(`/dashboard/product/${product_id}`);
     }
@@ -44,17 +49,17 @@ const ProductCard = ({ product, onClick, className = "" }: ProductCardProps) => 
           alt={title}
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
         />
-        
+
         {/* Discount Badge */}
         {discount && discount !== "0%" && (
           <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
             {discount}
           </div>
         )}
-        
+
         {/* Quick Actions */}
         <div className="absolute top-2 right-2 flex flex-col gap-1">
-          <button 
+          <button
             className="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-colors"
             onClick={(e) => {
               e.stopPropagation();
@@ -78,12 +83,14 @@ const ProductCard = ({ product, onClick, className = "" }: ProductCardProps) => 
           <span className="text-lg font-bold text-primary">
             {sale_price_currency} {parseFloat(sale_price).toFixed(2)}
           </span>
-          
-          {original_price && parseFloat(original_price) > parseFloat(sale_price) && (
-            <span className="text-sm text-muted-foreground line-through">
-              {original_price_currency} {parseFloat(original_price).toFixed(2)}
-            </span>
-          )}
+
+          {original_price &&
+            parseFloat(original_price) > parseFloat(sale_price) && (
+              <span className="text-sm text-muted-foreground line-through">
+                {original_price_currency}{" "}
+                {parseFloat(original_price).toFixed(2)}
+              </span>
+            )}
         </div>
 
         {/* Rating and Reviews */}
@@ -101,8 +108,8 @@ const ProductCard = ({ product, onClick, className = "" }: ProductCardProps) => 
             </div>
             <span className="text-xs text-muted-foreground">(4.5)</span>
           </div>
-          
-          <button 
+
+          <button
             className="text-xs text-primary hover:underline"
             onClick={(e) => {
               e.stopPropagation();
@@ -117,4 +124,4 @@ const ProductCard = ({ product, onClick, className = "" }: ProductCardProps) => 
   );
 };
 
-export default ProductCard; 
+export default ProductCard;

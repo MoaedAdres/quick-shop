@@ -5,7 +5,7 @@ import ProtectedRoute from "@/Utils/ProtectedRoutes";
 import RedirectRoute from "@/Utils/RedirectRoute";
 import { useAuthStore } from "@/Stores/auth.store";
 import { useEffect } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -44,8 +44,13 @@ const App = () => {
             const module = await import("@/Layouts/DashboardLayout.tsx");
             return { element: <module.default /> };
           },
-          children: dashboardRoutes,
-          // errorElement:<div>hello</div>
+          children: [
+            {
+              index: true,
+              element: <Navigate to="home" replace />,
+            },
+            ...dashboardRoutes,
+          ],
         },
       ],
     },
