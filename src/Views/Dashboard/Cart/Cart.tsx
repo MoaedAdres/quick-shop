@@ -152,7 +152,7 @@ const Cart = () => {
       </div>
 
       {/* Cart Items */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto min-h-[400px] md:min-h-[500px]">
         <div className="p-4 space-y-4">
           <AnimatePresence>
             {cart.items.map((item) => (
