@@ -19,6 +19,8 @@ import type {
   OrdersResponse,
   OrderDetailsResponse,
   Order,
+  ShippingPreviewSuccess,
+  ShippingPreviewError,
 } from "@/Types/types";
 
 // Query Keys
@@ -130,7 +132,7 @@ export const useGetCategories = () => {
 
 // ------------------------------ Cart Queries & Mutations ---------------------------------------------
 
-export const useGetCart = (enabled: boolean = true) => {
+export const useGetCart = (enabled = true) => {
   return useFetchData<CartResponse>({
     queryKey: queryKeys.cart.all,
     queryFn: async () => {
@@ -224,8 +226,8 @@ export const useRefreshToken = () => {
 
 // Shipping Mutations
 export const useShippingPreview = () => {
-  return useMutateData({
-    mutationFn: (payload: ShippingAddress) => backApis.shippingPreview(payload),
+  return useMutateData<ShippingPreviewSuccess | ShippingPreviewError, ShippingAddress>({
+    mutationFn: (address: ShippingAddress) => backApis.shippingPreview(address),
     displaySuccess: false,
   });
 };

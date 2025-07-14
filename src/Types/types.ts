@@ -188,7 +188,6 @@ export interface AddToCartPayload {
   quantity: number;
 }
 
-// Shipping Types
 export interface ShippingAddress {
   address: string;
   address2?: string;
@@ -203,6 +202,31 @@ export interface ShippingAddress {
   order_comment?: string;
 }
 
+export interface UnshippableProduct {
+  id: number;
+  product: CartProduct;
+  quantity: number;
+}
+
+export interface ShippingPreviewError {
+  message: string;
+  data: {
+    unshippable_products: UnshippableProduct[];
+  };
+}
+
+export interface ShippingPreviewSuccess {
+  data: {
+    total_shipping_fee: number;
+    currency: string;
+    estimated_delivery_min_days: number;
+    estimated_delivery_max_days: number;
+    shipping_companies: string[];
+  };
+  message: string;
+}
+
+// Shipping Types
 export interface ShippingPreview {
   total_shipping_fee: number;
   currency: string;

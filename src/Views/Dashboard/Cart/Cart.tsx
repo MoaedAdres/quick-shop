@@ -1,12 +1,18 @@
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { useGetCart } from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import CartItem from "@/components/ui/cart-item";
+import ShippingPreviewForm from "@/components/ui/shipping-preview-form";
+import type { ShippingPreviewSuccess, ShippingPreviewError } from "@/Types/types";
 
 const Cart = () => {
   const { data: cartData, isLoading, error } = useGetCart();
   const cart = cartData?.data;
+  const [shippingPreview, setShippingPreview] = useState<ShippingPreviewSuccess | null>(null);
+  const [shippingError, setShippingError] = useState<ShippingPreviewError | null>(null);
+  const [showShippingForm, setShowShippingForm] = useState(false);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -19,14 +25,29 @@ const Cart = () => {
     if (!cart?.items) return { subtotal: 0, shipping: 0, tax: 0, total: 0 };
     
     const subtotal = cart.items.reduce((sum, item) => sum + parseFloat(item.product.price) * item.quantity, 0);
-    const shipping = subtotal > 50 ? 0 : 5.99; // Free shipping over $50
+    const shipping = shippingPreview?.data.total_shipping_fee ?? 0;
     const tax = subtotal * 0.08; // 8% tax
     const total = subtotal + shipping + tax;
 
     return { subtotal, shipping, tax, total };
   };
 
+  const handleShippingSuccess = (preview: ShippingPreviewSuccess) => {
+    setShippingPreview(preview);
+    setShippingError(null);
+    setShowShippingForm(false);
+  };
+
+  const handleShippingError = (error: ShippingPreviewError) => {
+    setShippingError(error);
+    setShippingPreview(null);
+  };
+
   const handleCheckout = () => {
+    if (!shippingPreview) {
+      setShowShippingForm(true);
+      return;
+    }
     // Handle checkout logic
     console.log("Proceeding to checkout...");
   };
@@ -38,7 +59,7 @@ const Cart = () => {
           <h1 className="text-xl font-semibold text-foreground">Shopping Cart</h1>
         </div>
         <div className="flex-1 flex items-center justify-center">
-          <i className={`${icons.spinner} text-2xl text-primary`} />
+          <i className={`${icons.spinner} text-2xl text-primary animate-spin`} />
         </div>
       </RFlex>
     );
@@ -69,7 +90,7 @@ const Cart = () => {
         </div>
 
         {/* Empty Cart */}
-        <div className="flex-1 flex flex-col items-center justify-center p-8">
+        <div className="flex-1 flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -124,33 +145,79 @@ const Cart = () => {
       </div>
 
       {/* Cart Summary */}
-      <div className="bg-card border-t border-border p-4 space-y-4">
-        {/* Order Summary */}
+      <div className="border-t border-border p-4 space-y-4">
+        {/* Shipping Error */}
+        {shippingError && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4"
+          >
+            <h3 className="text-red-700 font-medium mb-2">Shipping Not Available</h3>
+            <p className="text-red-600 text-sm mb-3">{shippingError.message}</p>
+            <div className="space-y-2">
+              {shippingError.data.unshippable_products.map((item) => (
+                <div key={item.id} className="text-sm text-red-600">
+                  • {item.product.name}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Shipping Preview */}
+        {shippingPreview && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4"
+          >
+            <h3 className="text-green-700 font-medium mb-2">Shipping Information</h3>
+            <div className="space-y-2 text-sm text-green-600">
+              <p>Estimated Delivery: {shippingPreview.data.estimated_delivery_min_days}-{shippingPreview.data.estimated_delivery_max_days} days</p>
+              <p>Shipping Companies: {shippingPreview.data.shipping_companies.join(", ")}</p>
+              <p>Shipping Fee: {formatPrice(shippingPreview.data.total_shipping_fee)}</p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Shipping Form */}
+        {showShippingForm && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="border border-border rounded-lg p-4 mb-4"
+          >
+            <h3 className="font-medium mb-4">Enter Shipping Details</h3>
+            <ShippingPreviewForm
+              onSuccess={handleShippingSuccess}
+              onError={handleShippingError}
+            />
+          </motion.div>
+        )}
+
+        {/* Cart Totals */}
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Subtotal</span>
-            <span className="text-foreground">{formatPrice(totals.subtotal)}</span>
+            <span className="font-medium">{formatPrice(totals.subtotal)}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Shipping</span>
-            <span className="text-foreground">
-              {totals.shipping === 0 ? "Free" : formatPrice(totals.shipping)}
-            </span>
+            <span className="font-medium">{formatPrice(totals.shipping)}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Tax</span>
-            <span className="text-foreground">{formatPrice(totals.tax)}</span>
+            <span className="text-muted-foreground">Tax (8%)</span>
+            <span className="font-medium">{formatPrice(totals.tax)}</span>
           </div>
-          <div className="border-t border-border pt-2">
-            <div className="flex justify-between font-semibold">
-              <span className="text-foreground">Total</span>
-              <span className="text-primary">{formatPrice(totals.total)}</span>
-            </div>
+          <div className="flex justify-between text-base font-semibold pt-2 border-t border-border">
+            <span>Total</span>
+            <span className="text-primary">{formatPrice(totals.total)}</span>
           </div>
         </div>
 
         {/* Free Shipping Progress */}
-        {totals.subtotal < 50 && (
+        {totals.subtotal < 50 && !shippingPreview && (
           <div className="bg-muted rounded-lg p-3">
             <div className="flex items-center gap-2 mb-2">
               <i className={`${icons.truck} text-primary`} />
@@ -178,7 +245,7 @@ const Cart = () => {
           onClick={handleCheckout}
           className="w-full bg-primary text-primary-foreground py-4 rounded-lg font-semibold text-lg"
         >
-          Checkout - {formatPrice(totals.total)}
+          {!shippingPreview ? "Calculate Shipping" : `Checkout - ${formatPrice(totals.total)}`}
         </motion.button>
 
         {/* Continue Shopping */}

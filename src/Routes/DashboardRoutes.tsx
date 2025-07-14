@@ -50,11 +50,11 @@ export const dashboardRoutes: RouteObject[] = [
     },
   },
   {
-    id: "product-details",
+    id: "product",
     path: "product/:productId",
     lazy: async () => {
-      const module = await import("@/Views/Dashboard/ProductDetails/ProductDetails");
+      const module = await import("@/Views/Dashboard/Product/ProductDetails");
       return { element: <module.default /> };
     },
   },
-];
+] as const;

@@ -24,6 +24,7 @@ export const icons = {
   truck: "fa-solid fa-truck",
   creditCard: "fa-solid fa-credit-card",
   moneyBill: "fa-solid fa-money-bill",
+  store: "fa-solid fa-store",
   
   // UI
   chevronRight: "fa-solid fa-chevron-right",
@@ -68,4 +69,6 @@ export const icons = {
   payment: "fa-solid fa-credit-card",
   orders: "fa-solid fa-box",
   wishlist: "fa-solid fa-heart",
-};
+  aliexpress: "ri-shopping-bag-fill",
+  printify: "ri-t-shirt-fill",
+} as const;

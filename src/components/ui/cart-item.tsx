@@ -26,6 +26,28 @@ const CartItem = ({ item, className = "" }: CartItemProps) => {
     return parseFloat(item.product.price) * item.quantity;
   };
 
+  const getSupplierIcon = (supplierCode: string) => {
+    switch (supplierCode) {
+      case "aliexpress":
+        return icons.aliexpress;
+      case "printify":
+        return icons.printify;
+      default:
+        return icons.shoppingBag;
+    }
+  };
+
+  const getSupplierColor = (supplierCode: string) => {
+    switch (supplierCode) {
+      case "aliexpress":
+        return "text-orange-500";
+      case "printify":
+        return "text-blue-500";
+      default:
+        return "text-muted-foreground";
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -37,18 +59,26 @@ const CartItem = ({ item, className = "" }: CartItemProps) => {
         {/* Product Image - Using a placeholder since API doesn't provide image */}
         <div className="flex-shrink-0">
           <div className="w-16 h-16 rounded-md bg-muted flex items-center justify-center">
-            <i className={`${icons.shoppingBag} text-2xl text-muted-foreground`} />
+            <i className={`${getSupplierIcon(item.product.supplier.code)} text-2xl ${getSupplierColor(item.product.supplier.code)}`} />
           </div>
         </div>
 
         {/* Product Info */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1">
           <h3 className="font-medium text-sm text-foreground line-clamp-2 mb-1">
             {item.product.name}
           </h3>
-          <p className="text-xs text-muted-foreground mb-2">
-            {item.product.supplier.name}
-          </p>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+            <i className={`${getSupplierIcon(item.product.supplier.code)} ${getSupplierColor(item.product.supplier.code)}`} />
+            <span>{item.product.supplier.name}</span>
+          </div>
+          
+          {/* SKU Info */}
+          {item.product.sku_attr && (
+            <div className="text-xs text-muted-foreground mb-2">
+              SKU: {item.product.sku_attr}
+            </div>
+          )}
           
           {/* Price */}
           <div className="flex items-center gap-2 mb-3">
@@ -73,7 +103,11 @@ const CartItem = ({ item, className = "" }: CartItemProps) => {
               disabled={deleteCartItemMutation.isPending}
               className="text-red-500 hover:text-red-600 p-1 disabled:opacity-50"
             >
-              <i className={`${icons.delete} text-sm`} />
+              {deleteCartItemMutation.isPending ? (
+                <i className={`${icons.spinner} text-sm animate-spin`} />
+              ) : (
+                <i className={`${icons.delete} text-sm`} />
+              )}
             </motion.button>
           </div>
         </div>

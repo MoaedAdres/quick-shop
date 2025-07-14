@@ -8,6 +8,8 @@ import type {
   RefreshTokenPayload,
   OrdersResponse,
   OrderDetailsResponse,
+  ShippingPreviewSuccess,
+  ShippingPreviewError,
 } from "@/Types/types";
 
 export const backApis = {
@@ -30,7 +32,7 @@ export const backApis = {
   removeFromCart: (itemId: number) => destroy(`orders/cart/items/${itemId}`),
 
   // ------------------------------ Shipping ---------------------------------------------
-  shippingPreview: (payload: ShippingAddress) =>
+  shippingPreview: (payload: ShippingAddress): Promise<ShippingPreviewSuccess | ShippingPreviewError> =>
     post("orders/shipping-preview", payload),
 
   // ------------------------------ Authentication ---------------------------------------------
