@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { icons } from "@/Constants/icons";
 import type { Product } from "@/Types/types";
 
@@ -9,8 +10,10 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product, onClick, className = "" }: ProductCardProps) => {
+  const navigate = useNavigate();
   const {
     title,
+    product_id,
     main_image,
     sale_price,
     sale_price_currency,
@@ -22,6 +25,8 @@ const ProductCard = ({ product, onClick, className = "" }: ProductCardProps) => 
   const handleClick = () => {
     if (onClick) {
       onClick();
+    } else {
+      navigate(`/dashboard/product/${product_id}`);
     }
   };
 
@@ -49,10 +54,22 @@ const ProductCard = ({ product, onClick, className = "" }: ProductCardProps) => 
         
         {/* Quick Actions */}
         <div className="absolute top-2 right-2 flex flex-col gap-1">
-          <button className="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-colors">
+          <button 
+            className="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              // Handle wishlist action
+            }}
+          >
             <i className={`${icons.heart} text-sm text-gray-600`} />
           </button>
-          <button className="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-colors">
+          <button 
+            className="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/dashboard/product/${product_id}`);
+            }}
+          >
             <i className={`${icons.info} text-sm text-gray-600`} />
           </button>
         </div>
@@ -94,7 +111,13 @@ const ProductCard = ({ product, onClick, className = "" }: ProductCardProps) => 
             <span className="text-xs text-muted-foreground">(4.5)</span>
           </div>
           
-          <button className="text-xs text-primary hover:underline">
+          <button 
+            className="text-xs text-primary hover:underline"
+            onClick={(e) => {
+              e.stopPropagation();
+              // Handle add to cart action
+            }}
+          >
             Add to Cart
           </button>
         </div>
