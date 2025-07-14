@@ -122,13 +122,14 @@ export const useGetCategories = () => {
 
 // ------------------------------ Cart Queries & Mutations ---------------------------------------------
 
-export const useGetCart = () => {
+export const useGetCart = (enabled: boolean = true) => {
   return useFetchData<CartResponse>({
     queryKey: queryKeys.cart.all,
     queryFn: async () => {
       const response = await backApis.getCart();
       return response.data;
     },
+    enableCondition: enabled,
   });
 };
 

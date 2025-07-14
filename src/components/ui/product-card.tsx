@@ -63,15 +63,6 @@ const ProductCard = ({ product, onClick, className = "" }: ProductCardProps) => 
           >
             <i className={`${icons.heart} text-sm text-gray-600`} />
           </button>
-          <button 
-            className="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-colors"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/dashboard/product/${product_id}`);
-            }}
-          >
-            <i className={`${icons.info} text-sm text-gray-600`} />
-          </button>
         </div>
       </div>
 
