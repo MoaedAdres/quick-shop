@@ -272,22 +272,57 @@ export interface Transaction {
 }
 
 // Order Types
+export interface OrderItem {
+  id: number;
+  product: CartProduct;
+  quantity: number;
+}
+
 export interface Order {
-  id: string;
-  userId: string;
-  items: CartItem[];
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
-  paymentStatus: "pending" | "paid" | "failed" | "refunded";
-  shippingAddress: Address;
-  billingAddress: Address;
-  subtotal: number;
-  shipping: number;
-  tax: number;
-  total: number;
-  trackingNumber?: string;
-  estimatedDelivery?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: number;
+  user: number;
+  status: 'pending' | 'processing' | 'paid' | 'shipped' | 'delivered' | 'cancelled' | 'fulfillment_failed' | 'Payment_failed';
+  payment_method: 'crypto' | 'stripe';
+  paid_at: string | null;
+  payment_reference: string;
+  supplier: {
+    name: string;
+    code: string;
+  };
+  items_price: number;
+  shipping_fee: number;
+  total_price: number;
+  product_total: number;
+  currency: string;
+  estimated_delivery_min_days: number;
+  estimated_delivery_max_days: number;
+  full_name: string;
+  country: string;
+  province: string;
+  city: string;
+  address: string;
+  address2: string | null;
+  zip: string;
+  mobile_no: string;
+  items: OrderItem[];
+  created_at: string;
+  updated_at: string;
+  failure_reason: string | null;
+}
+
+export interface OrdersResponse {
+  data: {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: Order[];
+  };
+  message: string | null;
+}
+
+export interface OrderDetailsResponse {
+  data: Order;
+  message: string | null;
 }
 
 // Hero Banner Types

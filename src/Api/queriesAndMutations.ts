@@ -16,6 +16,9 @@ import type {
   TelegramLoginResponse,
   RefreshTokenPayload,
   RefreshTokenResponse,
+  OrdersResponse,
+  OrderDetailsResponse,
+  Order,
 } from "@/Types/types";
 
 // Query Keys
@@ -39,6 +42,11 @@ export const queryKeys = {
   },
   wallet: {
     all: ["wallet"] as const,
+  },
+  orders: {
+    all: ["orders"] as const,
+    list: (status?: string) => ["orders", "list", status] as const,
+    details: (orderId: number) => ["orders", "details", orderId] as const,
   },
 };
 
@@ -219,5 +227,23 @@ export const useShippingPreview = () => {
   return useMutateData({
     mutationFn: (payload: ShippingAddress) => backApis.shippingPreview(payload),
     displaySuccess: false,
+  });
+};
+
+// ------------------------------ Orders Queries ---------------------------------------------
+
+export const useGetOrders = (status?: string) => {
+  return useFetchData<OrdersResponse, Error, Order[]>({
+    queryKey: queryKeys.orders.list(status),
+    queryFn: () => backApis.getOrders(status),
+    selectFn: (response) => response.data.results,
+  });
+};
+
+export const useGetOrderDetails = (orderId: number) => {
+  return useFetchData<OrderDetailsResponse, Error, Order>({
+    queryKey: queryKeys.orders.details(orderId),
+    queryFn: () => backApis.getOrderById(orderId),
+    selectFn: (response) => response.data,
   });
 };

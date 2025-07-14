@@ -57,6 +57,7 @@ const BottomNavbar = () => {
         icon={icons.cart} 
         badge={cartItemCount}
       />
+      <CustomNavItem title="orders" to="orders" icon={icons.orders} />
       <CustomNavItem title="wallet" to="wallet" icon={icons.wallet} />
       <CustomNavItem title="profile" to="profile" icon={icons.user} />
     </RFlex>

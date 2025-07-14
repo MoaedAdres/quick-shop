@@ -6,6 +6,8 @@ import type {
   ShippingAddress,
   TelegramLoginPayload,
   RefreshTokenPayload,
+  OrdersResponse,
+  OrderDetailsResponse,
 } from "@/Types/types";
 
 export const backApis = {
@@ -48,9 +50,8 @@ export const backApis = {
   // updateUserProfile: (payload: UpdateProfilePayload) => put("user/profile", payload),
 
   // ------------------------------ Orders ---------------------------------------------
-  // TODO: Add order endpoints when you provide them
-  // getOrders: (params: OrdersFilters) => get("orders", { params }),
-  // getOrderById: (orderId: string) => get(`orders/${orderId}`),
+  getOrders: (status?: string): Promise<OrdersResponse> => get("orders", { params: { status } }),
+  getOrderById: (orderId: number): Promise<OrderDetailsResponse> => get(`orders/${orderId}`),
   // createOrder: (payload: CreateOrderPayload) => post("orders", payload),
 
   // ------------------------------ Wallet ---------------------------------------------

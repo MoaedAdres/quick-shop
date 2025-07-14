@@ -1,5 +1,7 @@
 {
   "home": "Home",
   "cart": "Cart",
-  "profile": "Profile"
+  "profile": "Profile",
+  "orders": "Orders",
+  "wallet": "Wallet"
 }
