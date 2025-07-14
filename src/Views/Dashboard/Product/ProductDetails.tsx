@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
@@ -18,6 +18,21 @@ const ProductDetails = () => {
 
   const { data: productData, isLoading } = useGetProductDetails(productId!);
   const addToCartMutation = useAddToCart();
+
+  // Set initial variant when data loads
+  useEffect(() => {
+    if (productData?.data?.sku_info) {
+      const firstSku = Array.isArray(productData.data.sku_info) 
+        ? productData.data.sku_info[0] 
+        : productData.data.sku_info;
+      
+      setSelectedSku({
+        sku_id: firstSku.sku_id,
+        sku_attr: firstSku.sku_attr,
+        price: firstSku.offer_sale_price,
+      });
+    }
+  }, [productData]);
 
   const handleQuantityChange = (delta: number) => {
     const newQuantity = quantity + delta;

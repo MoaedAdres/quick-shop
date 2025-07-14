@@ -81,7 +81,7 @@ const Cart = () => {
     );
   }
 
-  if (!cart || cart.items.length === 0) {
+  if (!cart || !cart.items || cart.items.length === 0) {
     return (
       <RFlex className="flex-col h-full pb-20 md:pb-0">
         {/* Header */}

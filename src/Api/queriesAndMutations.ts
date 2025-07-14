@@ -147,7 +147,7 @@ export const useAddToCart = () => {
   return useMutateData({
     mutationFn: (payload: AddToCartPayload) => backApis.addToCart(payload),
     invalidateKeys: [{ queryKey: queryKeys.cart.all }],
-    displaySuccess: true,
+    displaySuccess: false, // Disable automatic success toast
   });
 };
 
