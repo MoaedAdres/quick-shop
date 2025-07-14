@@ -43,7 +43,8 @@ const CustomNavItem = ({
 const BottomNavbar = () => {
   const { isAuthenticated } = useAuthStore();
   const { data: cartData } = useGetCart(isAuthenticated);
-  const cartItemCount = cartData?.data?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+  const cartItemCount =
+    cartData?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   return (
     <RFlex
@@ -51,10 +52,10 @@ const BottomNavbar = () => {
       className="justify-between items-center w-full fixed bottom-0 bg-sidebar border-t border-border z-50 lg:hidden"
     >
       <CustomNavItem title="home" to="home" icon={icons.home} />
-      <CustomNavItem 
-        title="cart" 
-        to="cart" 
-        icon={icons.cart} 
+      <CustomNavItem
+        title="cart"
+        to="cart"
+        icon={icons.cart}
         badge={cartItemCount}
       />
       <CustomNavItem title="orders" to="orders" icon={icons.orders} />

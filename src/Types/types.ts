@@ -169,7 +169,7 @@ export interface CartItem {
   quantity: number;
 }
 
-export interface Cart {
+export interface CartResponse {
   id: number;
   user: number;
   items: CartItem[];
@@ -241,10 +241,6 @@ export interface ShippingPreviewResponse {
 }
 
 // API Response Types
-export interface CartResponse {
-  data: Cart;
-  message: string | null;
-}
 
 export interface ShippingPreviewResponse {
   data: ShippingPreview;
@@ -305,8 +301,16 @@ export interface OrderItem {
 export interface Order {
   id: number;
   user: number;
-  status: 'pending' | 'processing' | 'paid' | 'shipped' | 'delivered' | 'cancelled' | 'fulfillment_failed' | 'Payment_failed';
-  payment_method: 'crypto' | 'stripe';
+  status:
+    | "pending"
+    | "processing"
+    | "paid"
+    | "shipped"
+    | "delivered"
+    | "cancelled"
+    | "fulfillment_failed"
+    | "Payment_failed";
+  payment_method: "crypto" | "stripe";
   paid_at: string | null;
   payment_reference: string;
   supplier: {
