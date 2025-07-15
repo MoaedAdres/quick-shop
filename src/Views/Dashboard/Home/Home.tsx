@@ -214,7 +214,7 @@ const Home = () => {
 
           {/* Promotional Banners */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <motion.div
+            {/* <motion.div
               whileHover={{ scale: 1.02 }}
               className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white"
             >
@@ -225,7 +225,7 @@ const Home = () => {
                   <p className="text-sm opacity-90">On orders over $50</p>
                 </div>
               </div>
-            </motion.div>
+            </motion.div> */}
 
             <motion.div
               whileHover={{ scale: 1.02 }}

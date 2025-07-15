@@ -248,7 +248,7 @@ const Cart = () => {
           </div>
         </div>
 
-        {/* Free Shipping Progress */}
+        {/* Free Shipping Progress
         {totals.subtotal < 50 && !shippingPreview && (
           <div className="bg-muted rounded-lg p-3">
             <div className="flex items-center gap-2 mb-2">
@@ -268,7 +268,7 @@ const Cart = () => {
               Add {formatPrice(50 - totals.subtotal)} more for free shipping
             </p>
           </div>
-        )}
+        )} */}
 
         {/* Checkout Button */}
         <motion.button
