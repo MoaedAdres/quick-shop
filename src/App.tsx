@@ -62,7 +62,9 @@ const App = () => {
   
   return (
     <QueryClientProvider client={queryClient}>
-      <main id="first div" className={`flex h-screen ${isTelegramApp ? '' : 'dark'}`}>
+      <main id="first div" className={`flex h-screen ${isTelegramApp ? '' : 'dark'}`} style={{
+        background: 'linear-gradient(to bottom, #100D20 0%, #0B0A12 50%, #0B0A10 100%)'
+      }}>
         <RouterProvider router={router} />
       </main>
       <Toaster />

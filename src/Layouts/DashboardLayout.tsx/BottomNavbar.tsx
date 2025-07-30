@@ -23,7 +23,7 @@ const CustomNavItem = ({
       to={to}
       className={({ isActive }) =>
         `flex flex-col items-center flex-1 gap-1 p-2 relative ${
-          isActive ? "text-primary" : "text-muted-foreground/50"
+          isActive ? "text-[#5019F8]" : "text-muted-foreground/50"
         }`
       }
     >

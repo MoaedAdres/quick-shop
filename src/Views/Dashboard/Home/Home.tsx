@@ -120,7 +120,7 @@ const Home = () => {
       <TopBar />
 
       {/* Search Bar */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+      <div className="sticky top-0 z-40 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 border-b border-border">
         <div className="p-4">
           <RSearchInput
             searchData={searchQuery}
@@ -153,10 +153,10 @@ const Home = () => {
 
           {/* Error State */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="bg-card border border-red-200/20 rounded-lg p-4">
               <div className="flex items-center">
                 <i className={`${icons.error} text-red-500 mr-2`} />
-                <span className="text-red-700">
+                <span className="text-red-400">
                   {(error as Error)?.message || "An error occurred"}
                 </span>
               </div>
@@ -229,7 +229,7 @@ const Home = () => {
 
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="bg-gradient-to-r from-green-500 to-teal-600 rounded-lg p-6 text-white"
+              className="bg-card border border-border/20 rounded-lg p-6 text-white"
             >
               <div className="flex items-center gap-3">
                 <i className={`${icons.gift} text-2xl`} />
@@ -248,9 +248,9 @@ const Home = () => {
       {/* Login Modal Overlay */}
       {!isAuthenticated && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-8 max-w-sm w-full flex flex-col items-center">
-            <h2 className="text-xl font-bold mb-4">Login Required</h2>
-            <p className="mb-4 text-gray-600">Please login to continue</p>
+          <div className="bg-card rounded-lg shadow-lg p-8 max-w-sm w-full flex flex-col items-center border border-border">
+            <h2 className="text-xl font-bold mb-4 text-foreground">Login Required</h2>
+            <p className="mb-4 text-muted-foreground">Please login to continue</p>
             <Button
               onClick={handleLogin}
               disabled={isLoading}

@@ -12,9 +12,9 @@ const HeroBanner = ({ banner, className = "" }: HeroBannerProps) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className={`relative rounded-lg overflow-hidden ${className}`}
+      className={`relative rounded-lg overflow-hidden border border-border/20 ${className}`}
       style={{
-        backgroundColor: banner.backgroundColor || "var(--primary)",
+        backgroundColor: "#0B0A12",
         color: banner.textColor || "white",
       }}
     >
