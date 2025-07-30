@@ -8,7 +8,11 @@ interface CategoryCardProps {
   className?: string;
 }
 
-const CategoryCard = ({ category, onClick, className = "" }: CategoryCardProps) => {
+const CategoryCard = ({
+  category,
+  onClick,
+  className = "",
+}: CategoryCardProps) => {
   const { name, sub_categories } = category;
 
   const handleClick = () => {
@@ -27,12 +31,12 @@ const CategoryCard = ({ category, onClick, className = "" }: CategoryCardProps) 
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={handleClick}
-      className={`bg-card rounded-lg p-4 text-center cursor-pointer hover:border hover:!border-border/50 transition-all duration-200 shadow-lg hover:shadow-xl ${className}`}
+      className={`bg-card rounded-lg p-1 text-center cursor-pointer hover:border hover:!border-border/50 transition-all duration-200 shadow-lg hover:shadow-xl ${className}`}
     >
       {/* Category Image */}
       <div className="mx-auto mb-3 rounded-[8px] overflow-hidden">
-        <img 
-          src={getCategoryImageUrl(name)} 
+        <img
+          src={getCategoryImageUrl(name)}
           alt={name}
           className="w-full h-full object-cover"
           loading="lazy"
@@ -40,16 +44,18 @@ const CategoryCard = ({ category, onClick, className = "" }: CategoryCardProps) 
       </div>
 
       {/* Category Name */}
-      <h3 className="font-medium text-sm text-foreground mb-1 line-clamp-1">
-        {name}
-      </h3>
+      <div className="p-3">
+        <h3 className="font-medium text-sm text-foreground mb-1 line-clamp-1">
+          {name}
+        </h3>
 
-      {/* Sub-categories Count */}
-      <p className="text-xs text-muted-foreground">
-        {sub_categories?.length || 0} sub-categories
-      </p>
+        {/* Sub-categories Count */}
+        <p className="text-xs text-muted-foreground">
+          {sub_categories?.length || 0} sub-categories
+        </p>
+      </div>
     </motion.div>
   );
 };
 
-export default CategoryCard; 
+export default CategoryCard;
