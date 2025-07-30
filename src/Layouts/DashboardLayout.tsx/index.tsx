@@ -56,7 +56,7 @@ const DashboardLayout = () => {
     >
       <RFlex 
         id="dashboard container" 
-        className="flex-col h-screen w-full bg-background"
+        className="flex-col h-screen w-full"
       >
         <div className="flex-1 overflow-hidden">
           <Outlet />
