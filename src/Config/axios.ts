@@ -24,11 +24,7 @@ api.interceptors.request.use(
         if (parsed.state?.token) {
           config.headers['Authorization'] = `Bearer ${parsed.state.token}`;
         }
-        
-        // Add telegram_id as fallback for backward compatibility
-        if (parsed.state?.user?.id) {
-          config.headers['telegram_id'] = parsed.state.user.id;
-        }
+
       } catch (error) {
         console.error('Error parsing auth data:', error);
       }
