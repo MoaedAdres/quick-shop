@@ -14,6 +14,11 @@ const api = axios.create({
 // Request interceptor to add authentication token to all requests
 api.interceptors.request.use(
   (config) => {
+    // Skip Authorization header for telegramLogin requests
+    if (config.url?.includes('telegram-login')) {
+      return config;
+    }
+    
     // Get auth data from localStorage
     const authData = localStorage.getItem('auth-storage');
     if (authData) {
