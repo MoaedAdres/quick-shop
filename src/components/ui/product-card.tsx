@@ -52,41 +52,41 @@ const ProductCard = ({
 
         {/* Discount Badge */}
         {discount && discount !== "0%" && (
-          <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
+          <div className="absolute top-1 left-1 bg-red-500 text-white text-[10px] font-semibold px-1 py-0.5 rounded">
             {discount}
           </div>
         )}
 
         {/* Quick Actions */}
-        <div className="absolute top-2 right-2 flex flex-col gap-1">
+        <div className="absolute top-1 right-1 flex flex-col gap-1">
           <button
-            className="w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-colors"
+            className="w-6 h-6 bg-white/90 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               // Handle wishlist action
             }}
           >
-            <i className={`${icons.heart} text-sm text-gray-600`} />
+            <i className={`${icons.heart} text-[10px] text-gray-600`} />
           </button>
         </div>
       </div>
 
       {/* Product Info */}
-      <div className="p-3">
+      <div className="p-2">
         {/* Product Title */}
-        <h3 className="text-sm font-medium text-foreground line-clamp-2 mb-2 leading-tight">
+        <h3 className="text-xs font-medium text-foreground line-clamp-2 mb-1 leading-tight">
           {title}
         </h3>
 
         {/* Price */}
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-lg font-bold text-primary">
+        <div className="flex items-center gap-1 mb-1">
+          <span className="text-sm font-bold text-primary">
             {sale_price_currency} {parseFloat(sale_price).toFixed(2)}
           </span>
 
           {original_price &&
             parseFloat(original_price) > parseFloat(sale_price) && (
-              <span className="text-sm text-muted-foreground line-through">
+              <span className="text-xs text-muted-foreground line-through">
                 {original_price_currency}{" "}
                 {parseFloat(original_price).toFixed(2)}
               </span>
@@ -100,17 +100,17 @@ const ProductCard = ({
               {[...Array(5)].map((_, i) => (
                 <i
                   key={i}
-                  className={`${icons.star} text-xs ${
+                  className={`${icons.star} text-[10px] ${
                     i < 4 ? "text-yellow-400" : "text-gray-300"
                   }`}
                 />
               ))}
             </div>
-            <span className="text-xs text-muted-foreground">(4.5)</span>
+            <span className="text-[10px] text-muted-foreground">(4.5)</span>
           </div>
 
           <button
-            className="text-xs text-primary hover:underline"
+            className="text-[10px] text-primary hover:underline"
             onClick={(e) => {
               e.stopPropagation();
               // Handle add to cart action

@@ -44,7 +44,7 @@ const CategoryCard = ({
       </div>
 
       {/* Category Name */}
-      <div className="p-3">
+      <div className="p-2">
         <h3 className="font-medium text-sm text-foreground mb-1 line-clamp-1">
           {name}
         </h3>

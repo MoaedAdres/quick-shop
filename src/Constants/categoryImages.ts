@@ -27,12 +27,68 @@ export const categoryImages = {
   hobby: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=200&h=200&fit=crop&crop=center",
   
   // Food & Grocery
-  food: "https://images.unsplash.com/photo-1504674900240-8947e31be3f6?w=200&h=200&fit=crop&crop=center",
+  food: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=200&h=200&fit=crop&crop=center",
   grocery: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&h=200&fit=crop&crop=center",
   
   // Books & Office
   book: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=200&h=200&fit=crop&crop=center",
   office: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=200&h=200&fit=crop&crop=center",
+  
+  // Security & Safety
+  security: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop&crop=center",
+  safety: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop&crop=center",
+  
+  // Jewelry & Accessories
+  jewelry: "https://images.unsplash.com/photo-1515562141207-7a88fb7a2aec?w=200&h=200&fit=crop&crop=center",
+  accessories: "https://images.unsplash.com/photo-1515562141207-7a88fb7a2aec?w=200&h=200&fit=crop&crop=center",
+  
+  // Automation & Smart Home
+  automation: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop&crop=center",
+  smart: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop&crop=center",
+  
+  // Automotive
+  automotive: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=200&h=200&fit=crop&crop=center",
+  car: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=200&h=200&fit=crop&crop=center",
+  
+  // Baby & Kids
+  baby: "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=200&h=200&fit=crop&crop=center",
+  kids: "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=200&h=200&fit=crop&crop=center",
+  
+  // Pet Supplies
+  pet: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=200&h=200&fit=crop&crop=center",
+  pets: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=200&h=200&fit=crop&crop=center",
+  
+  // Tools & Hardware
+  tools: "https://images.unsplash.com/photo-1581147033417-4a7d5dc07c9b?w=200&h=200&fit=crop&crop=center",
+  hardware: "https://images.unsplash.com/photo-1581147033417-4a7d5dc07c9b?w=200&h=200&fit=crop&crop=center",
+  
+  // Music & Instruments
+  music: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop&crop=center",
+  instruments: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop&crop=center",
+  
+  // Art & Crafts
+  art: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=200&h=200&fit=crop&crop=center",
+  crafts: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=200&h=200&fit=crop&crop=center",
+  
+  // Outdoor & Camping
+  outdoor: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=200&h=200&fit=crop&crop=center",
+  camping: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=200&h=200&fit=crop&crop=center",
+  
+  // Gaming
+  gaming: "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=200&h=200&fit=crop&crop=center",
+  games: "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=200&h=200&fit=crop&crop=center",
+  
+  // Photography
+  photography: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=200&h=200&fit=crop&crop=center",
+  camera: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=200&h=200&fit=crop&crop=center",
+  
+  // Kitchen & Cooking
+  kitchen: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&h=200&fit=crop&crop=center",
+  cooking: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&h=200&fit=crop&crop=center",
+  
+  // Bathroom & Personal Care
+  bathroom: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&h=200&fit=crop&crop=center",
+  personal: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&h=200&fit=crop&crop=center",
   
   // Default
   default: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&h=200&fit=crop&crop=center"
@@ -57,6 +113,34 @@ export const getCategoryImage = (categoryName: string): string => {
     return categoryImages.food;
   } else if (nameLower.includes('book') || nameLower.includes('office')) {
     return categoryImages.book;
+  } else if (nameLower.includes('security') || nameLower.includes('safety')) {
+    return categoryImages.security;
+  } else if (nameLower.includes('jewelry') || nameLower.includes('accessories')) {
+    return categoryImages.jewelry;
+  } else if (nameLower.includes('automation') || nameLower.includes('smart')) {
+    return categoryImages.automation;
+  } else if (nameLower.includes('automotive') || nameLower.includes('car')) {
+    return categoryImages.automotive;
+  } else if (nameLower.includes('baby') || nameLower.includes('kids')) {
+    return categoryImages.baby;
+  } else if (nameLower.includes('pet') || nameLower.includes('pets')) {
+    return categoryImages.pet;
+  } else if (nameLower.includes('tools') || nameLower.includes('hardware')) {
+    return categoryImages.tools;
+  } else if (nameLower.includes('music') || nameLower.includes('instruments')) {
+    return categoryImages.music;
+  } else if (nameLower.includes('art') || nameLower.includes('crafts')) {
+    return categoryImages.art;
+  } else if (nameLower.includes('outdoor') || nameLower.includes('camping')) {
+    return categoryImages.outdoor;
+  } else if (nameLower.includes('gaming') || nameLower.includes('games')) {
+    return categoryImages.gaming;
+  } else if (nameLower.includes('photography') || nameLower.includes('camera')) {
+    return categoryImages.photography;
+  } else if (nameLower.includes('kitchen') || nameLower.includes('cooking')) {
+    return categoryImages.kitchen;
+  } else if (nameLower.includes('bathroom') || nameLower.includes('personal')) {
+    return categoryImages.bathroom;
   } else {
     return categoryImages.default;
   }
