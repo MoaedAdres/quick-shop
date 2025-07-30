@@ -27,7 +27,7 @@ const CategoryCard = ({ category, onClick, className = "" }: CategoryCardProps) 
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={handleClick}
-      className={`bg-[#0D0A1D] border-none rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-all duration-200 shadow-lg hover:shadow-xl ${className}`}
+      className={`bg-[#0D0A1D] border-none rounded-lg p-4 text-center cursor-pointer hover:!border-primary/50 transition-all duration-200 shadow-lg hover:shadow-xl ${className}`}
     >
       {/* Category Image */}
       <div className="mx-auto mb-3 rounded-[8px] overflow-hidden">
