@@ -26,7 +26,7 @@ class TelegramService {
   getUser(): TelegramUser | null {
     try {
       const user = this.webApp?.initDataUnsafe?.user || null;
-      console.log('Telegram user data:', user);
+      console.log('Telegram initDataUnsafe:', this.webApp?.initDataUnsafe);
       return user;
     } catch (error) {
       console.error('Error getting Telegram user:', error);
