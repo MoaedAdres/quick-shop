@@ -10,6 +10,8 @@ import type {
   OrderDetailsResponse,
   ShippingPreviewSuccess,
   ShippingPreviewError,
+  CreateCheckoutSessionPayload,
+  CheckoutSessionResponse,
 } from "@/Types/types";
 
 export const backApis = {
@@ -35,6 +37,10 @@ export const backApis = {
   shippingPreview: (payload: ShippingAddress): Promise<ShippingPreviewSuccess | ShippingPreviewError> =>
     post("orders/shipping-preview", payload),
 
+  // ------------------------------ Payment ---------------------------------------------
+  createCheckoutSession: (payload: CreateCheckoutSessionPayload): Promise<CheckoutSessionResponse> =>
+    post("payments/create-checkout-session", payload),
+
   // ------------------------------ Authentication ---------------------------------------------
   telegramLogin: (payload: TelegramLoginPayload) =>
     post("users/telegram-login", payload),
@@ -53,12 +59,6 @@ export const backApis = {
 
   // ------------------------------ Orders ---------------------------------------------
   getOrders: (status?: string): Promise<OrdersResponse> => get("orders", { params: { status } }),
-  getOrderById: (orderId: number): Promise<OrderDetailsResponse> => get(`orders/${orderId}`),
-  // createOrder: (payload: CreateOrderPayload) => post("orders", payload),
-
-  // ------------------------------ Wallet ---------------------------------------------
-  // TODO: Add wallet endpoints when you provide them
-  // getWallet: () => get("wallet"),
-  // getWalletTransactions: (params: TransactionsFilters) => get("wallet/transactions", { params }),
-  // addMoneyToWallet: (payload: AddMoneyPayload) => post("wallet/add-money", payload),
+  getOrderById: (orderId: number): Promise<OrderDetailsResponse> =>
+    get(`orders/${orderId}`),
 };

@@ -9,14 +9,22 @@ export const dashboardRoutes: RouteObject[] = [
       return { element: <module.default /> };
     },
   },
-  {
-    id: "search",
-    path: "search",
-    lazy: async () => {
-      const module = await import("@/Views/Dashboard/Search/SearchPage");
-      return { element: <module.default /> };
+      {
+      id: "search",
+      path: "search",
+      lazy: async () => {
+        const module = await import("@/Views/Dashboard/Search/SearchPage");
+        return { element: <module.default /> };
+      },
     },
-  },
+    {
+      id: "checkout",
+      path: "checkout",
+      lazy: async () => {
+        const module = await import("@/Views/Dashboard/Checkout/Checkout");
+        return { element: <module.default /> };
+      },
+    },
   {
     id: "cart",
     path: "cart",

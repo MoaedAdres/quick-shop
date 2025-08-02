@@ -56,8 +56,8 @@ const Cart = () => {
       setShowShippingForm(true);
       return;
     }
-    // Handle checkout logic
-    console.log("Proceeding to checkout...");
+    // Navigate to checkout page
+    window.location.href = "/dashboard/checkout";
   };
 
   if (isLoading) {

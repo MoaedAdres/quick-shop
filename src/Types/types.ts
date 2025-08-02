@@ -468,3 +468,32 @@ export interface RefreshTokenResponse {
   access: string;
   refresh: string;
 }
+
+// Stripe Payment Types
+export interface CreateCheckoutSessionPayload {
+  amount: number;
+  currency: string;
+  shipping_address: ShippingAddress;
+  items: CartItem[];
+  success_url: string;
+  cancel_url: string;
+}
+
+export interface CheckoutSessionResponse {
+  data: {
+    session_id: string;
+    url: string;
+  };
+  message: string | null;
+}
+
+export interface StripePaymentMethod {
+  id: string;
+  type: string;
+  card?: {
+    brand: string;
+    last4: string;
+    exp_month: number;
+    exp_year: number;
+  };
+}

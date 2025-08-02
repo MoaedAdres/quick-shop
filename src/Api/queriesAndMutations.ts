@@ -22,6 +22,8 @@ import type {
   ShippingPreviewSuccess,
   ShippingPreviewError,
   Product,
+  CreateCheckoutSessionPayload,
+  CheckoutSessionResponse,
 } from "@/Types/types";
 
 // Query Keys
@@ -51,6 +53,9 @@ export const queryKeys = {
     list: (status?: string) => ["orders", "list", status] as const,
     details: (orderId: number) => ["orders", "details", orderId] as const,
   },
+  payments: {
+    all: ["payments"] as const,
+  },
 };
 
 // ------------------------------ Products Queries ---------------------------------------------
@@ -70,7 +75,7 @@ export const useGetRecommendedProducts = (
 export const useGetRecommendedProductsInfinite = (
   params: Omit<RecommendedProductsParams, "page">
 ) => {
-  return useInfiniteData<ProductsResponse, any, Product[]>({
+  return useInfiniteData<ProductsResponse, unknown, Product[]>({
     queryKey: queryKeys.products.recommended({ ...params, page: 1 }),
     queryFn: async ({ pageParam }: { pageParam?: unknown }) => {
       const response = await backApis.getRecommendedProducts({
@@ -164,6 +169,18 @@ export const useDeleteCartItem = () => {
   });
 };
 
+// ------------------------------ Payment Mutations ---------------------------------------------
+
+export const useCreateCheckoutSession = () => {
+  return useMutateData<CheckoutSessionResponse, CreateCheckoutSessionPayload>({
+    mutationFn: async (payload) => {
+      const response = await backApis.createCheckoutSession(payload);
+      return response;
+    },
+    displaySuccess: false,
+  });
+};
+
 // ------------------------------ Authentication Mutations ---------------------------------------------
 
 export const useTelegramLogin = () => {
@@ -224,7 +241,6 @@ export const useRefreshToken = () => {
 // export const useAddMoneyToWallet = () => {
 //   return useMutateData({
 //     mutationFn: (payload: AddMoneyPayload) => backApis.addMoneyToWallet(payload),
-//     invalidateKeys: [queryKeys.wallet.all],
 //     displaySuccess: true,
 //   });
 // };
