@@ -2,8 +2,15 @@ import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { mockUser } from "@/data/mock-data";
 import RFlex from "@/RComponents/RFlex";
+import { useNavigate } from "react-router-dom";
 
 const TopBar = () => {
+  const navigate = useNavigate();
+
+  const handleCartClick = () => {
+    navigate("/dashboard/cart");
+  };
+
   return (
     <RFlex className="p-4 w-full justify-between items-center bg-card border-b border-border">
       <motion.div
@@ -12,7 +19,7 @@ const TopBar = () => {
         className="flex items-center gap-3"
       >
         <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-          <i className={`${icons.shoppingBag} text-white text-sm`} />
+          <i className={`${icons.cart} text-white text-sm`} />
         </div>
         <div>
           <h1 className="text-lg font-bold text-foreground">Quick Shop</h1>
@@ -28,17 +35,10 @@ const TopBar = () => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="w-10 h-10 bg-muted rounded-full flex items-center justify-center"
+          onClick={handleCartClick}
+          className="w-10 h-10 flex items-center justify-center cursor-pointer"
         >
-          <i className={`${icons.heart} text-muted-foreground`} />
-        </motion.button>
-        
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="w-10 h-10 bg-muted rounded-full flex items-center justify-center"
-        >
-          <i className={`${icons.share} text-muted-foreground`} />
+          <i className={`${icons.cart} text-white text-sm`} />
         </motion.button>
 
         <motion.div

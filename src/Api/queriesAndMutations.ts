@@ -21,6 +21,7 @@ import type {
   Order,
   ShippingPreviewSuccess,
   ShippingPreviewError,
+  Product,
 } from "@/Types/types";
 
 // Query Keys
@@ -97,13 +98,24 @@ export const useGetRecommendedProductsInfinite = (
 };
 
 export const useSearchProducts = (params: SearchParams) => {
-  return useFetchData<SearchProductsResponse>({
+  return useInfiniteData<SearchProductsResponse, unknown, Product[]>({
     queryKey: queryKeys.products.search(params),
-    queryFn: async () => {
-      const response = await backApis.getProductsWithSearch(params);
+    queryFn: async ({ pageParam }: { pageParam?: unknown }) => {
+      const response = await backApis.getProductsWithSearch({
+        ...params,
+        page: (pageParam as number) ?? 1,
+      });
       return response.data;
     },
     enableCondition: !!params.search.trim(), // Only run if search query exists
+    selectFn: (data) => data.pages.flatMap((page) => page.data.products),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: SearchProductsResponse) => {
+      if (lastPage?.data?.total_products <= lastPage?.data?.page_size) {
+        return undefined;
+      }
+      return lastPage?.data?.page + 1;
+    },
   });
 };
 
@@ -226,7 +238,10 @@ export const useRefreshToken = () => {
 
 // Shipping Mutations
 export const useShippingPreview = () => {
-  return useMutateData<ShippingPreviewSuccess | ShippingPreviewError, ShippingAddress>({
+  return useMutateData<
+    ShippingPreviewSuccess | ShippingPreviewError,
+    ShippingAddress
+  >({
     mutationFn: (address: ShippingAddress) => backApis.shippingPreview(address),
     displaySuccess: false,
   });

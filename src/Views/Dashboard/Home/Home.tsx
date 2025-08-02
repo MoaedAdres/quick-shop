@@ -1,77 +1,57 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { useAuthStore } from "@/Stores/auth.store";
-import {
-  useGetRecommendedProducts,
-  useGetCategories,
-  useSearchProducts,
-} from "@/Api/queriesAndMutations";
+import { useGetRecommendedProducts } from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
-import RSearchInput from "@/RComponents/RSearchInput";
 import TopBar from "@/Views/Dashboard/Home/TopBar";
 import ProductCard from "@/components/ui/product-card";
-import CategoryCard from "@/components/ui/category-card";
 import HeroBanner from "@/components/ui/hero-banner";
+
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 const Home = () => {
-  const { login, isLoading, isAuthenticated } = useAuthStore();
-  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
+  const { login, isLoading } = useAuthStore();
+  const isAuthenticated = true;
+  const [recommendedPage, setRecommendedPage] = useState(1);
 
   // Mock hero banners (you can replace with API data later)
   const mockHeroBanners = [
     {
       id: "1",
-      title: "Summer Sale",
-      subtitle: "Up to 70% off",
+      title: "Customized Clothing",
+      subtitle: "Personalized fashion for everyone",
       image:
-        "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=400&fit=crop",
-      link: "/sale",
+        "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=400&fit=crop&q=80",
+      link: "/customized-clothing",
     },
     {
       id: "2",
-      title: "New Arrivals",
-      subtitle: "Fresh styles for you",
+      title: "Dropshipping Products",
+      subtitle: "Quality products, fast delivery",
       image:
-        "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=800&h=400&fit=crop",
-      link: "/new",
+        "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=400&fit=crop&q=80",
+      link: "/dropshipping",
+    },
+    {
+      id: "3",
+      title: "Virtual Gift Cards",
+      subtitle: "Perfect gifts for any occasion",
+      image:
+        "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=800&h=400&fit=crop&q=80",
     },
   ];
 
   // React Query hooks
   const recommendedProductsQuery = useGetRecommendedProducts({
-    page: 1,
+    page: recommendedPage,
     page_size: 20,
     type: "GLOBAL_TOPSELLERS",
   });
 
-  const categoriesQuery = useGetCategories();
-
-  const searchProductsQuery = useSearchProducts({
-    search: searchQuery,
-    page: 1,
-    page_size: 20,
-    local: "en_US",
-    country: "US",
-    currency: "USD",
-  });
-
-  // Auto-rotate hero banners
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentBannerIndex((prev) =>
-        prev === mockHeroBanners.length - 1 ? 0 : prev + 1
-      );
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [mockHeroBanners.length]);
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
+  const handleLoadMoreRecommended = () => {
+    setRecommendedPage((prev) => prev + 1);
   };
 
   //   const handleDebug = () => {
@@ -82,11 +62,6 @@ const Home = () => {
   // Language: ${user?.language_code || "N/A"}
   // Premium: ${user?.is_premium || false}`);
   //   };
-
-  const handleCategoryClick = (category: any) => {
-    console.log("Selected category:", category);
-    // TODO: Implement category filtering
-  };
 
   const handleProductClick = (product: any) => {
     console.log("Selected product:", product);
@@ -102,45 +77,26 @@ const Home = () => {
     }
   };
 
-  // Get the appropriate data based on search state
-  const products = searchQuery.trim()
-    ? searchProductsQuery.data?.data?.products
-    : recommendedProductsQuery.data?.data?.products;
-  const categories = categoriesQuery.data?.data;
-  const loading = searchQuery.trim()
-    ? searchProductsQuery.isLoading
-    : recommendedProductsQuery.isLoading;
-  const error = searchQuery.trim()
-    ? searchProductsQuery.error
-    : recommendedProductsQuery.error;
+  // Get the appropriate data
+  const products = recommendedProductsQuery.data?.data?.products;
+  const loading = recommendedProductsQuery.isLoading;
+  const error = recommendedProductsQuery.error;
+
+  // Check if there are more products to load
+  const hasMoreRecommended =
+    recommendedProductsQuery.data?.data?.is_finished === false;
 
   return (
     <RFlex className="flex-col h-full pb-20 md:pb-0 relative">
       {/* Top Bar */}
       <TopBar />
 
-      {/* Search Bar */}
-      <div className="sticky top-0 z-40 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 border-b border-border">
-        <div className="p-4">
-          <RSearchInput
-            searchData={searchQuery}
-            handleSearchClicked={handleSearch}
-            handleDataChanged={handleSearch}
-            placeholder="Search products..."
-            className="w-full"
-          />
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-4 space-y-6">
           {/* Hero Banner */}
           <div className="h-48 md:h-64">
-            <HeroBanner
-              banner={mockHeroBanners[currentBannerIndex]}
-              className="h-full"
-            />
+            <HeroBanner banners={mockHeroBanners} className="h-full" />
           </div>
 
           {/* Loading State */}
@@ -163,30 +119,32 @@ const Home = () => {
             </div>
           )}
 
-          {/* Category Shortcuts */}
-          {categories && categories.length > 0 && (
-            <div>
-              <h2 className="text-lg font-semibold text-foreground mb-4">
-                Shop by Category
-              </h2>
-              <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-                {categories.slice(0, 12).map((category) => (
-                  <CategoryCard
-                    key={category.id}
-                    category={category}
-                    onClick={() => handleCategoryClick(category)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Products */}
           {products && products.length > 0 && (
             <div>
-              <h2 className="text-lg font-semibold text-foreground mb-4">
-                {searchQuery.trim() ? "Search Results" : "Recommended Products"}
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-foreground">
+                  Recommended Products
+                </h2>
+                {hasMoreRecommended && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleLoadMoreRecommended}
+                    disabled={recommendedProductsQuery.isLoading}
+                    className="text-xs"
+                  >
+                    {recommendedProductsQuery.isLoading ? (
+                      <>
+                        <i className={`${icons.spinner} mr-2`} />
+                        Loading...
+                      </>
+                    ) : (
+                      "See More"
+                    )}
+                  </Button>
+                )}
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {products.slice(0, 8).map((product) => (
                   <ProductCard
@@ -198,19 +156,6 @@ const Home = () => {
               </div>
             </div>
           )}
-
-          {/* No Results */}
-          {!loading &&
-            !error &&
-            products &&
-            products.length === 0 &&
-            searchQuery.trim() && (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">
-                  No products found for "{searchQuery}"
-                </p>
-              </div>
-            )}
 
           {/* Promotional Banners */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -249,8 +194,12 @@ const Home = () => {
       {!isAuthenticated && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
           <div className="bg-card rounded-lg shadow-lg p-8 max-w-sm w-full flex flex-col items-center border border-border">
-            <h2 className="text-xl font-bold mb-4 text-foreground">Login Required</h2>
-            <p className="mb-4 text-muted-foreground">Please login to continue</p>
+            <h2 className="text-xl font-bold mb-4 text-foreground">
+              Login Required
+            </h2>
+            <p className="mb-4 text-muted-foreground">
+              Please login to continue
+            </p>
             <Button
               onClick={handleLogin}
               disabled={isLoading}

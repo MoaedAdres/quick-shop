@@ -49,14 +49,13 @@ const BottomNavbar = () => {
   return (
     <RFlex
       id="bottom navbar"
-      className="justify-between items-center w-full fixed bottom-0 bg-sidebar border-t border-border z-50 lg:hidden"
+      className="justify-between items-center w-full fixed bottom-0 bg-sidebar border-t border-border z-50"
     >
       <CustomNavItem title="home" to="home" icon={icons.home} />
       <CustomNavItem
-        title="cart"
-        to="cart"
-        icon={icons.cart}
-        badge={cartItemCount}
+        title="search"
+        to="search"
+        icon={icons.search}
       />
       <CustomNavItem title="orders" to="orders" icon={icons.orders} />
       <CustomNavItem title="wallet" to="wallet" icon={icons.wallet} />
