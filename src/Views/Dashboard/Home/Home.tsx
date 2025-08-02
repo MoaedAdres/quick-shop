@@ -1,8 +1,7 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { useAuthStore } from "@/Stores/auth.store";
-import { useGetRecommendedProducts } from "@/Api/queriesAndMutations";
+import { useGetRecommendedProductsInfinite } from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import TopBar from "@/Views/Dashboard/Home/TopBar";
 import ProductCard from "@/components/ui/product-card";
@@ -14,7 +13,6 @@ import { toast } from "sonner";
 const Home = () => {
   const { login, isLoading } = useAuthStore();
   const isAuthenticated = true;
-  const [recommendedPage, setRecommendedPage] = useState(1);
 
   // Mock hero banners (you can replace with API data later)
   const mockHeroBanners = [
@@ -44,15 +42,10 @@ const Home = () => {
   ];
 
   // React Query hooks
-  const recommendedProductsQuery = useGetRecommendedProducts({
-    page: recommendedPage,
+  const recommendedProductsQuery = useGetRecommendedProductsInfinite({
     page_size: 20,
     type: "GLOBAL_TOPSELLERS",
   });
-
-  const handleLoadMoreRecommended = () => {
-    setRecommendedPage((prev) => prev + 1);
-  };
 
   //   const handleDebug = () => {
   //     telegramService.showAlert(`User Debug Info:
@@ -78,13 +71,7 @@ const Home = () => {
   };
 
   // Get the appropriate data
-  const products = recommendedProductsQuery.data?.data?.products;
-  const loading = recommendedProductsQuery.isLoading;
-  const error = recommendedProductsQuery.error;
-
-  // Check if there are more products to load
-  const hasMoreRecommended =
-    recommendedProductsQuery.data?.data?.is_finished === false;
+  const products = recommendedProductsQuery.data;
 
   return (
     <RFlex className="flex-col h-full pb-20 md:pb-0 relative">
@@ -100,25 +87,12 @@ const Home = () => {
           </div>
 
           {/* Loading State */}
-          {loading && (
+          {recommendedProductsQuery.isLoading && (
             <div className="flex items-center justify-center py-8">
               <i className={`${icons.spinner} text-2xl text-primary`} />
               <span className="ml-2 text-muted-foreground">Loading...</span>
             </div>
           )}
-
-          {/* Error State */}
-          {error && (
-            <div className="bg-card border border-red-200/20 rounded-lg p-4">
-              <div className="flex items-center">
-                <i className={`${icons.error} text-red-500 mr-2`} />
-                <span className="text-red-400">
-                  {(error as Error)?.message || "An error occurred"}
-                </span>
-              </div>
-            </div>
-          )}
-
           {/* Products */}
           {products && products.length > 0 && (
             <div>
@@ -126,27 +100,9 @@ const Home = () => {
                 <h2 className="text-lg font-semibold text-foreground">
                   Recommended Products
                 </h2>
-                {hasMoreRecommended && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleLoadMoreRecommended}
-                    disabled={recommendedProductsQuery.isLoading}
-                    className="text-xs"
-                  >
-                    {recommendedProductsQuery.isLoading ? (
-                      <>
-                        <i className={`${icons.spinner} mr-2`} />
-                        Loading...
-                      </>
-                    ) : (
-                      "See More"
-                    )}
-                  </Button>
-                )}
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {products.slice(0, 8).map((product) => (
+                {products.map((product) => (
                   <ProductCard
                     key={product.product_id}
                     product={product}

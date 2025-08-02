@@ -70,7 +70,7 @@ export const useGetRecommendedProducts = (
 export const useGetRecommendedProductsInfinite = (
   params: Omit<RecommendedProductsParams, "page">
 ) => {
-  return useInfiniteData<ProductsResponse>({
+  return useInfiniteData<ProductsResponse, any, Product[]>({
     queryKey: queryKeys.products.recommended({ ...params, page: 1 }),
     queryFn: async ({ pageParam }: { pageParam?: unknown }) => {
       const response = await backApis.getRecommendedProducts({
@@ -79,20 +79,13 @@ export const useGetRecommendedProductsInfinite = (
       });
       return response.data;
     },
+    selectFn: (data) => data.pages.flatMap((page) => page.data.products),
     initialPageParam: 1,
     getNextPageParam: (lastPage: ProductsResponse) => {
-      if (lastPage?.data?.is_finished) {
+      if (lastPage?.data?.total_products <= lastPage?.data?.page_size) {
         return undefined;
       }
-      // Calculate next page based on current products count and total
-      const currentCount = lastPage?.data?.current_products_count || 0;
-      const totalCount = lastPage?.data?.total_products_count || 0;
-      const pageSize = 20; // Assuming default page size, adjust if needed
-
-      if (currentCount < totalCount) {
-        return Math.floor(currentCount / pageSize) + 1;
-      }
-      return undefined;
+      return lastPage?.data?.page + 1;
     },
   });
 };
@@ -114,7 +107,7 @@ export const useSearchProducts = (params: SearchParams) => {
       if (lastPage?.data?.total_products <= lastPage?.data?.page_size) {
         return undefined;
       }
-      return lastPage?.data?.page + 1;
+      return Number(lastPage?.data?.page) + 1;
     },
   });
 };

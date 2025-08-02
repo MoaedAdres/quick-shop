@@ -104,9 +104,9 @@ export interface SubCategory {
 // API Response Types
 export interface ProductsResponse {
   data: {
-    current_products_count: number;
-    total_products_count: number;
-    is_finished: boolean;
+    page: number;
+    page_size: number;
+    total_products: number;
     products: Product[];
   };
   message: string | null;
