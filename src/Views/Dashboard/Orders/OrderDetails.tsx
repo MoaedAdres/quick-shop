@@ -145,6 +145,7 @@ export default function OrderDetails() {
                     <thead className="bg-muted/30">
                       <tr>
                         <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Product</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Supplier</th>
                         <th className="px-4 py-3 text-center text-sm font-medium text-muted-foreground">Quantity</th>
                         <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Price</th>
                         <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Total</th>
@@ -154,11 +155,14 @@ export default function OrderDetails() {
                       {order.items?.map((item) => (
                         <tr key={item.id}>
                           <td className="px-4 py-3">
-                            <div>
-                              <p className="font-medium text-foreground">{item.product.name}</p>
-                              <p className="text-sm text-muted-foreground">
-                                Supplier: {item.product.supplier.name}
-                              </p>
+                            <p className="font-medium text-foreground">{item.product.name}</p>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <i className={`${icons.store} text-sm text-muted-foreground`} />
+                              <span className="text-sm text-muted-foreground">
+                                {item.product.supplier.name}
+                              </span>
                             </div>
                           </td>
                           <td className="px-4 py-3 text-center text-foreground">{item.quantity}</td>
