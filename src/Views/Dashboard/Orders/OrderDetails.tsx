@@ -136,49 +136,83 @@ export default function OrderDetails() {
               </div>
             </div>
 
-            {/* Order Items */}
-            <div className="mt-8">
-              <h3 className="font-semibold text-lg mb-4 text-foreground">Order Items</h3>
-              <div className="border border-border rounded-lg overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-muted/30">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Product</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Supplier</th>
-                        <th className="px-4 py-3 text-center text-sm font-medium text-muted-foreground">Quantity</th>
-                        <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Price</th>
-                        <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {order.items?.map((item) => (
-                        <tr key={item.id}>
-                          <td className="px-4 py-3">
-                            <p className="font-medium text-foreground">{item.product.name}</p>
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-2">
-                              <i className={`${icons.store} text-sm text-muted-foreground`} />
-                              <span className="text-sm text-muted-foreground">
-                                {item.product.supplier.name}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-center text-foreground">{item.quantity}</td>
-                          <td className="px-4 py-3 text-right text-foreground">
-                            ${Number(item.product.price)?.toFixed(2)}
-                          </td>
-                          <td className="px-4 py-3 text-right text-foreground">
-                            ${(Number(item.product.price) * item.quantity)?.toFixed(2)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+                         {/* Order Items */}
+             <div className="mt-8">
+               <h3 className="font-semibold text-lg mb-4 text-foreground">Order Items</h3>
+               
+               {/* Desktop Table View */}
+               <div className="hidden md:block border border-border rounded-lg overflow-hidden">
+                 <div className="overflow-x-auto">
+                   <table className="w-full min-w-[600px]">
+                     <thead className="bg-muted/30">
+                       <tr>
+                         <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Product</th>
+                         <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Supplier</th>
+                         <th className="px-4 py-3 text-center text-sm font-medium text-muted-foreground">Quantity</th>
+                         <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Price</th>
+                         <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Total</th>
+                       </tr>
+                     </thead>
+                     <tbody className="divide-y divide-border">
+                       {order.items?.map((item) => (
+                         <tr key={item.id}>
+                           <td className="px-4 py-3">
+                             <div className="max-w-xs">
+                               <p className="font-medium text-foreground text-sm leading-tight line-clamp-2">
+                                 {item.product.name}
+                               </p>
+                             </div>
+                           </td>
+                           <td className="px-4 py-3">
+                             <div className="flex items-center gap-2">
+                               <i className={`${icons.store} text-sm text-muted-foreground`} />
+                               <span className="text-sm text-muted-foreground">
+                                 {item.product.supplier.name}
+                               </span>
+                             </div>
+                           </td>
+                           <td className="px-4 py-3 text-center text-foreground">{item.quantity}</td>
+                           <td className="px-4 py-3 text-right text-foreground">
+                             ${Number(item.product.price)?.toFixed(2)}
+                           </td>
+                           <td className="px-4 py-3 text-right text-foreground">
+                             ${(Number(item.product.price) * item.quantity)?.toFixed(2)}
+                           </td>
+                         </tr>
+                       ))}
+                     </tbody>
+                   </table>
+                 </div>
+               </div>
+
+               {/* Mobile Card View */}
+               <div className="md:hidden space-y-4">
+                 {order.items?.map((item) => (
+                   <div key={item.id} className="bg-card border border-border rounded-lg p-4 space-y-3">
+                     <div>
+                       <h4 className="font-medium text-foreground text-sm leading-tight line-clamp-2 mb-2">
+                         {item.product.name}
+                       </h4>
+                       <div className="flex items-center gap-2">
+                         <i className={`${icons.store} text-xs text-muted-foreground`} />
+                         <span className="text-xs text-muted-foreground">
+                           {item.product.supplier.name}
+                         </span>
+                       </div>
+                     </div>
+                     <div className="flex justify-between items-center text-sm">
+                       <div className="flex items-center gap-4">
+                         <span className="text-muted-foreground">Qty: {item.quantity}</span>
+                         <span className="text-muted-foreground">Price: ${Number(item.product.price)?.toFixed(2)}</span>
+                       </div>
+                       <span className="font-medium text-foreground">
+                         ${(Number(item.product.price) * item.quantity)?.toFixed(2)}
+                       </span>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+             </div>
 
             {/* Order Summary */}
             <div className="mt-8 border-t border-border pt-6">
