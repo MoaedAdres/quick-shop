@@ -6,7 +6,7 @@ function ProtectedRoute() {
   // For regular web app, check authentication
   const { isAuthenticated, isTelegramApp } = useAuthStore();
   const shouldAllow = isAuthenticated || isTelegramApp;
-  return shouldAllow ? <Outlet /> : <Navigate to="/login" replace />;
+  return shouldAllow ? <Outlet /> : <Navigate to="/dashboard/home" replace />;
 }
 
 export default ProtectedRoute;
