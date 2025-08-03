@@ -146,55 +146,7 @@ const Checkout = () => {
             )}
           </AnimatePresence>
 
-          {/* Order Summary */}
-          <div className="bg-card border border-border rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-foreground mb-4">
-              Order Summary
-            </h2>
-            
-            {/* Cart Items */}
-            <div className="space-y-3 mb-4">
-              {cartData.items.map((item) => (
-                <div key={item.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
-                      <i className={`${icons.shoppingBag} text-muted-foreground`} />
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">{item.product.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Qty: {item.quantity}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="font-medium text-foreground">
-                    {formatPrice(parseFloat(item.product.price) * item.quantity)}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Totals */}
-            <div className="space-y-2 pt-4 border-t border-border">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-medium">{formatPrice(totals.subtotal)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Shipping</span>
-                <span className="font-medium">{formatPrice(totals.shipping)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Tax (8%)</span>
-                <span className="font-medium">{formatPrice(totals.tax)}</span>
-              </div>
-              <div className="flex justify-between text-base font-semibold pt-2 border-t border-border">
-                <span>Total</span>
-                <span className="text-primary">{formatPrice(totals.total)}</span>
-              </div>
-            </div>
-          </div>
-
+          
           {/* Payment Section */}
           {!showShippingForm && shippingAddress && shippingPreview && (
             <motion.div

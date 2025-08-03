@@ -1,24 +1,15 @@
-import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { useGetCart } from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import CartItem from "@/components/ui/cart-item";
 import ShippingPreviewForm from "@/components/ui/shipping-preview-form";
-import type {
-  ShippingPreviewSuccess,
-  ShippingPreviewError,
-} from "@/Types/types";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const { data: cartData, isLoading, error } = useGetCart();
   const cart = cartData;
-  const [shippingPreview, setShippingPreview] =
-    useState<ShippingPreviewSuccess | null>(null);
-  const [shippingError, setShippingError] =
-    useState<ShippingPreviewError | null>(null);
-  const [showShippingForm, setShowShippingForm] = useState(false);
-
+  const navigate = useNavigate();
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -33,31 +24,10 @@ const Cart = () => {
       (sum, item) => sum + parseFloat(item.product.price) * item.quantity,
       0
     );
-    const shipping = shippingPreview?.data.total_shipping_fee ?? 0;
-    const tax = subtotal * 0.08; // 8% tax
-    const total = subtotal + shipping + tax;
+    const tax = subtotal;
+    const total = subtotal;
 
-    return { subtotal, shipping, tax, total };
-  };
-
-  const handleShippingSuccess = (preview: ShippingPreviewSuccess) => {
-    setShippingPreview(preview);
-    setShippingError(null);
-    setShowShippingForm(false);
-  };
-
-  const handleShippingError = (error: ShippingPreviewError) => {
-    setShippingError(error);
-    setShippingPreview(null);
-  };
-
-  const handleCheckout = () => {
-    if (!shippingPreview) {
-      setShowShippingForm(true);
-      return;
-    }
-    // Navigate to checkout page
-    window.location.href = "/dashboard/checkout";
+    return { subtotal, tax, total };
   };
 
   if (isLoading) {
@@ -164,29 +134,8 @@ const Cart = () => {
 
       {/* Cart Summary */}
       <div className="border-t border-border p-4 space-y-4">
-        {/* Shipping Error */}
-        {shippingError && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4"
-          >
-            <h3 className="text-red-700 font-medium mb-2">
-              Shipping Not Available
-            </h3>
-            <p className="text-red-600 text-sm mb-3">{shippingError.message}</p>
-            <div className="space-y-2">
-              {shippingError.data.unshippable_products.map((item) => (
-                <div key={item.id} className="text-sm text-red-600">
-                  • {item.product.name}
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
         {/* Shipping Preview */}
-        {shippingPreview && (
+        {/* {shippingPreview && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -211,41 +160,14 @@ const Cart = () => {
               </p>
             </div>
           </motion.div>
-        )}
+        )} */}
 
         {/* Shipping Form */}
-        {showShippingForm && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="border border-border rounded-lg p-4 mb-4"
-          >
-            <h3 className="font-medium mb-4">Enter Shipping Details</h3>
-            <ShippingPreviewForm
-              onSuccess={handleShippingSuccess}
-              onError={handleShippingError}
-            />
-          </motion.div>
-        )}
 
         {/* Cart Totals */}
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Subtotal</span>
-            <span className="font-medium">{formatPrice(totals.subtotal)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Shipping</span>
-            <span className="font-medium">{formatPrice(totals.shipping)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Tax (8%)</span>
-            <span className="font-medium">{formatPrice(totals.tax)}</span>
-          </div>
-          <div className="flex justify-between text-base font-semibold pt-2 border-t border-border">
-            <span>Total</span>
-            <span className="text-primary">{formatPrice(totals.total)}</span>
-          </div>
+        <div className="flex justify-between text-base font-semibold pt-2  border-border">
+          <span>Total</span>
+          <span className="text-primary">{formatPrice(totals.total)}</span>
         </div>
 
         {/* Free Shipping Progress
@@ -274,12 +196,10 @@ const Cart = () => {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={handleCheckout}
+          onClick={() => navigate("/dashboard/checkout")}
           className="w-full bg-primary text-primary-foreground py-4 rounded-lg font-semibold text-lg"
         >
-          {!shippingPreview
-            ? "Calculate Shipping"
-            : `Checkout - ${formatPrice(totals.total)}`}
+          Checkout - {formatPrice(totals.total)}
         </motion.button>
 
         {/* Continue Shopping */}
