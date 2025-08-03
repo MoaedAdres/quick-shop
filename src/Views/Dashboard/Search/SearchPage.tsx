@@ -45,7 +45,8 @@ const SearchPage = () => {
   };
 
   const categories = categoriesQuery.data?.data;
-  const products = searchProductsQuery.data?.data?.products;
+  const products = searchProductsQuery.data;
+  console.log("products", products);
   const loading = searchProductsQuery.isLoading;
   const error = searchProductsQuery.error;
 
@@ -110,10 +111,9 @@ const SearchPage = () => {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">
-                {selectedCategory 
+                {selectedCategory
                   ? `${selectedCategory.name} Products`
-                  : `Search Results for "${searchQuery}"`
-                }
+                  : `Search Results for "${searchQuery}"`}
               </h2>
               {(searchQuery.trim() || selectedCategory) && (
                 <Button
@@ -173,8 +173,7 @@ const SearchPage = () => {
                   <p className="text-muted-foreground">
                     {searchQuery.trim()
                       ? `No products found for "${searchQuery}"`
-                      : `No products found in ${selectedCategory?.name}`
-                    }
+                      : `No products found in ${selectedCategory?.name}`}
                   </p>
                 </div>
               )}
@@ -185,4 +184,4 @@ const SearchPage = () => {
   );
 };
 
-export default SearchPage; 
+export default SearchPage;

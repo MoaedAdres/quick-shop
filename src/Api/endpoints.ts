@@ -6,8 +6,6 @@ import type {
   ShippingAddress,
   TelegramLoginPayload,
   RefreshTokenPayload,
-  OrdersResponse,
-  OrderDetailsResponse,
   CreateCheckoutSessionPayload,
   CheckoutSessionResponse,
 } from "@/Types/types";

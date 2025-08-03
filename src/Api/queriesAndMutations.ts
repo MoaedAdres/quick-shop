@@ -25,7 +25,6 @@ import type {
   CheckoutSessionResponse,
   StripeOrderResponse,
 } from "@/Types/types";
-import type { AxiosResponse } from "axios";
 
 // Query Keys
 export const queryKeys = {

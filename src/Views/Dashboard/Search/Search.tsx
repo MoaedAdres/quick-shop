@@ -21,7 +21,6 @@ const Search = ({ onClose }: { onClose: () => void }) => {
     country: "US",
     currency: "USD",
   });
-
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     setSelectedCategory(null);
@@ -43,6 +42,8 @@ const Search = ({ onClose }: { onClose: () => void }) => {
 
   const categories = categoriesQuery.data?.data;
   const products = searchProductsQuery.data;
+  console.log("products", products);
+
   const loading = searchProductsQuery.isLoading;
   const error = searchProductsQuery.error;
 
@@ -112,10 +113,9 @@ const Search = ({ onClose }: { onClose: () => void }) => {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">
-                {selectedCategory 
+                {selectedCategory
                   ? `${selectedCategory.name} Products`
-                  : `Search Results for "${searchQuery}"`
-                }
+                  : `Search Results for "${searchQuery}"`}
               </h2>
               {(searchQuery.trim() || selectedCategory) && (
                 <Button
@@ -175,8 +175,7 @@ const Search = ({ onClose }: { onClose: () => void }) => {
                   <p className="text-muted-foreground">
                     {searchQuery.trim()
                       ? `No products found for "${searchQuery}"`
-                      : `No products found in ${selectedCategory?.name}`
-                    }
+                      : `No products found in ${selectedCategory?.name}`}
                   </p>
                 </div>
               )}
@@ -187,4 +186,4 @@ const Search = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
-export default Search; 
+export default Search;
