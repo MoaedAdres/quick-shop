@@ -4,7 +4,10 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import type { SwiperRef } from "swiper/react";
 import { icons } from "@/Constants/icons";
-import { useGetPrintifyProductDetails, useAddToCart } from "@/Api/queriesAndMutations";
+import {
+  useGetPrintifyProductDetails,
+  useAddToCart,
+} from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -18,11 +21,11 @@ import "swiper/css/pagination";
 const PrintifyProductDetails = () => {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
-  
+
   // State for image gallery
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const swiperRef = useRef<SwiperRef | null>(null);
-  
+
   // State for product selection
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<{
@@ -30,11 +33,18 @@ const PrintifyProductDetails = () => {
     title: string;
     price: number;
   } | null>(null);
+  
+  // State for option selections
+  const [selectedOptions, setSelectedOptions] = useState<{
+    [optionId: string]: string;
+  }>({});
 
   // Fetch product details
-  const { data: productDetails, isLoading, error } = useGetPrintifyProductDetails(
-    productId || ""
-  );
+  const {
+    data: productDetails,
+    isLoading,
+    error,
+  } = useGetPrintifyProductDetails(productId || "");
   const addToCartMutation = useAddToCart();
 
   // Reset image index and set initial variant when product changes
@@ -44,10 +54,12 @@ const PrintifyProductDetails = () => {
       // When in loop mode, we need to use slideToLoop for proper navigation
       swiperRef.current.swiper.slideToLoop(0);
     }
-    
+
     // Set initial variant when product data loads
     if (productDetails?.data?.variants) {
-      const firstEnabledVariant = productDetails.data.variants.find(v => v.is_enabled);
+      const firstEnabledVariant = productDetails.data.variants.find(
+        (v) => v.is_enabled
+      );
       if (firstEnabledVariant) {
         setSelectedVariant({
           id: firstEnabledVariant.id.toString(),
@@ -70,7 +82,8 @@ const PrintifyProductDetails = () => {
   // Handle slide change
   const handleSlideChange = (swiper: any) => {
     // When in loop mode, we need to get the real index
-    const realIndex = swiper.realIndex !== undefined ? swiper.realIndex : swiper.activeIndex;
+    const realIndex =
+      swiper.realIndex !== undefined ? swiper.realIndex : swiper.activeIndex;
     setSelectedImageIndex(realIndex);
   };
 
@@ -80,6 +93,29 @@ const PrintifyProductDetails = () => {
     if (newQuantity >= 1 && newQuantity <= 10) {
       setQuantity(newQuantity);
     }
+  };
+
+  // Handle option selection
+  const handleOptionSelect = (optionId: string, valueId: string) => {
+    setSelectedOptions(prev => ({
+      ...prev,
+      [optionId]: valueId
+    }));
+  };
+
+  // Get filtered variants based on selected options
+  const getFilteredVariants = () => {
+    if (!productDetails?.data?.variants) return [];
+    
+    return productDetails.data.variants.filter(variant => {
+      // If no options are selected, show all enabled variants
+      if (Object.keys(selectedOptions).length === 0) {
+        return variant.is_enabled;
+      }
+      
+      // For now, just return enabled variants since the option filtering logic needs more work
+      return variant.is_enabled;
+    });
   };
 
   // Handle add to cart
@@ -92,9 +128,9 @@ const PrintifyProductDetails = () => {
     // Construct sku_attr string from Printify product data
     const skuAttrParts = [
       `print_provider_id:${productDetails.data.print_provider_id}`,
-      `blueprint_id:${productDetails.data.blueprint_id}`
+      `blueprint_id:${productDetails.data.blueprint_id}`,
     ];
-    const skuAttr = skuAttrParts.join(',');
+    const skuAttr = skuAttrParts.join(",");
 
     const payload: AddToCartPayload = {
       source: "printify",
@@ -115,7 +151,7 @@ const PrintifyProductDetails = () => {
       toast.error("Failed to add to cart. Please try again.");
     }
   };
-
+  const filteredVariants = getFilteredVariants();
   // Handle back navigation
   const handleBack = () => {
     navigate(-1);
@@ -125,7 +161,9 @@ const PrintifyProductDetails = () => {
     return (
       <RFlex className="flex-col h-full">
         <div className="flex items-center justify-center h-full">
-          <i className={`${icons.spinner} text-2xl text-primary animate-spin`} />
+          <i
+            className={`${icons.spinner} text-2xl text-primary animate-spin`}
+          />
           <span className="ml-2 text-muted-foreground">Loading product...</span>
         </div>
       </RFlex>
@@ -169,7 +207,9 @@ const PrintifyProductDetails = () => {
           <i className={`${icons.arrowLeft} text-lg`} />
           Back
         </Button>
-        <h1 className="text-lg font-semibold text-foreground">Product Details</h1>
+        <h1 className="text-lg font-semibold text-foreground">
+          Product Details
+        </h1>
         <div className="w-10" /> {/* Spacer for centering */}
       </div>
 
@@ -185,20 +225,22 @@ const PrintifyProductDetails = () => {
                   ref={swiperRef}
                   modules={[Navigation, Pagination, Autoplay]}
                   navigation={true}
-                  pagination={{ 
-                    clickable: true, 
+                  pagination={{
+                    clickable: true,
                     dynamicBullets: true,
-                    el: '.swiper-pagination',
-                    type: 'bullets'
+                    el: ".swiper-pagination",
+                    type: "bullets",
                   }}
                   loop={true}
                   autoplay={{ delay: 5000, disableOnInteraction: false }}
                   onSlideChange={handleSlideChange}
                   className="h-96 rounded-lg overflow-hidden"
-                  style={{
-                    "--swiper-navigation-color": "hsl(var(--primary))",
-                    "--swiper-pagination-color": "hsl(var(--primary))",
-                  } as React.CSSProperties}
+                  style={
+                    {
+                      "--swiper-navigation-color": "hsl(var(--primary))",
+                      "--swiper-pagination-color": "hsl(var(--primary))",
+                    } as React.CSSProperties
+                  }
                 >
                   {images.map((image, index) => (
                     <SwiperSlide key={index}>
@@ -269,7 +311,9 @@ const PrintifyProductDetails = () => {
                       ${(selectedVariant.price / 100).toFixed(2)}
                     </span>
                   ) : (
-                    <span className="text-lg text-muted-foreground">Please select a variant</span>
+                    <span className="text-lg text-muted-foreground">
+                      Please select a variant
+                    </span>
                   )}
                 </div>
               </div>
@@ -277,24 +321,32 @@ const PrintifyProductDetails = () => {
               {/* Options */}
               {product.options.length > 0 && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-foreground">Options</h3>
+                  <h3 className="text-lg font-semibold text-foreground">
+                    Options
+                  </h3>
                   {product.options.map((option, index) => (
                     <div key={index} className="space-y-2">
-                      <h4 className="font-medium text-foreground">{option.name}</h4>
+                      <h4 className="font-medium text-foreground">
+                        {option.name}
+                      </h4>
                       <div className="flex flex-wrap gap-2">
                         {option.values.map((value) => (
                           <button
                             key={value.id}
+                            onClick={() => handleOptionSelect(index.toString(), value.id.toString())}
                             className={`px-3 py-2 rounded-lg border text-sm transition-all ${
-                              option.type === "color" && value.colors
-                                ? "border-border hover:border-primary"
-                                : "border-border hover:border-primary"
+                              selectedOptions[index.toString()] === value.id.toString()
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border hover:border-primary/50"
                             }`}
                             style={
                               option.type === "color" && value.colors
                                 ? {
                                     backgroundColor: value.colors[0],
-                                    color: value.colors[0] === "#FFFFFF" ? "#000" : "#FFF",
+                                    color:
+                                      value.colors[0] === "#FFFFFF"
+                                        ? "#000"
+                                        : "#FFF",
                                   }
                                 : {}
                             }
@@ -310,8 +362,10 @@ const PrintifyProductDetails = () => {
 
               {/* Description */}
               <div className="space-y-2">
-                <h3 className="text-lg font-semibold text-foreground">Description</h3>
-                <div 
+                <h3 className="text-lg font-semibold text-foreground">
+                  Description
+                </h3>
+                <div
                   className="text-sm text-muted-foreground leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: product.description }}
                 />
@@ -319,9 +373,11 @@ const PrintifyProductDetails = () => {
 
               {/* Variants */}
               <div className="space-y-2">
-                <h3 className="font-medium text-foreground">Available Variants</h3>
+                <h3 className="font-medium text-foreground">
+                  Available Variants
+                </h3>
                 <div className="grid grid-cols-2 gap-2">
-                  {product.variants.filter(v => v.is_enabled).map((variant) => (
+                  {filteredVariants.map((variant) => (
                     <button
                       key={variant.id}
                       onClick={() =>
@@ -359,7 +415,9 @@ const PrintifyProductDetails = () => {
                   >
                     <i className={icons.remove} />
                   </button>
-                  <span className="font-medium text-foreground">{quantity}</span>
+                  <span className="font-medium text-foreground">
+                    {quantity}
+                  </span>
                   <button
                     onClick={() => handleQuantityChange(1)}
                     disabled={quantity >= 10}
@@ -372,8 +430,8 @@ const PrintifyProductDetails = () => {
 
               {/* Action Buttons */}
               <div className="flex gap-4 pt-4">
-                <Button 
-                  className="flex-1" 
+                <Button
+                  className="flex-1"
                   size="lg"
                   onClick={handleAddToCart}
                   disabled={!selectedVariant || addToCartMutation.isPending}
@@ -407,11 +465,15 @@ const PrintifyProductDetails = () => {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <span className="text-sm text-muted-foreground">Blueprint ID</span>
+                  <span className="text-sm text-muted-foreground">
+                    Blueprint ID
+                  </span>
                   <p className="font-medium">{product.blueprint_id}</p>
                 </div>
                 <div className="space-y-2">
-                  <span className="text-sm text-muted-foreground">Print Provider ID</span>
+                  <span className="text-sm text-muted-foreground">
+                    Print Provider ID
+                  </span>
                   <p className="font-medium">{product.print_provider_id}</p>
                 </div>
                 <div className="space-y-2">
@@ -421,7 +483,9 @@ const PrintifyProductDetails = () => {
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <span className="text-sm text-muted-foreground">Last Updated</span>
+                  <span className="text-sm text-muted-foreground">
+                    Last Updated
+                  </span>
                   <p className="font-medium">
                     {new Date(product.updated_at).toLocaleDateString()}
                   </p>
@@ -447,9 +511,14 @@ const PrintifyProductDetails = () => {
                     </thead>
                     <tbody>
                       {product.variants.slice(0, 10).map((variant) => (
-                        <tr key={variant.id} className="border-b border-border/50">
+                        <tr
+                          key={variant.id}
+                          className="border-b border-border/50"
+                        >
                           <td className="py-2">{variant.title}</td>
-                          <td className="py-2">${(variant.price / 100).toFixed(2)}</td>
+                          <td className="py-2">
+                            ${(variant.price / 100).toFixed(2)}
+                          </td>
                           <td className="py-2">{variant.grams}g</td>
                           <td className="py-2">
                             <span
@@ -468,7 +537,8 @@ const PrintifyProductDetails = () => {
                   </table>
                   {product.variants.length > 10 && (
                     <p className="text-sm text-muted-foreground mt-2">
-                      Showing first 10 variants of {product.variants.length} total
+                      Showing first 10 variants of {product.variants.length}{" "}
+                      total
                     </p>
                   )}
                 </div>
