@@ -220,6 +220,7 @@ const Checkout = () => {
           shippingAddress={shippingAddress}
           cartItems={cartData.items}
           totals={totals}
+          isLoading={createStripeOrderMutation.isPending}
         />
       )}
     </RFlex>

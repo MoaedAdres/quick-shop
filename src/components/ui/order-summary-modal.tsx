@@ -20,6 +20,7 @@ interface OrderSummaryModalProps {
     tax: number;
     total: number;
   };
+  isLoading?: boolean;
 }
 
 const OrderSummaryModal = ({
@@ -30,6 +31,7 @@ const OrderSummaryModal = ({
   shippingAddress,
   cartItems,
   totals,
+  isLoading = false,
 }: OrderSummaryModalProps) => {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -232,10 +234,20 @@ const OrderSummaryModal = ({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={onContinue}
-                className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-medium flex items-center justify-center gap-2"
+                disabled={isLoading}
+                className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <i className={icons.creditCard} />
-                Proceed to Payment
+                {isLoading ? (
+                  <>
+                    <i className={`${icons.spinner} animate-spin`} />
+                    Initializing Payment...
+                  </>
+                ) : (
+                  <>
+                    <i className={icons.creditCard} />
+                    Proceed to Payment
+                  </>
+                )}
               </motion.button>
               <button
                 onClick={onClose}

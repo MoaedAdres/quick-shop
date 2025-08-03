@@ -69,14 +69,9 @@ const PaymentForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-card border border-border rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-foreground mb-4">
-          Payment Details
-        </h3>
-        <PaymentElement />
-      </div>
+      <PaymentElement />
 
-      <div className="bg-card border border-border rounded-lg p-6">
+      <div className="">
         <h3 className="text-lg font-semibold text-foreground mb-4">
           Payment Summary
         </h3>
