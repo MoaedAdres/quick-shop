@@ -284,7 +284,9 @@ export const useGetOrders = (status?: string) => {
 export const useGetOrderDetails = (orderId: number) => {
   return useFetchData<OrderDetailsResponse, Error, Order>({
     queryKey: queryKeys.orders.details(orderId),
-    queryFn: () => backApis.getOrderById(orderId),
-    selectFn: (response) => response.data,
+    queryFn: async () => {
+      const response = await backApis.getOrderById(orderId);
+      return response?.data?.data;
+    },
   });
 };

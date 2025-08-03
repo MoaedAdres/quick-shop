@@ -64,6 +64,5 @@ export const backApis = {
 
   // ------------------------------ Orders ---------------------------------------------
   getOrders: (status?: string) => get("orders", { params: { status } }),
-  getOrderById: (orderId: number): Promise<OrderDetailsResponse> =>
-    get(`orders/${orderId}`),
+  getOrderById: (orderId: number) => get(`orders/${orderId}`),
 };
