@@ -2,12 +2,10 @@ import { useAuthStore } from "@/Stores/auth.store";
 import { Navigate } from "react-router-dom";
 
 const RedirectRoute = () => {
-  const { isAuthenticated } = useAuthStore();
+  const token = useAuthStore().token;
+  const isAuthenticated = !!token;
   return (
-    <Navigate
-      to={`${isAuthenticated ? "/dashboard/home" : "login"}`}
-      replace
-    />
+    <Navigate to={`${isAuthenticated ? "/dashboard/home" : "login"}`} replace />
   );
 };
 
