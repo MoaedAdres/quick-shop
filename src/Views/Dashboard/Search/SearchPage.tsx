@@ -54,10 +54,20 @@ const SearchPage = () => {
 
   // Trigger fetch when last element comes into view
   useEffect(() => {
-    if (inView && searchProductsQuery.hasNextPage && !searchProductsQuery.isFetchingNextPage) {
+    if (
+      inView &&
+      searchProductsQuery.hasNextPage &&
+      !searchProductsQuery.isFetchingNextPage
+    ) {
       searchProductsQuery.fetchNextPage();
     }
-  }, [inView, searchProductsQuery.hasNextPage, searchProductsQuery.isFetchingNextPage, searchProductsQuery.fetchNextPage]);
+  }, [
+    inView,
+    searchProductsQuery.hasNextPage,
+    searchProductsQuery.isFetchingNextPage,
+    searchProductsQuery.fetchNextPage,
+    searchProductsQuery,
+  ]);
 
   const categories = categoriesQuery.data?.data;
   const products = searchProductsQuery.data;
@@ -171,7 +181,9 @@ const SearchPage = () => {
                 {products.map((product, index) => (
                   <div
                     key={product.product_id}
-                    ref={index === products.length - 1 ? lastElementRef : undefined}
+                    ref={
+                      index === products.length - 1 ? lastElementRef : undefined
+                    }
                   >
                     <ProductCard
                       product={product}
@@ -185,8 +197,12 @@ const SearchPage = () => {
             {/* Loading more indicator */}
             {searchProductsQuery.isFetchingNextPage && (
               <div className="flex items-center justify-center py-4">
-                <i className={`${icons.spinner} text-xl text-primary animate-spin`} />
-                <span className="ml-2 text-muted-foreground">Loading more...</span>
+                <i
+                  className={`${icons.spinner} text-xl text-primary animate-spin`}
+                />
+                <span className="ml-2 text-muted-foreground">
+                  Loading more...
+                </span>
               </div>
             )}
 
