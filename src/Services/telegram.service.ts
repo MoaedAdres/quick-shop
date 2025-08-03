@@ -57,7 +57,7 @@ class TelegramService {
       
       // Only apply Telegram theme colors if they exist and are not the default blue
       if (this.webApp.themeParams) {
-        const { bg_color, text_color, button_color, button_text_color } = this.webApp.themeParams;
+        const { bg_color, text_color } = this.webApp.themeParams;
         
         // Only override background and text colors, preserve your purple theme
         if (bg_color) document.documentElement.style.setProperty('--background', bg_color);
