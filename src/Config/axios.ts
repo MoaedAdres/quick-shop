@@ -10,8 +10,7 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
 });
-const constantToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU0MzA1ODQyLCJpYXQiOjE3NTQyMTk0NDIsImp0aSI6ImMzOTg4N2ZjYmFlNzRhMWJhNjU1NDg3ZWU4ZWUwYTU1IiwidXNlcl9pZCI6NH0.e5_sq44oD_pSyjbrI15_MQMockj6MPtSHKMUY8Gf7vw";
+
 // Request interceptor to add authentication token to all requests
 api.interceptors.request.use(
   (config) => {
@@ -27,9 +26,9 @@ api.interceptors.request.use(
         const parsed = JSON.parse(authData);
 
         // Add access token if available
-        // if (parsed.state?.token) {
-        config.headers["Authorization"] = `Bearer ${constantToken}`;
-        // }
+        if (parsed.state?.token) {
+          config.headers["Authorization"] = `Bearer ${parsed.state.token}`;
+        }
       } catch (error) {
         console.error("Error parsing auth data:", error);
       }
