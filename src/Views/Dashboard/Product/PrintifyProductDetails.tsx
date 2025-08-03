@@ -4,10 +4,11 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import type { SwiperRef } from "swiper/react";
 import { icons } from "@/Constants/icons";
-import { useGetPrintifyProductDetails } from "@/Api/queriesAndMutations";
+import { useGetPrintifyProductDetails, useAddToCart } from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import { Button } from "@/components/ui/button";
-import type { PrintifyProductDetails } from "@/Types/types";
+import { toast } from "sonner";
+import type { PrintifyProductDetails, AddToCartPayload } from "@/Types/types";
 
 // Import Swiper styles
 import "swiper/css";
@@ -21,20 +22,41 @@ const PrintifyProductDetails = () => {
   // State for image gallery
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const swiperRef = useRef<SwiperRef | null>(null);
+  
+  // State for product selection
+  const [quantity, setQuantity] = useState(1);
+  const [selectedVariant, setSelectedVariant] = useState<{
+    id: string;
+    title: string;
+    price: number;
+  } | null>(null);
 
   // Fetch product details
   const { data: productDetails, isLoading, error } = useGetPrintifyProductDetails(
     productId || ""
   );
+  const addToCartMutation = useAddToCart();
 
-  // Reset image index when product changes
+  // Reset image index and set initial variant when product changes
   useEffect(() => {
     setSelectedImageIndex(0);
     if (swiperRef.current?.swiper) {
       // When in loop mode, we need to use slideToLoop for proper navigation
       swiperRef.current.swiper.slideToLoop(0);
     }
-  }, [productId]);
+    
+    // Set initial variant when product data loads
+    if (productDetails?.data?.variants) {
+      const firstEnabledVariant = productDetails.data.variants.find(v => v.is_enabled);
+      if (firstEnabledVariant) {
+        setSelectedVariant({
+          id: firstEnabledVariant.id.toString(),
+          title: firstEnabledVariant.title,
+          price: firstEnabledVariant.price,
+        });
+      }
+    }
+  }, [productId, productDetails]);
 
   // Handle thumbnail click
   const handleThumbnailClick = (index: number) => {
@@ -50,6 +72,48 @@ const PrintifyProductDetails = () => {
     // When in loop mode, we need to get the real index
     const realIndex = swiper.realIndex !== undefined ? swiper.realIndex : swiper.activeIndex;
     setSelectedImageIndex(realIndex);
+  };
+
+  // Handle quantity change
+  const handleQuantityChange = (delta: number) => {
+    const newQuantity = quantity + delta;
+    if (newQuantity >= 1 && newQuantity <= 10) {
+      setQuantity(newQuantity);
+    }
+  };
+
+  // Handle add to cart
+  const handleAddToCart = async () => {
+    if (!selectedVariant || !productDetails?.data) {
+      toast.error("Please select a variant");
+      return;
+    }
+
+    // Construct sku_attr string from Printify product data
+    const skuAttrParts = [
+      `print_provider_id:${productDetails.data.print_provider_id}`,
+      `blueprint_id:${productDetails.data.blueprint_id}`
+    ];
+    const skuAttr = skuAttrParts.join(',');
+
+    const payload: AddToCartPayload = {
+      source: "printify",
+      product: {
+        product_id: productId!,
+        name: productDetails.data.title,
+        sku_id: selectedVariant.id,
+        sku_attr: skuAttr,
+        price: selectedVariant.price,
+      },
+      quantity,
+    };
+
+    try {
+      await addToCartMutation.mutateAsync(payload);
+      toast.success("Added to cart successfully!");
+    } catch (error) {
+      toast.error("Failed to add to cart. Please try again.");
+    }
   };
 
   // Handle back navigation
@@ -185,7 +249,7 @@ const PrintifyProductDetails = () => {
                   {product.title}
                 </h1>
                 <div className="flex flex-wrap gap-2">
-                  {product.tags.slice(0, 5).map((tag, index) => (
+                  {product.tags.slice(0, 10).map((tag, index) => (
                     <span
                       key={index}
                       className="px-3 py-1 bg-muted text-xs text-muted-foreground rounded-full"
@@ -200,12 +264,12 @@ const PrintifyProductDetails = () => {
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-foreground">Price</h3>
                 <div className="flex items-center gap-4">
-                  {product.variants.find(v => v.is_enabled) ? (
+                  {selectedVariant ? (
                     <span className="text-3xl font-bold text-primary">
-                      ${(product.variants.find(v => v.is_enabled)!.price / 100).toFixed(2)}
+                      ${(selectedVariant.price / 100).toFixed(2)}
                     </span>
                   ) : (
-                    <span className="text-lg text-muted-foreground">Price varies by variant</span>
+                    <span className="text-lg text-muted-foreground">Please select a variant</span>
                   )}
                 </div>
               </div>
@@ -253,11 +317,78 @@ const PrintifyProductDetails = () => {
                 />
               </div>
 
+              {/* Variants */}
+              <div className="space-y-2">
+                <h3 className="font-medium text-foreground">Available Variants</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {product.variants.filter(v => v.is_enabled).map((variant) => (
+                    <button
+                      key={variant.id}
+                      onClick={() =>
+                        setSelectedVariant({
+                          id: variant.id.toString(),
+                          title: variant.title,
+                          price: variant.price,
+                        })
+                      }
+                      className={`p-3 rounded-lg border text-sm transition-all ${
+                        selectedVariant?.id === variant.id.toString()
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="text-left">
+                        <div className="font-medium">{variant.title}</div>
+                        <div className="text-xs text-muted-foreground">
+                          ${(variant.price / 100).toFixed(2)}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quantity */}
+              <div className="space-y-2">
+                <h3 className="font-medium text-foreground">Quantity</h3>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => handleQuantityChange(-1)}
+                    disabled={quantity <= 1}
+                    className="w-8 h-8 rounded-full bg-muted flex items-center justify-center disabled:opacity-50"
+                  >
+                    <i className={icons.remove} />
+                  </button>
+                  <span className="font-medium text-foreground">{quantity}</span>
+                  <button
+                    onClick={() => handleQuantityChange(1)}
+                    disabled={quantity >= 10}
+                    className="w-8 h-8 rounded-full bg-muted flex items-center justify-center disabled:opacity-50"
+                  >
+                    <i className={icons.add} />
+                  </button>
+                </div>
+              </div>
+
               {/* Action Buttons */}
               <div className="flex gap-4 pt-4">
-                <Button className="flex-1" size="lg">
-                  <i className={`${icons.cart} mr-2`} />
-                  Add to Cart
+                <Button 
+                  className="flex-1" 
+                  size="lg"
+                  onClick={handleAddToCart}
+                  disabled={!selectedVariant || addToCartMutation.isPending}
+                >
+                  {addToCartMutation.isPending ? (
+                    <>
+                      <i className={`${icons.spinner} animate-spin mr-2`} />
+                      Adding to Cart...
+                    </>
+                  ) : (
+                    <>
+                      <i className={`${icons.cart} mr-2`} />
+                      Add to Cart
+                    </>
+                  )}
                 </Button>
                 <Button variant="outline" size="lg">
                   <i className={`${icons.heart} mr-2`} />

@@ -155,69 +155,67 @@ const ProductDetails = () => {
           {/* Product Images */}
           <div className="mb-6">
             {/* Main Image Swiper */}
-            <div className="aspect-square rounded-lg overflow-hidden mb-4">
+            <div className="relative">
               <Swiper
                 ref={swiperRef}
-                onSlideChange={handleSlideChange}
                 modules={[Navigation, Pagination, Autoplay]}
                 navigation={true}
-                pagination={{
-                  clickable: true,
+                pagination={{ 
+                  clickable: true, 
                   dynamicBullets: true,
+                  el: '.swiper-pagination',
+                  type: 'bullets'
                 }}
                 loop={true}
-                autoplay={{
-                  delay: 5000,
-                  disableOnInteraction: false,
-                }}
-                className="h-full [&_.swiper-button-next]:text-primary [&_.swiper-button-prev]:text-primary [&_.swiper-pagination-bullet]:bg-primary [&_.swiper-pagination-bullet-active]:bg-primary [&_.swiper-button-next]:!w-4 [&_.swiper-button-prev]:!w-4 [&_.swiper-button-next]:!h-4 [&_.swiper-button-prev]:!h-4 [&_.swiper-button-next]:!min-w-4 [&_.swiper-button-prev]:!min-w-4 [&_.swiper-button-next]:!min-h-4 [&_.swiper-button-prev]:!min-h-4 [&_.swiper-button-next::after]:!text-sm [&_.swiper-button-prev::after]:!text-sm [&_.swiper-button-next::after]:!text-[15px] [&_.swiper-button-prev::after]:!text-[15px]"
-                style={
-                  {
-                    "--swiper-navigation-color": "var(--primary)",
-                    "--swiper-pagination-color": "var(--primary)",
-                  } as React.CSSProperties
-                }
+                autoplay={{ delay: 5000, disableOnInteraction: false }}
+                onSlideChange={handleSlideChange}
+                className="h-96 rounded-lg overflow-hidden"
+                style={{
+                  "--swiper-navigation-color": "hsl(var(--primary))",
+                  "--swiper-pagination-color": "hsl(var(--primary))",
+                } as React.CSSProperties}
               >
                 {product.media_info.images.map((image, index) => (
                   <SwiperSlide key={index}>
-                    <div className="w-full h-full">
-                      <img
-                        src={image}
-                        alt={`${product.title} - ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                    <img
+                      src={image}
+                      alt={`${product.title} - ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
                   </SwiperSlide>
                 ))}
               </Swiper>
             </div>
 
-            {/* Image Thumbnails */}
-            <div className="grid grid-cols-4 gap-2">
-              {product.media_info.images.map((image, index) => (
-                <motion.div
-                  key={index}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleThumbnailClick(index)}
-                  className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
-                    selectedImageIndex === index
-                      ? "border-primary ring-2 ring-primary/20"
-                      : "border-border hover:border-primary/50"
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${product.title} - ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Active indicator */}
-                  {selectedImageIndex === index && (
-                    <div className="absolute top-1 right-1 w-3 h-3 bg-primary rounded-full border-2 border-background" />
-                  )}
-                </motion.div>
-              ))}
-            </div>
+            {/* Thumbnail Gallery */}
+            {product.media_info.images.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                {product.media_info.images.map((image, index) => (
+                  <motion.button
+                    key={index}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleThumbnailClick(index)}
+                    className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all relative ${
+                      selectedImageIndex === index
+                        ? "border-primary ring-2 ring-primary/20"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`${product.title} - ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    {selectedImageIndex === index && (
+                      <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                        <div className="w-2 h-2 bg-primary rounded-full" />
+                      </div>
+                    )}
+                  </motion.button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Product Info */}
