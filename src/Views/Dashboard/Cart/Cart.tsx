@@ -170,28 +170,6 @@ const Cart = () => {
           <span className="text-primary">{formatPrice(totals.total)}</span>
         </div>
 
-        {/* Free Shipping Progress
-        {totals.subtotal < 50 && !shippingPreview && (
-          <div className="bg-muted rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <i className={`${icons.truck} text-primary`} />
-              <span className="text-sm font-medium text-foreground">
-                Free shipping on orders over $50
-              </span>
-            </div>
-            <div className="w-full bg-background rounded-full h-2">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${(totals.subtotal / 50) * 100}%` }}
-                className="bg-primary h-2 rounded-full"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Add {formatPrice(50 - totals.subtotal)} more for free shipping
-            </p>
-          </div>
-        )} */}
-
         {/* Checkout Button */}
         <motion.button
           whileHover={{ scale: 1.02 }}

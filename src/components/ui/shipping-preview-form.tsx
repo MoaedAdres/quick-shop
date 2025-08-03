@@ -2,14 +2,23 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { useShippingPreview } from "@/Api/queriesAndMutations";
-import type { ShippingAddress, ShippingPreviewSuccess, ShippingPreviewError } from "@/Types/types";
+import type {
+  ShippingAddress,
+  ShippingPreviewSuccess,
+  ShippingPreviewError,
+} from "@/Types/types";
 
 interface ShippingPreviewFormProps {
   onSuccess?: (data: ShippingPreviewSuccess) => void;
   onError?: (error: ShippingPreviewError) => void;
+  setShippingAddress?: (address: ShippingAddress) => void;
 }
 
-const ShippingPreviewForm = ({ onSuccess, onError }: ShippingPreviewFormProps) => {
+const ShippingPreviewForm = ({
+  onSuccess,
+  onError,
+  setShippingAddress,
+}: ShippingPreviewFormProps) => {
   const [formData, setFormData] = useState<ShippingAddress>({
     address: "",
     address2: "",
@@ -30,17 +39,17 @@ const ShippingPreviewForm = ({ onSuccess, onError }: ShippingPreviewFormProps) =
     e.preventDefault();
     try {
       const result = await shippingPreviewMutation.mutateAsync(formData);
-      if ("data" in result && "total_shipping_fee" in result.data) {
-        onSuccess?.(result as ShippingPreviewSuccess);
-      } else {
-        onError?.(result as ShippingPreviewError);
-      }
+      onSuccess?.(result?.data as unknown as ShippingPreviewSuccess);
+      setShippingAddress?.(formData);
     } catch (error) {
       console.error("Failed to get shipping preview:", error);
+      onError?.(error as unknown as ShippingPreviewError);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -50,7 +59,10 @@ const ShippingPreviewForm = ({ onSuccess, onError }: ShippingPreviewFormProps) =
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Full Name */}
         <div>
-          <label htmlFor="full_name" className="block text-sm font-medium text-foreground mb-1">
+          <label
+            htmlFor="full_name"
+            className="block text-sm font-medium text-foreground mb-1"
+          >
             Full Name
           </label>
           <input
@@ -66,7 +78,10 @@ const ShippingPreviewForm = ({ onSuccess, onError }: ShippingPreviewFormProps) =
 
         {/* Contact Person */}
         <div>
-          <label htmlFor="contact_person" className="block text-sm font-medium text-foreground mb-1">
+          <label
+            htmlFor="contact_person"
+            className="block text-sm font-medium text-foreground mb-1"
+          >
             Contact Person
           </label>
           <input
@@ -83,7 +98,10 @@ const ShippingPreviewForm = ({ onSuccess, onError }: ShippingPreviewFormProps) =
         {/* Phone */}
         <div className="flex gap-2">
           <div className="w-24">
-            <label htmlFor="phone_country" className="block text-sm font-medium text-foreground mb-1">
+            <label
+              htmlFor="phone_country"
+              className="block text-sm font-medium text-foreground mb-1"
+            >
               Code
             </label>
             <input
@@ -97,7 +115,10 @@ const ShippingPreviewForm = ({ onSuccess, onError }: ShippingPreviewFormProps) =
             />
           </div>
           <div className="flex-1">
-            <label htmlFor="mobile_no" className="block text-sm font-medium text-foreground mb-1">
+            <label
+              htmlFor="mobile_no"
+              className="block text-sm font-medium text-foreground mb-1"
+            >
               Phone Number
             </label>
             <input
@@ -114,7 +135,10 @@ const ShippingPreviewForm = ({ onSuccess, onError }: ShippingPreviewFormProps) =
 
         {/* Address */}
         <div className="md:col-span-2">
-          <label htmlFor="address" className="block text-sm font-medium text-foreground mb-1">
+          <label
+            htmlFor="address"
+            className="block text-sm font-medium text-foreground mb-1"
+          >
             Address
           </label>
           <input
@@ -130,7 +154,10 @@ const ShippingPreviewForm = ({ onSuccess, onError }: ShippingPreviewFormProps) =
 
         {/* Address 2 */}
         <div className="md:col-span-2">
-          <label htmlFor="address2" className="block text-sm font-medium text-foreground mb-1">
+          <label
+            htmlFor="address2"
+            className="block text-sm font-medium text-foreground mb-1"
+          >
             Address Line 2 (Optional)
           </label>
           <input
@@ -145,7 +172,10 @@ const ShippingPreviewForm = ({ onSuccess, onError }: ShippingPreviewFormProps) =
 
         {/* City */}
         <div>
-          <label htmlFor="city" className="block text-sm font-medium text-foreground mb-1">
+          <label
+            htmlFor="city"
+            className="block text-sm font-medium text-foreground mb-1"
+          >
             City
           </label>
           <input
@@ -161,7 +191,10 @@ const ShippingPreviewForm = ({ onSuccess, onError }: ShippingPreviewFormProps) =
 
         {/* Province/State */}
         <div>
-          <label htmlFor="province" className="block text-sm font-medium text-foreground mb-1">
+          <label
+            htmlFor="province"
+            className="block text-sm font-medium text-foreground mb-1"
+          >
             Province/State
           </label>
           <input
@@ -177,7 +210,10 @@ const ShippingPreviewForm = ({ onSuccess, onError }: ShippingPreviewFormProps) =
 
         {/* Country */}
         <div>
-          <label htmlFor="country" className="block text-sm font-medium text-foreground mb-1">
+          <label
+            htmlFor="country"
+            className="block text-sm font-medium text-foreground mb-1"
+          >
             Country
           </label>
           <input
@@ -193,7 +229,10 @@ const ShippingPreviewForm = ({ onSuccess, onError }: ShippingPreviewFormProps) =
 
         {/* ZIP/Postal Code */}
         <div>
-          <label htmlFor="zip" className="block text-sm font-medium text-foreground mb-1">
+          <label
+            htmlFor="zip"
+            className="block text-sm font-medium text-foreground mb-1"
+          >
             ZIP/Postal Code
           </label>
           <input
@@ -209,7 +248,10 @@ const ShippingPreviewForm = ({ onSuccess, onError }: ShippingPreviewFormProps) =
 
         {/* Order Comment */}
         <div className="md:col-span-2">
-          <label htmlFor="order_comment" className="block text-sm font-medium text-foreground mb-1">
+          <label
+            htmlFor="order_comment"
+            className="block text-sm font-medium text-foreground mb-1"
+          >
             Order Comment (Optional)
           </label>
           <textarea
@@ -247,4 +289,4 @@ const ShippingPreviewForm = ({ onSuccess, onError }: ShippingPreviewFormProps) =
   );
 };
 
-export default ShippingPreviewForm; 
+export default ShippingPreviewForm;

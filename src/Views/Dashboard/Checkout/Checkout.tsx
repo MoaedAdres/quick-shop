@@ -6,20 +6,24 @@ import { useGetCart } from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import StripePayment from "@/components/ui/stripe-payment";
 import ShippingPreviewForm from "@/components/ui/shipping-preview-form";
+import OrderSummaryModal from "@/components/ui/order-summary-modal";
 import type {
   ShippingPreviewSuccess,
   ShippingPreviewError,
   ShippingAddress,
 } from "@/Types/types";
 import { toast } from "sonner";
+import { calculateTax, getTaxRate } from "@/Constants/tax";
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { data: cartData, isLoading, error } = useGetCart();
-  const [shippingPreview, setShippingPreview] = useState<ShippingPreviewSuccess | null>(null);
-  const [shippingError, setShippingError] = useState<ShippingPreviewError | null>(null);
+  const [shippingPreview, setShippingPreview] =
+    useState<ShippingPreviewSuccess | null>(null);
   const [showShippingForm, setShowShippingForm] = useState(true);
-  const [shippingAddress, setShippingAddress] = useState<ShippingAddress | null>(null);
+  const [shippingAddress, setShippingAddress] =
+    useState<ShippingAddress | null>(null);
+  const [showOrderSummaryModal, setShowOrderSummaryModal] = useState(false);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -36,21 +40,24 @@ const Checkout = () => {
       0
     );
     const shipping = shippingPreview?.data.total_shipping_fee ?? 0;
-    const tax = subtotal * 0.08; // 8% tax
+
+    // Get tax rate based on shipping address country (if available)
+    const country = shippingAddress?.country;
+    const tax = calculateTax(subtotal, country);
     const total = subtotal + shipping + tax;
 
     return { subtotal, shipping, tax, total };
   };
 
   const handleShippingSuccess = (preview: ShippingPreviewSuccess) => {
+    console.log("preview", preview);
     setShippingPreview(preview);
-    setShippingError(null);
-    setShowShippingForm(false);
+    setShowOrderSummaryModal(true);
   };
 
   const handleShippingError = (error: ShippingPreviewError) => {
-    setShippingError(error);
     setShippingPreview(null);
+    toast.error(error.message ?? "error when shipping preview");
   };
 
   const handlePaymentSuccess = () => {
@@ -67,6 +74,15 @@ const Checkout = () => {
     navigate("/dashboard/cart");
   };
 
+  const handleOrderSummaryContinue = () => {
+    setShowOrderSummaryModal(false);
+    setShowShippingForm(false);
+  };
+
+  const handleOrderSummaryBack = () => {
+    setShowOrderSummaryModal(false);
+  };
+
   if (isLoading) {
     return (
       <RFlex className="flex-col h-full pb-20 md:pb-0">
@@ -74,7 +90,9 @@ const Checkout = () => {
           <h1 className="text-xl font-semibold text-foreground">Checkout</h1>
         </div>
         <div className="flex-1 flex items-center justify-center">
-          <i className={`${icons.spinner} text-2xl text-primary animate-spin`} />
+          <i
+            className={`${icons.spinner} text-2xl text-primary animate-spin`}
+          />
         </div>
       </RFlex>
     );
@@ -141,12 +159,12 @@ const Checkout = () => {
                 <ShippingPreviewForm
                   onSuccess={(preview) => handleShippingSuccess(preview)}
                   onError={handleShippingError}
+                  setShippingAddress={setShippingAddress}
                 />
               </motion.div>
             )}
           </AnimatePresence>
 
-          
           {/* Payment Section */}
           {!showShippingForm && shippingAddress && shippingPreview && (
             <motion.div
@@ -168,24 +186,23 @@ const Checkout = () => {
               />
             </motion.div>
           )}
-
-          {/* Error Display */}
-          {shippingError && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-red-50 border border-red-200 rounded-lg p-4"
-            >
-              <div className="flex items-center">
-                <i className={`${icons.error} text-red-500 mr-2`} />
-                <span className="text-red-700">{shippingError.message}</span>
-              </div>
-            </motion.div>
-          )}
         </div>
       </div>
+
+      {/* Order Summary Modal */}
+      {shippingPreview && shippingAddress && cartData && (
+        <OrderSummaryModal
+          isOpen={showOrderSummaryModal}
+          onClose={handleOrderSummaryBack}
+          onContinue={handleOrderSummaryContinue}
+          shippingPreview={shippingPreview}
+          shippingAddress={shippingAddress}
+          cartItems={cartData.items}
+          totals={totals}
+        />
+      )}
     </RFlex>
   );
 };
 
-export default Checkout; 
+export default Checkout;

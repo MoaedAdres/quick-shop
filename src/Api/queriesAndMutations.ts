@@ -252,7 +252,6 @@ export const useShippingPreview = () => {
     ShippingAddress
   >({
     mutationFn: (address: ShippingAddress) => backApis.shippingPreview(address),
-    displaySuccess: false,
   });
 };
 
