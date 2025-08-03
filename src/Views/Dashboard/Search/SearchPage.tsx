@@ -24,6 +24,7 @@ const SearchPage = () => {
     local: "en_US",
     country: "US",
     currency: "USD",
+    cat_id: selectedCategory?.id,
   });
 
   const handleSearch = (query: string) => {

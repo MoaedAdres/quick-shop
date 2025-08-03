@@ -105,7 +105,7 @@ export const useSearchProducts = (params: SearchParams) => {
       });
       return response.data;
     },
-    enableCondition: !!params.search.trim(), // Only run if search query exists
+    enableCondition: !!params.search.trim() || !!params.cat_id, // Run if search query or category ID exists
     selectFn: (data) => data.pages.flatMap((page) => page.data.products),
     initialPageParam: 1,
     getNextPageParam: (lastPage: SearchProductsResponse) => {
