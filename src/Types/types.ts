@@ -143,6 +143,7 @@ export interface SearchParams extends PaginationParams {
   local?: string;
   country?: string;
   currency?: string;
+  cat_id?: number;
 }
 
 export interface RecommendedProductsParams extends PaginationParams {

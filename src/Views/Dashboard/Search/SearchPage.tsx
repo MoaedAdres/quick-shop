@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { useGetCategories, useSearchProducts } from "@/Api/queriesAndMutations";
@@ -8,6 +8,7 @@ import CategoryCard from "@/components/ui/category-card";
 import ProductCard from "@/components/ui/product-card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useInView } from "react-intersection-observer";
 
 const SearchPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,6 +44,19 @@ const SearchPage = () => {
   const handleBackClick = () => {
     navigate(-1);
   };
+
+  // Intersection Observer for infinite scroll
+  const { ref: lastElementRef, inView } = useInView({
+    threshold: 0,
+    rootMargin: "100px",
+  });
+
+  // Trigger fetch when last element comes into view
+  useEffect(() => {
+    if (inView && searchProductsQuery.hasNextPage && !searchProductsQuery.isFetchingNextPage) {
+      searchProductsQuery.fetchNextPage();
+    }
+  }, [inView, searchProductsQuery.hasNextPage, searchProductsQuery.isFetchingNextPage, searchProductsQuery.fetchNextPage]);
 
   const categories = categoriesQuery.data?.data;
   const products = searchProductsQuery.data;
@@ -131,7 +145,7 @@ const SearchPage = () => {
             </div>
 
             {/* Loading State */}
-            {loading && (
+            {loading && !searchProductsQuery.isFetchingNextPage && (
               <div className="flex items-center justify-center py-8">
                 <i className={`${icons.spinner} text-2xl text-primary`} />
                 <span className="ml-2 text-muted-foreground">Loading...</span>
@@ -153,13 +167,25 @@ const SearchPage = () => {
             {/* Products Grid */}
             {products && products.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {products.map((product) => (
-                  <ProductCard
+                {products.map((product, index) => (
+                  <div
                     key={product.product_id}
-                    product={product}
-                    onClick={() => handleProductClick(product)}
-                  />
+                    ref={index === products.length - 1 ? lastElementRef : undefined}
+                  >
+                    <ProductCard
+                      product={product}
+                      onClick={() => handleProductClick(product)}
+                    />
+                  </div>
                 ))}
+              </div>
+            )}
+
+            {/* Loading more indicator */}
+            {searchProductsQuery.isFetchingNextPage && (
+              <div className="flex items-center justify-center py-4">
+                <i className={`${icons.spinner} text-xl text-primary animate-spin`} />
+                <span className="ml-2 text-muted-foreground">Loading more...</span>
               </div>
             )}
 
