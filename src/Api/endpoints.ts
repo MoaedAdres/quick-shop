@@ -8,8 +8,6 @@ import type {
   RefreshTokenPayload,
   OrdersResponse,
   OrderDetailsResponse,
-  ShippingPreviewSuccess,
-  ShippingPreviewError,
   CreateCheckoutSessionPayload,
   CheckoutSessionResponse,
 } from "@/Types/types";
@@ -34,12 +32,19 @@ export const backApis = {
   removeFromCart: (itemId: number) => destroy(`orders/cart/items/${itemId}`),
 
   // ------------------------------ Shipping ---------------------------------------------
-  shippingPreview: (payload: ShippingAddress): Promise<ShippingPreviewSuccess | ShippingPreviewError> =>
+  shippingPreview: (payload: ShippingAddress) =>
     post("orders/shipping-preview", payload),
 
   // ------------------------------ Payment ---------------------------------------------
-  createCheckoutSession: (payload: CreateCheckoutSessionPayload): Promise<CheckoutSessionResponse> =>
+  createCheckoutSession: (
+    payload: CreateCheckoutSessionPayload
+  ): Promise<CheckoutSessionResponse> =>
     post("payments/create-checkout-session", payload),
+
+  createStripeOrder: (payload: {
+    payment_method: "stripe";
+    delivery_address: ShippingAddress;
+  }) => post("orders", payload),
 
   // ------------------------------ Authentication ---------------------------------------------
   telegramLogin: (payload: TelegramLoginPayload) =>
@@ -58,7 +63,8 @@ export const backApis = {
   // updateUserProfile: (payload: UpdateProfilePayload) => put("user/profile", payload),
 
   // ------------------------------ Orders ---------------------------------------------
-  getOrders: (status?: string): Promise<OrdersResponse> => get("orders", { params: { status } }),
+  getOrders: (status?: string): Promise<OrdersResponse> =>
+    get("orders", { params: { status } }),
   getOrderById: (orderId: number): Promise<OrderDetailsResponse> =>
     get(`orders/${orderId}`),
 };

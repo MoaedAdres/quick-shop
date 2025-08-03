@@ -1,16 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { icons } from "@/Constants/icons";
-import { useCreateCheckoutSession } from "@/Api/queriesAndMutations";
 import type { 
-  CreateCheckoutSessionPayload, 
   ShippingAddress, 
   CartItem 
 } from "@/Types/types";
-import { toast } from "sonner";
 
 interface StripePaymentProps {
+  clientSecret: string;
   amount: number;
   currency: string;
   shippingAddress: ShippingAddress;
@@ -20,52 +20,62 @@ interface StripePaymentProps {
   onCancel: () => void;
 }
 
-const StripePayment = ({
+// Payment Form Component
+const PaymentForm = ({
   amount,
   currency,
-  shippingAddress,
-  cartItems,
   onSuccess,
   onError,
   onCancel,
-}: StripePaymentProps) => {
+}: {
+  amount: number;
+  currency: string;
+  onSuccess: () => void;
+  onError: (error: string) => void;
+  onCancel: () => void;
+}) => {
+  const stripe = useStripe();
+  const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
-  const createCheckoutSessionMutation = useCreateCheckoutSession();
 
-  const handleCheckout = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const payload: CreateCheckoutSessionPayload = {
-        amount: Math.round(amount * 100), // Convert to cents
-        currency: currency.toLowerCase(),
-        shipping_address: shippingAddress,
-        items: cartItems,
-        success_url: `${window.location.origin}/dashboard/orders?success=true`,
-        cancel_url: `${window.location.origin}/dashboard/cart`,
-      };
-
-      const response = await createCheckoutSessionMutation.mutateAsync(payload);
-      
-      // Redirect to Stripe Checkout
-      const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-      const { error } = await stripe!.redirectToCheckout({
-        sessionId: response.data.session_id,
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/dashboard/orders?success=true`,
+        },
       });
 
       if (error) {
-        onError(error.message || "Checkout failed");
+        onError(error.message || "Payment failed");
+      } else {
+        onSuccess();
       }
     } catch (error) {
-      onError("Failed to start checkout. Please try again.");
-      console.error("Checkout session creation failed:", error);
+      onError("Payment failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="bg-card border border-border rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-foreground mb-4">
+          Payment Details
+        </h3>
+        <PaymentElement />
+      </div>
+
       <div className="bg-card border border-border rounded-lg p-6">
         <h3 className="text-lg font-semibold text-foreground mb-4">
           Payment Summary
@@ -79,10 +89,6 @@ const StripePayment = ({
                 currency: currency.toUpperCase(),
               }).format(amount)}
             </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Items</span>
-            <span className="font-medium">{cartItems.length}</span>
           </div>
         </div>
       </div>
@@ -99,26 +105,74 @@ const StripePayment = ({
         </motion.button>
         
         <motion.button
-          onClick={handleCheckout}
-          disabled={isLoading}
+          type="submit"
+          disabled={!stripe || isLoading}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="flex-1 bg-primary text-primary-foreground py-3 px-4 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 bg-primary text-primary-foreground py-3 px-4 rounded-lg font-medium disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {isLoading ? (
-            <div className="flex items-center justify-center">
-              <i className={`${icons.spinner} text-sm animate-spin mr-2`} />
-              Redirecting...
-            </div>
+            <>
+              <i className={`${icons.spinner} animate-spin`} />
+              Processing...
+            </>
           ) : (
-            `Pay ${new Intl.NumberFormat("en-US", {
-              style: "currency",
-              currency: currency.toUpperCase(),
-            }).format(amount)}`
+            <>
+              <i className={icons.creditCard} />
+              Pay Now
+            </>
           )}
         </motion.button>
       </div>
-    </div>
+    </form>
+  );
+};
+
+// Main Stripe Payment Component
+const StripePayment = ({
+  clientSecret,
+  amount,
+  currency,
+  onSuccess,
+  onError,
+  onCancel,
+}: StripePaymentProps) => {
+  const [stripePromise, setStripePromise] = useState<any>(null);
+
+  useEffect(() => {
+    const initStripe = async () => {
+      const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+      setStripePromise(stripe);
+    };
+    initStripe();
+  }, []);
+
+  if (!stripePromise) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <i className={`${icons.spinner} text-2xl text-primary animate-spin`} />
+      </div>
+    );
+  }
+
+  return (
+    <Elements
+      stripe={stripePromise}
+      options={{
+        clientSecret,
+        appearance: {
+          theme: 'stripe',
+        },
+      }}
+    >
+      <PaymentForm
+        amount={amount}
+        currency={currency}
+        onSuccess={onSuccess}
+        onError={onError}
+        onCancel={onCancel}
+      />
+    </Elements>
   );
 };
 

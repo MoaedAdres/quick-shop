@@ -487,6 +487,14 @@ export interface CheckoutSessionResponse {
   message: string | null;
 }
 
+export interface StripeOrderResponse {
+  data: {
+    client_secret: string;
+    order_ids: string[];
+  };
+  message: string;
+}
+
 export interface StripePaymentMethod {
   id: string;
   type: string;

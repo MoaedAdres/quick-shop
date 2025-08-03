@@ -20,10 +20,10 @@ import type {
   OrderDetailsResponse,
   Order,
   ShippingPreviewSuccess,
-  ShippingPreviewError,
   Product,
   CreateCheckoutSessionPayload,
   CheckoutSessionResponse,
+  StripeOrderResponse,
 } from "@/Types/types";
 
 // Query Keys
@@ -181,6 +181,16 @@ export const useCreateCheckoutSession = () => {
   });
 };
 
+export const useCreateStripeOrder = () => {
+  return useMutateData<StripeOrderResponse, { payment_method: "stripe"; delivery_address: ShippingAddress }>({
+    mutationFn: async (payload) => {
+      const response = await backApis.createStripeOrder(payload);
+      return response.data;
+    },
+    displaySuccess: false,
+  });
+};
+
 // ------------------------------ Authentication Mutations ---------------------------------------------
 
 export const useTelegramLogin = () => {
@@ -247,11 +257,11 @@ export const useRefreshToken = () => {
 
 // Shipping Mutations
 export const useShippingPreview = () => {
-  return useMutateData<
-    ShippingPreviewSuccess | ShippingPreviewError,
-    ShippingAddress
-  >({
-    mutationFn: (address: ShippingAddress) => backApis.shippingPreview(address),
+  return useMutateData<ShippingPreviewSuccess, ShippingAddress>({
+    mutationFn: async (address: ShippingAddress) => {
+      const response = await backApis.shippingPreview(address);
+      return response?.data;
+    },
   });
 };
 

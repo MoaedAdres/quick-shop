@@ -39,7 +39,8 @@ const ShippingPreviewForm = ({
     e.preventDefault();
     try {
       const result = await shippingPreviewMutation.mutateAsync(formData);
-      onSuccess?.(result?.data as unknown as ShippingPreviewSuccess);
+      console.log("result", result);
+      onSuccess?.(result);
       setShippingAddress?.(formData);
     } catch (error) {
       console.error("Failed to get shipping preview:", error);

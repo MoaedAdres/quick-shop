@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { icons } from "@/Constants/icons";
-import { useGetCart } from "@/Api/queriesAndMutations";
+import { useGetCart, useCreateStripeOrder } from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import StripePayment from "@/components/ui/stripe-payment";
 import ShippingPreviewForm from "@/components/ui/shipping-preview-form";
@@ -13,7 +13,7 @@ import type {
   ShippingAddress,
 } from "@/Types/types";
 import { toast } from "sonner";
-import { calculateTax, getTaxRate } from "@/Constants/tax";
+import { calculateTax } from "@/Constants/tax";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -24,13 +24,16 @@ const Checkout = () => {
   const [shippingAddress, setShippingAddress] =
     useState<ShippingAddress | null>(null);
   const [showOrderSummaryModal, setShowOrderSummaryModal] = useState(false);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
+  const [orderIds, setOrderIds] = useState<string[]>([]);
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(price);
-  };
+  // const formatPrice = (price: number) => {
+  //   return new Intl.NumberFormat("en-US", {
+  //     style: "currency",
+  //     currency: "USD",
+  //   }).format(price);
+  // };
 
   const calculateCartTotals = () => {
     if (!cartData?.items) return { subtotal: 0, shipping: 0, tax: 0, total: 0 };
@@ -61,7 +64,7 @@ const Checkout = () => {
   };
 
   const handlePaymentSuccess = () => {
-    toast.success("Payment successful! Your order has been placed.");
+    toast.success(`Payment successful! Your order${orderIds.length > 1 ? 's' : ''} has been placed.`);
     // Navigate to order confirmation or orders page
     navigate("/dashboard/orders");
   };
@@ -74,9 +77,26 @@ const Checkout = () => {
     navigate("/dashboard/cart");
   };
 
-  const handleOrderSummaryContinue = () => {
-    setShowOrderSummaryModal(false);
-    setShowShippingForm(false);
+  const createStripeOrderMutation = useCreateStripeOrder();
+
+  const handleOrderSummaryContinue = async () => {
+    if (!shippingAddress) return;
+
+    try {
+      const result = await createStripeOrderMutation.mutateAsync({
+        payment_method: "stripe",
+        delivery_address: shippingAddress,
+      });
+
+      setStripeClientSecret(result.data.client_secret);
+      setOrderIds(result.data.order_ids);
+      setShowOrderSummaryModal(false);
+      setShowShippingForm(false);
+      setShowPaymentForm(true);
+    } catch (error) {
+      console.error("Failed to create Stripe order:", error);
+      toast.error("Failed to initialize payment. Please try again.");
+    }
   };
 
   const handleOrderSummaryBack = () => {
@@ -166,7 +186,7 @@ const Checkout = () => {
           </AnimatePresence>
 
           {/* Payment Section */}
-          {!showShippingForm && shippingAddress && shippingPreview && (
+          {showPaymentForm && stripeClientSecret && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -176,9 +196,10 @@ const Checkout = () => {
                 Payment
               </h2>
               <StripePayment
+                clientSecret={stripeClientSecret}
                 amount={totals.total}
                 currency="USD"
-                shippingAddress={shippingAddress}
+                shippingAddress={shippingAddress!}
                 cartItems={cartData.items}
                 onSuccess={handlePaymentSuccess}
                 onError={handlePaymentError}
