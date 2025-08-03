@@ -7,7 +7,7 @@ import RFlex from "@/RComponents/RFlex";
 import { toast } from "sonner";
 import type { AddToCartPayload } from "@/Types/types";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { Pagination, Autoplay } from "swiper/modules";
 import type { SwiperRef } from "swiper/react";
 
 // Import Swiper styles
@@ -158,8 +158,7 @@ const ProductDetails = () => {
             <div className="relative">
               <Swiper
                 ref={swiperRef}
-                modules={[Navigation, Pagination, Autoplay]}
-                navigation={true}
+                modules={[Pagination, Autoplay]}
                 pagination={{ 
                   clickable: true, 
                   dynamicBullets: true,
@@ -171,7 +170,6 @@ const ProductDetails = () => {
                 onSlideChange={handleSlideChange}
                 className="h-96 rounded-lg overflow-hidden"
                 style={{
-                  "--swiper-navigation-color": "hsl(var(--primary))",
                   "--swiper-pagination-color": "hsl(var(--primary))",
                 } as React.CSSProperties}
               >

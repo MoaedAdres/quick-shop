@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { Pagination, Autoplay } from "swiper/modules";
 import type { SwiperRef } from "swiper/react";
 import { icons } from "@/Constants/icons";
 import {
@@ -33,12 +33,12 @@ const PrintifyProductDetails = () => {
     title: string;
     price: number;
   } | null>(null);
-  
+
   // State for option selections
   const [selectedOptions, setSelectedOptions] = useState<{
     [optionId: string]: string;
   }>({});
-
+  console.log("selectedOptions", selectedOptions);
   // Fetch product details
   const {
     data: productDetails,
@@ -95,28 +95,79 @@ const PrintifyProductDetails = () => {
     }
   };
 
-  // Handle option selection
+  // Handle option selection (toggle functionality)
   const handleOptionSelect = (optionId: string, valueId: string) => {
-    setSelectedOptions(prev => ({
-      ...prev,
-      [optionId]: valueId
-    }));
+    setSelectedOptions((prev) => {
+      const currentValue = prev[optionId];
+
+      // If clicking the same option, unselect it
+      if (currentValue === valueId) {
+        const newOptions = { ...prev };
+        delete newOptions[optionId];
+        return newOptions;
+      }
+
+      // Otherwise, select the new option
+      return {
+        ...prev,
+        [optionId]: valueId,
+      };
+    });
   };
 
   // Get filtered variants based on selected options
-  const getFilteredVariants = () => {
+  const getFilteredVariants = useCallback(() => {
     if (!productDetails?.data?.variants) return [];
-    
-    return productDetails.data.variants.filter(variant => {
+
+    const filtered = productDetails.data.variants.filter((variant) => {
       // If no options are selected, show all enabled variants
       if (Object.keys(selectedOptions).length === 0) {
         return variant.is_enabled;
       }
-      
-      // For now, just return enabled variants since the option filtering logic needs more work
-      return variant.is_enabled;
+      // Check if variant matches all selected options
+      const selectedOptionEntries = Object.entries(selectedOptions);
+
+      return (
+        variant.is_enabled &&
+        selectedOptionEntries.every(([optionIndex, selectedValueId]) => {
+          // Get the option values for this variant
+          const optionIndexNum = parseInt(optionIndex);
+          const variantOptionValue = variant.options[optionIndexNum];
+
+          // Check if the variant's option value matches the selected value
+          return (
+            variantOptionValue &&
+            variantOptionValue.toString() === selectedValueId
+          );
+        })
+      );
     });
-  };
+
+    // Sort enabled variants first, then by title
+    return filtered.sort((a, b) => {
+      if (a.is_enabled && !b.is_enabled) return -1;
+      if (!a.is_enabled && b.is_enabled) return 1;
+      return a.title.localeCompare(b.title);
+    });
+  }, [selectedOptions, productDetails?.data?.variants]);
+
+  // Auto-select variant when options change
+  useEffect(() => {
+    const filteredVariants = getFilteredVariants();
+
+    if (filteredVariants.length > 0) {
+      // Select the first available variant
+      const firstVariant = filteredVariants[0];
+      setSelectedVariant({
+        id: firstVariant.id.toString(),
+        title: firstVariant.title,
+        price: firstVariant.price,
+      });
+    } else if (Object.keys(selectedOptions).length > 0) {
+      // No variants match the selected options, clear selection
+      setSelectedVariant(null);
+    }
+  }, [selectedOptions, productDetails?.data?.variants, getFilteredVariants]);
 
   // Handle add to cart
   const handleAddToCart = async () => {
@@ -223,8 +274,7 @@ const PrintifyProductDetails = () => {
               <div className="relative">
                 <Swiper
                   ref={swiperRef}
-                  modules={[Navigation, Pagination, Autoplay]}
-                  navigation={true}
+                  modules={[Pagination, Autoplay]}
                   pagination={{
                     clickable: true,
                     dynamicBullets: true,
@@ -237,7 +287,6 @@ const PrintifyProductDetails = () => {
                   className="h-96 rounded-lg overflow-hidden"
                   style={
                     {
-                      "--swiper-navigation-color": "hsl(var(--primary))",
                       "--swiper-pagination-color": "hsl(var(--primary))",
                     } as React.CSSProperties
                   }
@@ -333,9 +382,15 @@ const PrintifyProductDetails = () => {
                         {option.values.map((value) => (
                           <button
                             key={value.id}
-                            onClick={() => handleOptionSelect(index.toString(), value.id.toString())}
+                            onClick={() =>
+                              handleOptionSelect(
+                                index.toString(),
+                                value.id.toString()
+                              )
+                            }
                             className={`px-3 py-2 rounded-lg border text-sm transition-all ${
-                              selectedOptions[index.toString()] === value.id.toString()
+                              selectedOptions[index.toString()] ===
+                              value.id.toString()
                                 ? "border-primary bg-primary/10 text-primary"
                                 : "border-border hover:border-primary/50"
                             }`}
@@ -373,40 +428,115 @@ const PrintifyProductDetails = () => {
 
               {/* Variants */}
               <div className="space-y-2">
-                <h3 className="font-medium text-foreground">
-                  Available Variants
-                </h3>
-                <div className="grid grid-cols-2 gap-2">
-                  {filteredVariants.map((variant) => (
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium text-foreground">
+                    Available Variants
+                  </h3>
+                  {Object.keys(selectedOptions).length > 0 && (
                     <button
-                      key={variant.id}
-                      onClick={() =>
-                        setSelectedVariant({
-                          id: variant.id.toString(),
-                          title: variant.title,
-                          price: variant.price,
-                        })
-                      }
-                      className={`p-3 rounded-lg border text-sm transition-all ${
-                        selectedVariant?.id === variant.id.toString()
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border text-muted-foreground hover:border-primary/50"
-                      }`}
+                      onClick={() => setSelectedOptions({})}
+                      className="text-sm text-primary hover:underline"
                     >
-                      <div className="text-left">
-                        <div className="font-medium">{variant.title}</div>
-                        <div className="text-xs text-muted-foreground">
-                          ${(variant.price / 100).toFixed(2)}
-                        </div>
-                      </div>
+                      Clear selections
                     </button>
-                  ))}
+                  )}
+                </div>
+                {filteredVariants.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    {filteredVariants.map((variant) => (
+                      <button
+                        key={variant.id}
+                        onClick={() =>
+                          setSelectedVariant({
+                            id: variant.id.toString(),
+                            title: variant.title,
+                            price: variant.price,
+                          })
+                        }
+                        className={`p-3 rounded-lg border text-sm transition-all ${
+                          selectedVariant?.id === variant.id.toString()
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border text-muted-foreground hover:border-primary/50"
+                        }`}
+                      >
+                        <div className="text-left">
+                          <div className="font-medium">{variant.title}</div>
+                          <div className="text-xs text-muted-foreground">
+                            ${(variant.price / 100).toFixed(2)}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : Object.keys(selectedOptions).length > 0 ? (
+                  <div className="p-4 text-center border border-dashed border-border rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      No variants available for the selected options
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-4 text-center border border-dashed border-border rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      Select options to see available variants
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Additional Details */}
+            <div className="mt-12 space-y-8">
+              {/* Product Specifications */}
+              <div>
+                <h3 className="text-xl font-semibold text-foreground mb-4">
+                  Product Specifications
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <span className="text-sm text-muted-foreground">
+                      Blueprint ID
+                    </span>
+                    <p className="font-medium">{product.blueprint_id}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-sm text-muted-foreground">
+                      Print Provider ID
+                    </span>
+                    <p className="font-medium">{product.print_provider_id}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-sm text-muted-foreground">
+                      Created
+                    </span>
+                    <p className="font-medium">
+                      {new Date(product.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-sm text-muted-foreground">
+                      Last Updated
+                    </span>
+                    <p className="font-medium">
+                      {new Date(product.updated_at).toLocaleDateString()}
+                    </p>
+                  </div>
                 </div>
               </div>
-
-              {/* Quantity */}
+              {/* Quantity and Total */}
               <div className="space-y-2">
-                <h3 className="font-medium text-foreground">Quantity</h3>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium text-foreground">Quantity</h3>
+                  {selectedVariant && (
+                    <div className="text-right">
+                      <div className="text-sm text-muted-foreground">
+                        Total Price
+                      </div>
+                      <div className="text-lg font-bold text-primary">
+                        ${((selectedVariant.price * quantity) / 100).toFixed(2)}
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => handleQuantityChange(-1)}
@@ -448,53 +578,10 @@ const PrintifyProductDetails = () => {
                     </>
                   )}
                 </Button>
-                <Button variant="outline" size="lg">
-                  <i className={`${icons.heart} mr-2`} />
-                  Wishlist
-                </Button>
               </div>
             </div>
-          </div>
-
-          {/* Additional Details */}
-          <div className="mt-12 space-y-8">
-            {/* Product Specifications */}
-            <div>
-              <h3 className="text-xl font-semibold text-foreground mb-4">
-                Product Specifications
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <span className="text-sm text-muted-foreground">
-                    Blueprint ID
-                  </span>
-                  <p className="font-medium">{product.blueprint_id}</p>
-                </div>
-                <div className="space-y-2">
-                  <span className="text-sm text-muted-foreground">
-                    Print Provider ID
-                  </span>
-                  <p className="font-medium">{product.print_provider_id}</p>
-                </div>
-                <div className="space-y-2">
-                  <span className="text-sm text-muted-foreground">Created</span>
-                  <p className="font-medium">
-                    {new Date(product.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <span className="text-sm text-muted-foreground">
-                    Last Updated
-                  </span>
-                  <p className="font-medium">
-                    {new Date(product.updated_at).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* Variants Table */}
-            {product.variants.length > 0 && (
+            {/* {product.variants.length > 0 && (
               <div>
                 <h3 className="text-xl font-semibold text-foreground mb-4">
                   Available Variants
@@ -509,31 +596,39 @@ const PrintifyProductDetails = () => {
                         <th className="text-left py-2">Status</th>
                       </tr>
                     </thead>
-                    <tbody>
-                      {product.variants.slice(0, 10).map((variant) => (
-                        <tr
-                          key={variant.id}
-                          className="border-b border-border/50"
-                        >
-                          <td className="py-2">{variant.title}</td>
-                          <td className="py-2">
-                            ${(variant.price / 100).toFixed(2)}
-                          </td>
-                          <td className="py-2">{variant.grams}g</td>
-                          <td className="py-2">
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs ${
-                                variant.is_enabled
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-gray-100 text-gray-800"
-                              }`}
-                            >
-                              {variant.is_enabled ? "Enabled" : "Disabled"}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
+                                         <tbody>
+                       {product.variants
+                         .sort((a, b) => {
+                           // Sort enabled variants first, then by title
+                           if (a.is_enabled && !b.is_enabled) return -1;
+                           if (!a.is_enabled && b.is_enabled) return 1;
+                           return a.title.localeCompare(b.title);
+                         })
+                         .slice(0, 10)
+                         .map((variant) => (
+                           <tr
+                             key={variant.id}
+                             className="border-b border-border/50"
+                           >
+                             <td className="py-2">{variant.title}</td>
+                             <td className="py-2">
+                               ${(variant.price / 100).toFixed(2)}
+                             </td>
+                             <td className="py-2">{variant.grams}g</td>
+                             <td className="py-2">
+                               <span
+                                 className={`px-2 py-1 rounded-full text-xs ${
+                                   variant.is_enabled
+                                     ? "bg-green-100 text-green-800"
+                                     : "bg-gray-100 text-gray-800"
+                                 }`}
+                               >
+                                 {variant.is_enabled ? "Enabled" : "Disabled"}
+                               </span>
+                             </td>
+                           </tr>
+                         ))}
+                     </tbody>
                   </table>
                   {product.variants.length > 10 && (
                     <p className="text-sm text-muted-foreground mt-2">
@@ -543,7 +638,7 @@ const PrintifyProductDetails = () => {
                   )}
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </div>
