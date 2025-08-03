@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import type { AddToCartPayload } from "@/Types/types";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
-import type { Swiper as SwiperType } from "swiper";
+import type { SwiperRef } from "swiper/react";
 
 // Import Swiper styles
 import "swiper/css";
@@ -25,7 +25,7 @@ const ProductDetails = () => {
     price: string;
   } | null>(null);
 
-  const swiperRef = useRef<SwiperType | null>(null);
+  const swiperRef = useRef<SwiperRef | null>(null);
 
   const { data: productData, isLoading } = useGetProductDetails(productId!);
   const addToCartMutation = useAddToCart();
@@ -46,22 +46,26 @@ const ProductDetails = () => {
 
     // Reset selected image to first image when product changes
     setSelectedImageIndex(0);
-    if (swiperRef.current) {
-      swiperRef.current.slideTo(0);
+    if (swiperRef.current?.swiper) {
+      // When in loop mode, we need to use slideToLoop for proper navigation
+      swiperRef.current.swiper.slideToLoop(0);
     }
   }, [productData]);
 
   // Handle thumbnail click
   const handleThumbnailClick = (index: number) => {
     setSelectedImageIndex(index);
-    if (swiperRef.current) {
-      swiperRef.current.slideTo(index);
+    if (swiperRef.current?.swiper) {
+      // When in loop mode, we need to use slideToLoop for proper navigation
+      swiperRef.current.swiper.slideToLoop(index);
     }
   };
 
   // Handle swiper slide change
-  const handleSlideChange = (swiper: SwiperType) => {
-    setSelectedImageIndex(swiper.activeIndex);
+  const handleSlideChange = (swiper: any) => {
+    // When in loop mode, we need to get the real index
+    const realIndex = swiper.realIndex !== undefined ? swiper.realIndex : swiper.activeIndex;
+    setSelectedImageIndex(realIndex);
   };
 
   const handleQuantityChange = (delta: number) => {
@@ -145,17 +149,15 @@ const ProductDetails = () => {
         </h1>
       </div>
 
-      {/* Product Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-4 md:p-6">
+             {/* Product Content */}
+       <div className="flex-1 overflow-y-auto">
+         <div className="p-4 md:p-6 pb-20 md:pb-6">
           {/* Product Images */}
           <div className="mb-6">
             {/* Main Image Swiper */}
             <div className="aspect-square rounded-lg overflow-hidden mb-4">
               <Swiper
-                onSwiper={(swiper) => {
-                  swiperRef.current = swiper;
-                }}
+                ref={swiperRef}
                 onSlideChange={handleSlideChange}
                 modules={[Navigation, Pagination, Autoplay]}
                 navigation={true}

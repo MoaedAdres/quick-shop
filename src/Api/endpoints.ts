@@ -21,6 +21,13 @@ export const backApis = {
   getProductDetails: (productId: string | number) =>
     get(`products/aliexpress/products/${productId}`),
 
+  // Printify Products
+  getPrintifyProducts: (params: { page?: number; per_page?: number }) =>
+    get("products/printify", { params }),
+
+  getPrintifyProductDetails: (productId: string) =>
+    get(`products/printify/${productId}`),
+
   // ------------------------------ Categories ---------------------------------------------
   getCategories: () => get("products/aliexpress/categories"),
 

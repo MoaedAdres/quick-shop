@@ -4,7 +4,7 @@ export const icons = {
   cart: "fa-solid fa-cart-shopping",
   user: "fa-regular fa-user",
   wallet: "fa-solid fa-wallet",
-  
+
   // Actions
   search: "fa-solid fa-magnifying-glass",
   close: "fa fa-close",
@@ -17,7 +17,7 @@ export const icons = {
   heartFilled: "fa-solid fa-heart",
   star: "fa-solid fa-star",
   starHalf: "fa-solid fa-star-half-stroke",
-  
+
   // Shopping
   shoppingBag: "fa-solid fa-shopping-bag",
   gift: "fa-solid fa-gift",
@@ -25,7 +25,7 @@ export const icons = {
   creditCard: "fa-solid fa-credit-card",
   moneyBill: "fa-solid fa-money-bill",
   store: "fa-solid fa-store",
-  
+
   // UI
   chevronRight: "fa-solid fa-chevron-right",
   chevronLeft: "fa-solid fa-chevron-left",
@@ -33,7 +33,7 @@ export const icons = {
   chevronUp: "fa-solid fa-chevron-up",
   arrowRight: "fa-solid fa-arrow-right",
   arrowLeft: "fa-solid fa-arrow-left",
-  
+
   // Categories
   electronics: "fa-solid fa-mobile-alt",
   apparel: "fa-solid fa-tshirt",
@@ -43,24 +43,24 @@ export const icons = {
   books: "fa-solid fa-book",
   toys: "fa-solid fa-gamepad",
   food: "fa-solid fa-utensils",
-  
+
   // Status
   check: "fa-solid fa-check",
   exclamation: "fa-solid fa-exclamation-triangle",
   info: "fa-solid fa-info-circle",
   success: "fa-solid fa-check-circle",
   error: "fa-solid fa-times-circle",
-  
+
   // Social
   share: "fa-solid fa-share",
   phone: "fa-solid fa-phone",
   email: "fa-solid fa-envelope",
   location: "fa-solid fa-map-marker-alt",
-  
+
   // Time
   clock: "fa-solid fa-clock",
   calendar: "fa-solid fa-calendar",
-  
+
   // Settings
   settings: "fa-solid fa-cog",
   logout: "fa-solid fa-sign-out-alt",
@@ -71,4 +71,5 @@ export const icons = {
   wishlist: "fa-solid fa-heart",
   aliexpress: "ri-shopping-bag-fill",
   printify: "ri-t-shirt-fill",
+  image: "fa-solid fa-image",
 } as const;

@@ -24,6 +24,9 @@ import type {
   CreateCheckoutSessionPayload,
   CheckoutSessionResponse,
   StripeOrderResponse,
+  PrintifyProductsResponse,
+  PrintifyProduct,
+  PrintifyProductDetailsResponse,
 } from "@/Types/types";
 
 // Query Keys
@@ -95,6 +98,29 @@ export const useGetRecommendedProductsInfinite = (
   });
 };
 
+export const useGetPrintifyProductsInfinite = (params: {
+  page_size?: number;
+}) => {
+  return useInfiniteData<PrintifyProductsResponse, unknown, PrintifyProduct[]>({
+    queryKey: ["products", "printify", params],
+    queryFn: async ({ pageParam }: { pageParam?: unknown }) => {
+      const response = await backApis.getPrintifyProducts({
+        page: (pageParam as number) ?? 1,
+        per_page: params.page_size || 20,
+      });
+      return response.data;
+    },
+    selectFn: (data) => data.pages.flatMap((page) => page.data.data),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: PrintifyProductsResponse) => {
+      if (lastPage?.data?.current_page >= lastPage?.data?.last_page) {
+        return undefined;
+      }
+      return lastPage?.data?.current_page + 1;
+    },
+  });
+};
+
 export const useSearchProducts = (params: SearchParams) => {
   return useInfiniteData<SearchProductsResponse, unknown, Product[]>({
     queryKey: queryKeys.products.search(params),
@@ -122,6 +148,17 @@ export const useGetProductDetails = (productId: string | number) => {
     queryKey: queryKeys.products.details(productId),
     queryFn: async () => {
       const response = await backApis.getProductDetails(productId);
+      return response.data;
+    },
+    enableCondition: !!productId, // Only run if productId exists
+  });
+};
+
+export const useGetPrintifyProductDetails = (productId: string) => {
+  return useFetchData<PrintifyProductDetailsResponse>({
+    queryKey: ["products", "printify", "details", productId],
+    queryFn: async () => {
+      const response = await backApis.getPrintifyProductDetails(productId);
       return response.data;
     },
     enableCondition: !!productId, // Only run if productId exists

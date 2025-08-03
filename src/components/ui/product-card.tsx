@@ -109,15 +109,6 @@ const ProductCard = ({
             <span className="text-[10px] text-muted-foreground">(4.5)</span>
           </div>
 
-          <button
-            className="text-[10px] text-primary hover:underline"
-            onClick={(e) => {
-              e.stopPropagation();
-              // Handle add to cart action
-            }}
-          >
-            Add to Cart
-          </button>
         </div>
       </div>
     </motion.div>

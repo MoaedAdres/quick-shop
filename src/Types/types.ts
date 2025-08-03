@@ -56,6 +56,149 @@ export interface Product {
   discount: string;
 }
 
+// Printify Product Types
+export interface PrintifyProduct {
+  id: string;
+  title: string;
+  description: string;
+  tags: string[];
+  options: PrintifyProductOption[];
+  variants: PrintifyProductVariant[];
+  images: PrintifyProductImage[];
+  created_at: string;
+  updated_at: string;
+  visible: boolean;
+  is_locked: boolean;
+  blueprint_id: number;
+  user_id: number;
+  shop_id: number;
+  print_provider_id: number;
+}
+
+export interface PrintifyProductOption {
+  name: string;
+  type: string;
+  values: PrintifyProductOptionValue[];
+  display_in_preview: boolean;
+}
+
+export interface PrintifyProductOptionValue {
+  id: number;
+  title: string;
+  colors?: string[];
+}
+
+export interface PrintifyProductVariant {
+  id: number;
+  sku: string;
+  cost: number;
+  price: number;
+  title: string;
+  grams: number;
+  is_enabled: boolean;
+  is_default: boolean;
+  is_available: boolean;
+  is_printify_express_eligible: boolean;
+  options: number[];
+  quantity: number;
+}
+
+export interface PrintifyProductImage {
+  src: string;
+  variant_ids: number[];
+  position: string;
+  is_default: boolean;
+  is_selected_for_publishing: boolean;
+  order: number | null;
+}
+
+export interface PrintifyProductsResponse {
+  data: {
+    current_page: number;
+    data: PrintifyProduct[];
+    first_page_url: string;
+    from: number;
+    last_page: number;
+    last_page_url: string;
+    links: Array<{
+      url: string | null;
+      label: string;
+      active: boolean;
+    }>;
+    next_page_url: string | null;
+    path: string;
+    per_page: number;
+    prev_page_url: string | null;
+    to: number;
+    total: number;
+  };
+  message: string | null;
+}
+
+// Printify Product Details Types
+export interface PrintifyProductDetails extends PrintifyProduct {
+  print_areas: PrintifyPrintArea[];
+  print_details: any[];
+  sales_channel_properties: any[];
+  is_printify_express_eligible: boolean;
+  is_printify_express_enabled: boolean;
+  is_economy_shipping_eligible: boolean;
+  is_economy_shipping_enabled: boolean;
+  is_deleted: boolean;
+  original_product_id: string;
+  views: PrintifyView[];
+}
+
+export interface PrintifyPrintArea {
+  variant_ids: number[];
+  placeholders: PrintifyPlaceholder[];
+  font_color: string;
+  font_family: string;
+  background: string;
+}
+
+export interface PrintifyPlaceholder {
+  position: string;
+  images: PrintifyPlaceholderImage[];
+}
+
+export interface PrintifyPlaceholderImage {
+  id: string;
+  name: string;
+  type: string;
+  height: number;
+  width: number;
+  x: number;
+  y: number;
+  scale: number;
+  angle: number;
+  src: string;
+  font_family?: string;
+  font_size?: number;
+  font_weight?: number;
+  font_color?: string;
+  font_style?: string;
+  input_text?: string;
+  text_align?: string;
+}
+
+export interface PrintifyView {
+  id: number;
+  label: string;
+  position: string;
+  files: PrintifyViewFile[];
+}
+
+export interface PrintifyViewFile {
+  src: string;
+  variant_ids: number[];
+}
+
+export interface PrintifyProductDetailsResponse {
+  data: PrintifyProductDetails;
+  message: string | null;
+}
+
 // Product Details Types
 export interface ProductDetails {
   sku_info: {

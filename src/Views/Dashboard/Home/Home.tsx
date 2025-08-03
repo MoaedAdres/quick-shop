@@ -1,11 +1,18 @@
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { useAuthStore } from "@/Stores/auth.store";
-import { useGetRecommendedProductsInfinite } from "@/Api/queriesAndMutations";
+import {
+  useGetRecommendedProductsInfinite,
+  useGetPrintifyProductsInfinite,
+} from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import TopBar from "@/Views/Dashboard/Home/TopBar";
 import ProductCard from "@/components/ui/product-card";
+import PrintifyProductCard from "@/components/ui/printify-product-card";
 import HeroBanner from "@/components/ui/hero-banner";
+import { useInView } from "react-intersection-observer";
+import { useEffect } from "react";
+import type { Product, PrintifyProduct } from "@/Types/types";
 
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -47,6 +54,56 @@ const Home = () => {
     type: "GLOBAL_TOPSELLERS",
   });
 
+  const printifyProductsQuery = useGetPrintifyProductsInfinite({
+    page_size: 20,
+  });
+
+  // Intersection Observer for infinite scroll - AliExpress
+  const { ref: lastElementRef, inView: aliexpressInView } = useInView({
+    threshold: 0,
+    rootMargin: "100px",
+  });
+
+  // Intersection Observer for infinite scroll - Printify
+  const { ref: lastPrintifyElementRef, inView: printifyInView } = useInView({
+    threshold: 0,
+    rootMargin: "100px",
+  });
+
+  // Trigger fetch when last element comes into view - AliExpress
+  useEffect(() => {
+    if (
+      aliexpressInView &&
+      recommendedProductsQuery.hasNextPage &&
+      !recommendedProductsQuery.isFetchingNextPage
+    ) {
+      recommendedProductsQuery.fetchNextPage();
+    }
+  }, [
+    aliexpressInView,
+    recommendedProductsQuery.hasNextPage,
+    recommendedProductsQuery.isFetchingNextPage,
+    recommendedProductsQuery.fetchNextPage,
+    recommendedProductsQuery,
+  ]);
+
+  // Trigger fetch when last element comes into view - Printify
+  useEffect(() => {
+    if (
+      printifyInView &&
+      printifyProductsQuery.hasNextPage &&
+      !printifyProductsQuery.isFetchingNextPage
+    ) {
+      printifyProductsQuery.fetchNextPage();
+    }
+  }, [
+    printifyInView,
+    printifyProductsQuery.hasNextPage,
+    printifyProductsQuery.isFetchingNextPage,
+    printifyProductsQuery.fetchNextPage,
+    printifyProductsQuery,
+  ]);
+
   //   const handleDebug = () => {
   //     telegramService.showAlert(`User Debug Info:
   // Telegram ID: ${user?.id || "N/A"}
@@ -70,8 +127,9 @@ const Home = () => {
     }
   };
 
-  // Get the appropriate data
-  const products = recommendedProductsQuery.data;
+  // Get the appropriate data - products is already the flattened array from selectFn
+  const products = recommendedProductsQuery.data || [];
+  const printifyProducts = printifyProductsQuery.data || [];
 
   return (
     <RFlex className="flex-col h-full pb-20 md:pb-0 relative">
@@ -87,28 +145,101 @@ const Home = () => {
           </div>
 
           {/* Loading State */}
-          {recommendedProductsQuery.isLoading && (
+          {(recommendedProductsQuery.isLoading ||
+            printifyProductsQuery.isLoading) && (
             <div className="flex items-center justify-center py-8">
               <i className={`${icons.spinner} text-2xl text-primary`} />
               <span className="ml-2 text-muted-foreground">Loading...</span>
             </div>
           )}
-          {/* Products */}
-          {products && products.length > 0 && (
+
+          {/* Recommended Products - AliExpress */}
+          {products.length > 0 && (
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-foreground">
-                  Recommended Products
+                  Recommended by AliExpress
                 </h2>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {products.map((product) => (
-                  <ProductCard
-                    key={product.product_id}
-                    product={product}
-                    onClick={() => handleProductClick(product)}
-                  />
-                ))}
+
+              {/* Horizontal Scrollable Products */}
+              <div className="relative">
+                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth">
+                  {products.map((product: Product, index: number) => (
+                    <div
+                      key={product.product_id}
+                      className="flex-shrink-0 w-48 md:w-56"
+                      ref={
+                        index === products.length - 1 ? lastElementRef : null
+                      }
+                    >
+                      <ProductCard
+                        product={product}
+                        onClick={() => handleProductClick(product)}
+                      />
+                    </div>
+                  ))}
+
+                  {/* Loading more indicator */}
+                  {recommendedProductsQuery.isFetchingNextPage && (
+                    <div className="flex-shrink-0 w-48 md:w-56 flex items-center justify-center">
+                      <div className="flex flex-col items-center gap-2">
+                        <i
+                          className={`${icons.spinner} text-xl text-primary animate-spin`}
+                        />
+                        <span className="text-xs text-muted-foreground">
+                          Loading more...
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Recommended Products - Printify */}
+          {printifyProducts.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-foreground">
+                  Recommended by Printify
+                </h2>
+              </div>
+
+              {/* Horizontal Scrollable Products */}
+              <div className="relative">
+                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth">
+                  {printifyProducts.map(
+                    (product: PrintifyProduct, index: number) => (
+                      <div
+                        key={product.id}
+                        className="flex-shrink-0 w-48 md:w-56"
+                        ref={
+                          index === printifyProducts.length - 1
+                            ? lastPrintifyElementRef
+                            : null
+                        }
+                      >
+                        <PrintifyProductCard product={product} />
+                      </div>
+                    )
+                  )}
+
+                  {/* Loading more indicator */}
+                  {printifyProductsQuery.isFetchingNextPage && (
+                    <div className="flex-shrink-0 w-48 md:w-56 flex items-center justify-center">
+                      <div className="flex flex-col items-center gap-2">
+                        <i
+                          className={`${icons.spinner} text-xl text-primary animate-spin`}
+                        />
+                        <span className="text-xs text-muted-foreground">
+                          Loading more...
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}

@@ -73,4 +73,12 @@ export const dashboardRoutes: RouteObject[] = [
       return { element: <module.default /> };
     },
   },
+  {
+    id: "printify-product",
+    path: "printify-product/:productId",
+    lazy: async () => {
+      const module = await import("@/Views/Dashboard/Product/PrintifyProductDetails");
+      return { element: <module.default /> };
+    },
+  },
 ] as const;
