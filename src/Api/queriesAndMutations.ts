@@ -25,6 +25,7 @@ import type {
   CheckoutSessionResponse,
   StripeOrderResponse,
 } from "@/Types/types";
+import type { AxiosResponse } from "axios";
 
 // Query Keys
 export const queryKeys = {
@@ -182,7 +183,10 @@ export const useCreateCheckoutSession = () => {
 };
 
 export const useCreateStripeOrder = () => {
-  return useMutateData<StripeOrderResponse, { payment_method: "stripe"; delivery_address: ShippingAddress }>({
+  return useMutateData<
+    StripeOrderResponse,
+    { payment_method: "stripe"; delivery_address: ShippingAddress }
+  >({
     mutationFn: async (payload) => {
       const response = await backApis.createStripeOrder(payload);
       return response.data;
@@ -270,8 +274,10 @@ export const useShippingPreview = () => {
 export const useGetOrders = (status?: string) => {
   return useFetchData<OrdersResponse, Error, Order[]>({
     queryKey: queryKeys.orders.list(status),
-    queryFn: () => backApis.getOrders(status),
-    selectFn: (response) => response.data.results,
+    queryFn: async () => {
+      const response = await backApis.getOrders(status);
+      return response?.data?.data?.results;
+    },
   });
 };
 

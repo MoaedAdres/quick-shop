@@ -63,8 +63,7 @@ export const backApis = {
   // updateUserProfile: (payload: UpdateProfilePayload) => put("user/profile", payload),
 
   // ------------------------------ Orders ---------------------------------------------
-  getOrders: (status?: string): Promise<OrdersResponse> =>
-    get("orders", { params: { status } }),
+  getOrders: (status?: string) => get("orders", { params: { status } }),
   getOrderById: (orderId: number): Promise<OrderDetailsResponse> =>
     get(`orders/${orderId}`),
 };

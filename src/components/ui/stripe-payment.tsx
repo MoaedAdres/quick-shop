@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
-import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { 
+  PaymentElement, 
+  useStripe, 
+  useElements,
+} from "@stripe/react-stripe-js";
 import { icons } from "@/Constants/icons";
 import type { 
   ShippingAddress, 
