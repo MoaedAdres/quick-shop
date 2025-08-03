@@ -86,7 +86,7 @@ api.interceptors.response.use(
         console.error("Token refresh failed:", refreshError);
         // Clear auth data and redirect to login
         localStorage.removeItem("auth-storage");
-        window.location.href = "/login";
+        window.location.href = "/dashboard/home";
       }
     }
 
