@@ -11,6 +11,7 @@ import {
 } from "react-router-dom";
 import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useAuthStore } from "@/Stores/auth.store";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -25,13 +26,14 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // const { login, isTelegramApp } = useAuthStore();
+  const { login } = useAuthStore();
 
   useEffect(() => {
     // Perform Telegram login authentication
     // Set dark theme by default
+    login();
     document.querySelector("html")?.setAttribute("data-theme", "dark");
-  }, []);
+  }, [login]);
 
   const router = createBrowserRouter([
     ...publicRoutes,
