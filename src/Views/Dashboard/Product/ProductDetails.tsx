@@ -10,6 +10,7 @@ import type { AddToCartPayload } from "@/Types/types";
 const ProductDetails = () => {
   const { productId } = useParams<{ productId: string }>();
   const [quantity, setQuantity] = useState(1);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedSku, setSelectedSku] = useState<{
     sku_id: string;
     sku_attr: string;
@@ -19,7 +20,7 @@ const ProductDetails = () => {
   const { data: productData, isLoading } = useGetProductDetails(productId!);
   const addToCartMutation = useAddToCart();
 
-  // Set initial variant when data loads
+  // Set initial variant and reset image when data loads
   useEffect(() => {
     if (productData?.data?.sku_info) {
       const firstSku = Array.isArray(productData.data.sku_info) 
@@ -32,6 +33,9 @@ const ProductDetails = () => {
         price: firstSku.offer_sale_price,
       });
     }
+    
+    // Reset selected image to first image when product changes
+    setSelectedImageIndex(0);
   }, [productData]);
 
   const handleQuantityChange = (delta: number) => {
@@ -110,22 +114,39 @@ const ProductDetails = () => {
         <div className="p-4 md:p-6">
           {/* Product Images */}
           <div className="mb-6">
+            {/* Main Image */}
             <div className="aspect-square rounded-lg overflow-hidden mb-4">
               <img
-                src={product.media_info.images[0]}
+                src={product.media_info.images[selectedImageIndex]}
                 alt={product.title}
                 className="w-full h-full object-cover"
               />
             </div>
+            
+            {/* Image Thumbnails */}
             <div className="grid grid-cols-4 gap-2">
-              {product.media_info.images.slice(1).map((image, index) => (
-                <div key={index} className="aspect-square rounded-lg overflow-hidden">
+              {product.media_info.images.map((image, index) => (
+                <motion.div
+                  key={index}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setSelectedImageIndex(index)}
+                  className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
+                    selectedImageIndex === index
+                      ? "border-primary ring-2 ring-primary/20"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                >
                   <img
                     src={image}
-                    alt={`${product.title} - ${index + 2}`}
+                    alt={`${product.title} - ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
-                </div>
+                  {/* Active indicator */}
+                  {selectedImageIndex === index && (
+                    <div className="absolute top-1 right-1 w-3 h-3 bg-primary rounded-full border-2 border-background" />
+                  )}
+                </motion.div>
               ))}
             </div>
           </div>

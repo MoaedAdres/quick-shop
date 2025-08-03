@@ -3,7 +3,6 @@ import { icons } from "@/Constants/icons";
 import { useGetCart } from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import CartItem from "@/components/ui/cart-item";
-import ShippingPreviewForm from "@/components/ui/shipping-preview-form";
 import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
