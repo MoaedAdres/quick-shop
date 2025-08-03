@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
@@ -6,6 +6,14 @@ import { useGetProductDetails, useAddToCart } from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import { toast } from "sonner";
 import type { AddToCartPayload } from "@/Types/types";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import type { Swiper as SwiperType } from "swiper";
+
+// Import Swiper styles
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 const ProductDetails = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -17,26 +25,44 @@ const ProductDetails = () => {
     price: string;
   } | null>(null);
 
+  const swiperRef = useRef<SwiperType | null>(null);
+
   const { data: productData, isLoading } = useGetProductDetails(productId!);
   const addToCartMutation = useAddToCart();
 
   // Set initial variant and reset image when data loads
   useEffect(() => {
     if (productData?.data?.sku_info) {
-      const firstSku = Array.isArray(productData.data.sku_info) 
-        ? productData.data.sku_info[0] 
+      const firstSku = Array.isArray(productData.data.sku_info)
+        ? productData.data.sku_info[0]
         : productData.data.sku_info;
-      
+
       setSelectedSku({
         sku_id: firstSku.sku_id,
         sku_attr: firstSku.sku_attr,
         price: firstSku.offer_sale_price,
       });
     }
-    
+
     // Reset selected image to first image when product changes
     setSelectedImageIndex(0);
+    if (swiperRef.current) {
+      swiperRef.current.slideTo(0);
+    }
   }, [productData]);
+
+  // Handle thumbnail click
+  const handleThumbnailClick = (index: number) => {
+    setSelectedImageIndex(index);
+    if (swiperRef.current) {
+      swiperRef.current.slideTo(index);
+    }
+  };
+
+  // Handle swiper slide change
+  const handleSlideChange = (swiper: SwiperType) => {
+    setSelectedImageIndex(swiper.activeIndex);
+  };
 
   const handleQuantityChange = (delta: number) => {
     const newQuantity = quantity + delta;
@@ -75,10 +101,14 @@ const ProductDetails = () => {
     return (
       <RFlex className="flex-col h-full pb-20 md:pb-0">
         <div className="bg-card border-b border-border p-4">
-          <h1 className="text-xl font-semibold text-foreground">Product Details</h1>
+          <h1 className="text-xl font-semibold text-foreground">
+            Product Details
+          </h1>
         </div>
         <div className="flex-1 flex items-center justify-center">
-          <i className={`${icons.spinner} text-2xl text-primary animate-spin`} />
+          <i
+            className={`${icons.spinner} text-2xl text-primary animate-spin`}
+          />
         </div>
       </RFlex>
     );
@@ -88,12 +118,16 @@ const ProductDetails = () => {
     return (
       <RFlex className="flex-col h-full pb-20 md:pb-0">
         <div className="bg-card border-b border-border p-4">
-          <h1 className="text-xl font-semibold text-foreground">Product Details</h1>
+          <h1 className="text-xl font-semibold text-foreground">
+            Product Details
+          </h1>
         </div>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <i className={`${icons.error} text-3xl text-red-500 mb-2`} />
-            <p className="text-muted-foreground">Failed to load product details</p>
+            <p className="text-muted-foreground">
+              Failed to load product details
+            </p>
           </div>
         </div>
       </RFlex>
@@ -106,7 +140,9 @@ const ProductDetails = () => {
     <RFlex className="flex-col h-full pb-20 md:pb-0">
       {/* Header */}
       <div className="bg-card border-b border-border p-4">
-        <h1 className="text-xl font-semibold text-foreground">Product Details</h1>
+        <h1 className="text-xl font-semibold text-foreground">
+          Product Details
+        </h1>
       </div>
 
       {/* Product Content */}
@@ -114,15 +150,46 @@ const ProductDetails = () => {
         <div className="p-4 md:p-6">
           {/* Product Images */}
           <div className="mb-6">
-            {/* Main Image */}
+            {/* Main Image Swiper */}
             <div className="aspect-square rounded-lg overflow-hidden mb-4">
-              <img
-                src={product.media_info.images[selectedImageIndex]}
-                alt={product.title}
-                className="w-full h-full object-cover"
-              />
+              <Swiper
+                onSwiper={(swiper) => {
+                  swiperRef.current = swiper;
+                }}
+                onSlideChange={handleSlideChange}
+                modules={[Navigation, Pagination, Autoplay]}
+                navigation={true}
+                pagination={{
+                  clickable: true,
+                  dynamicBullets: true,
+                }}
+                loop={true}
+                autoplay={{
+                  delay: 5000,
+                  disableOnInteraction: false,
+                }}
+                className="h-full [&_.swiper-button-next]:text-primary [&_.swiper-button-prev]:text-primary [&_.swiper-pagination-bullet]:bg-primary [&_.swiper-pagination-bullet-active]:bg-primary [&_.swiper-button-next]:!w-4 [&_.swiper-button-prev]:!w-4 [&_.swiper-button-next]:!h-4 [&_.swiper-button-prev]:!h-4 [&_.swiper-button-next]:!min-w-4 [&_.swiper-button-prev]:!min-w-4 [&_.swiper-button-next]:!min-h-4 [&_.swiper-button-prev]:!min-h-4 [&_.swiper-button-next::after]:!text-sm [&_.swiper-button-prev::after]:!text-sm [&_.swiper-button-next::after]:!text-[15px] [&_.swiper-button-prev::after]:!text-[15px]"
+                style={
+                  {
+                    "--swiper-navigation-color": "var(--primary)",
+                    "--swiper-pagination-color": "var(--primary)",
+                  } as React.CSSProperties
+                }
+              >
+                {product.media_info.images.map((image, index) => (
+                  <SwiperSlide key={index}>
+                    <div className="w-full h-full">
+                      <img
+                        src={image}
+                        alt={`${product.title} - ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
             </div>
-            
+
             {/* Image Thumbnails */}
             <div className="grid grid-cols-4 gap-2">
               {product.media_info.images.map((image, index) => (
@@ -130,7 +197,7 @@ const ProductDetails = () => {
                   key={index}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setSelectedImageIndex(index)}
+                  onClick={() => handleThumbnailClick(index)}
                   className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
                     selectedImageIndex === index
                       ? "border-primary ring-2 ring-primary/20"
@@ -153,7 +220,9 @@ const ProductDetails = () => {
 
           {/* Product Info */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">{product.title}</h2>
+            <h2 className="text-xl font-semibold text-foreground">
+              {product.title}
+            </h2>
 
             {/* Store Info */}
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -184,18 +253,22 @@ const ProductDetails = () => {
 
             {/* Variants */}
             <div className="space-y-2">
-              <h3 className="font-medium text-foreground">Available Variants</h3>
+              <h3 className="font-medium text-foreground">
+                Available Variants
+              </h3>
               <div className="grid grid-cols-2 gap-2">
                 {[product.sku_info].flat().map((sku) => (
                   <motion.button
                     key={sku.sku_id}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => setSelectedSku({
-                      sku_id: sku.sku_id,
-                      sku_attr: sku.sku_attr,
-                      price: sku.offer_sale_price,
-                    })}
+                    onClick={() =>
+                      setSelectedSku({
+                        sku_id: sku.sku_id,
+                        sku_attr: sku.sku_attr,
+                        price: sku.offer_sale_price,
+                      })
+                    }
                     className={`p-3 rounded-lg border text-sm ${
                       selectedSku?.sku_id === sku.sku_id
                         ? "border-primary bg-primary/10 text-primary"
@@ -281,7 +354,9 @@ const ProductDetails = () => {
               <h3 className="font-medium text-foreground">Store Ratings</h3>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Item as Described</span>
+                  <span className="text-sm text-muted-foreground">
+                    Item as Described
+                  </span>
                   <div className="flex items-center gap-1">
                     <i className={`${icons.star} text-yellow-400`} />
                     <span className="text-sm font-medium">
@@ -290,7 +365,9 @@ const ProductDetails = () => {
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Communication</span>
+                  <span className="text-sm text-muted-foreground">
+                    Communication
+                  </span>
                   <div className="flex items-center gap-1">
                     <i className={`${icons.star} text-yellow-400`} />
                     <span className="text-sm font-medium">
@@ -299,7 +376,9 @@ const ProductDetails = () => {
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Shipping Speed</span>
+                  <span className="text-sm text-muted-foreground">
+                    Shipping Speed
+                  </span>
                   <div className="flex items-center gap-1">
                     <i className={`${icons.star} text-yellow-400`} />
                     <span className="text-sm font-medium">
@@ -316,4 +395,4 @@ const ProductDetails = () => {
   );
 };
 
-export default ProductDetails; 
+export default ProductDetails;
