@@ -28,7 +28,7 @@ const TapToEarn: React.FC = () => {
   const [coins, setCoins] = useState(0);
   const [energy, setEnergy] = useState(1000);
   const [maxEnergy] = useState(1000);
-  const [coinsPerTap, setCoinsPerTap] = useState(1);
+  const [coinsPerTap, _] = useState(1);
   const [floatingTexts, setFloatingTexts] = useState<FloatingText[]>([]);
   const [clickEffects, setClickEffects] = useState<ClickEffect[]>([]);
   const [particles, setParticles] = useState<Particle[]>([]);
