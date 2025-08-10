@@ -72,4 +72,6 @@ export const icons = {
   aliexpress: "ri-shopping-bag-fill",
   printify: "ri-t-shirt-fill",
   image: "fa-solid fa-image",
+  coins: "fa-solid fa-coins",
+  gamepad: "fa-solid fa-gamepad",
 } as const;
