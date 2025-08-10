@@ -45,9 +45,10 @@ const BottomNavbar = () => {
       className="justify-between items-center w-full fixed bottom-0 bg-sidebar border-t border-border z-50"
     >
       <CustomNavItem title="home" to="home" icon={icons.home} />
+      <CustomNavItem title="earn" to="tap-to-earn" icon={icons.coins} />
       <CustomNavItem title="search" to="search" icon={icons.search} />
       <CustomNavItem title="orders" to="orders" icon={icons.orders} />
-      <CustomNavItem title="wallet" to="wallet" icon={icons.wallet} />
+      {/* <CustomNavItem title="wallet" to="wallet" icon={icons.wallet} /> */}
       <CustomNavItem title="profile" to="profile" icon={icons.user} />
     </RFlex>
   );

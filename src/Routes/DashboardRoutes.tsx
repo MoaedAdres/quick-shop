@@ -81,4 +81,12 @@ export const dashboardRoutes: RouteObject[] = [
       return { element: <module.default /> };
     },
   },
+  {
+    id: "tap-to-earn",
+    path: "tap-to-earn",
+    lazy: async () => {
+      const module = await import("@/Views/Dashboard/TapToEarn/TapToEarn");
+      return { element: <module.default /> };
+    },
+  },
 ] as const;
