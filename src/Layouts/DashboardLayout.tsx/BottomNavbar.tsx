@@ -1,5 +1,7 @@
+import { useGetCart } from "@/Api/queriesAndMutations";
 import { icons } from "@/Constants/icons";
 import RFlex from "@/RComponents/RFlex";
+import { useAuthStore } from "@/Stores/auth.store";
 import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
 
@@ -39,6 +41,10 @@ const CustomNavItem = ({
 };
 
 const BottomNavbar = () => {
+  const { isAuthenticated } = useAuthStore();
+  const { data: cartData } = useGetCart(isAuthenticated);
+  const cartItemCount =
+    cartData?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
   return (
     <RFlex
       id="bottom navbar"
