@@ -58,9 +58,9 @@ const Checkout = () => {
     setShowOrderSummaryModal(true);
   };
 
-  const handleShippingError = (error: ShippingPreviewError) => {
+  const handleShippingError = (_: ShippingPreviewError) => {
     setShippingPreview(null);
-    toast.error(error.message ?? "error when shipping preview");
+    toast.error("some items is out of stock or not available in your area");
   };
 
   const handlePaymentSuccess = () => {

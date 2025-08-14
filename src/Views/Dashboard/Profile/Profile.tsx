@@ -3,10 +3,13 @@ import { icons } from "@/Constants/icons";
 import { mockUser } from "@/data/mock-data";
 import RFlex from "@/RComponents/RFlex";
 import { useAuthStore } from "@/Stores/auth.store";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
+  const { t } = useTranslation();
   const { user, logout } = useAuthStore();
-
+  const navigate = useNavigate();
   // Use Telegram user data if available
   const displayName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : mockUser.name;
   const avatar = user?.photo_url || mockUser.avatar;
@@ -195,9 +198,10 @@ const Profile = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => navigate("/dashboard/orders")}
                 className="text-primary text-sm font-medium"
               >
-                View All
+                {t("view-all")}
               </motion.button>
             </div>
             
