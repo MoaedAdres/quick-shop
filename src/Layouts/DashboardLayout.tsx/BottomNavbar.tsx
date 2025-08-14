@@ -54,8 +54,7 @@ const BottomNavbar = () => {
       <CustomNavItem title="home" to="home" icon={icons.home} />
       <CustomNavItem title="earn" to="tap-to-earn" icon={icons.coins} />
       <CustomNavItem title="search" to="search" icon={icons.search} />
-      <CustomNavItem title="orders" to="orders" icon={icons.orders} />
-      {/* <CustomNavItem title="wallet" to="wallet" icon={icons.wallet} /> */}
+      <CustomNavItem title="cart" to="cart" icon={icons.cart} badge={cartItemCount} />
       <CustomNavItem title="profile" to="profile" icon={icons.user} />
     </RFlex>
   );

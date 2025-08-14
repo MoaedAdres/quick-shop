@@ -2,15 +2,14 @@ import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { mockUser } from "@/data/mock-data";
 import RFlex from "@/RComponents/RFlex";
-import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/Stores/auth.store";
 
 const TopBar = () => {
-  const navigate = useNavigate();
-
-  const handleCartClick = () => {
-    navigate("/dashboard/cart");
-  };
-
+  const { user } = useAuthStore();
+  const displayName = user
+    ? `${user.first_name} ${user.last_name || ""}`.trim()
+    : mockUser.name;
+  const avatar = user?.photo_url || mockUser.avatar;
   return (
     <RFlex className="p-4 w-full justify-between items-center bg-card border-b border-border">
       <motion.div
@@ -32,23 +31,14 @@ const TopBar = () => {
         animate={{ opacity: 1, x: 0 }}
         className="flex items-center gap-3"
       >
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleCartClick}
-          className="w-10 h-10 flex items-center justify-center cursor-pointer"
-        >
-          <i className={`${icons.cart} text-white text-sm`} />
-        </motion.button>
-
         <motion.div
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary"
         >
           <img
-            src={mockUser.avatar}
-            alt={mockUser.name}
+            src={avatar}
+            alt={displayName}
             className="w-full h-full object-cover"
           />
         </motion.div>

@@ -3,5 +3,8 @@
   "cart": "Cart",
   "profile": "Profile",
   "orders": "Orders",
-  "wallet": "Wallet"
+  "wallet": "Wallet",
+  "earn": "Earn",
+  "search": "Search",
+  "view-all": "View All"
 }
