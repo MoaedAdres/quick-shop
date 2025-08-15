@@ -759,3 +759,69 @@ export interface TappingSettingsPayload {
   reward_amount: number;
   daily_tap_limit: number;
 }
+
+// NOWPayments Crypto Payment Types
+export interface CryptoPaymentPayload {
+  payment_method: "crypto";
+  pay_currency: string;
+  delivery_address: ShippingAddress;
+}
+
+export interface CryptoPaymentResponse {
+  data: {
+    payment_id: string;
+    payment_status: string;
+    pay_address: string;
+    price_amount: number;
+    price_currency: string;
+    pay_amount: number;
+    amount_received: number;
+    pay_currency: string;
+    order_id: string;
+    order_description: string;
+    payin_extra_id: string | null;
+    ipn_callback_url: string | null;
+    customer_email: string | null;
+    created_at: string;
+    updated_at: string;
+    purchase_id: string;
+    smart_contract: string | null;
+    network: string;
+    network_precision: number | null;
+    time_limit: string | null;
+    burning_percent: number | null;
+    expiration_estimate_date: string;
+    is_fixed_rate: boolean;
+    is_fee_paid_by_user: boolean;
+    valid_until: string;
+    type: string;
+    product: string;
+    origin_ip: string;
+  };
+  message: string;
+}
+
+export interface CryptoPaymentStatus {
+  payment_id: string;
+  payment_status: 'waiting' | 'confirming' | 'confirmed' | 'sending' | 'partially_paid' | 'finished' | 'failed' | 'refunded' | 'expired';
+  pay_address: string;
+  price_amount: number;
+  pay_amount: number;
+  amount_received: number;
+  pay_currency: string;
+  order_id: string;
+  network: string;
+  created_at: string;
+  updated_at: string;
+  expiration_estimate_date: string;
+  valid_until: string;
+}
+
+export interface SupportedCurrency {
+  id: string;
+  name: string;
+  symbol: string;
+  network: string;
+  is_popular: boolean;
+  logo_url: string;
+}

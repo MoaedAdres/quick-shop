@@ -35,6 +35,10 @@ import type {
   ReferralSettingsPayload,
   TappingSettingsResponse,
   TappingSettingsPayload,
+  CryptoPaymentResponse,
+  CryptoPaymentPayload,
+  CryptoPaymentStatus,
+  SupportedCurrency,
 } from "@/Types/types";
 
 // Query Keys
@@ -77,6 +81,11 @@ export const queryKeys = {
     recentUsers: ["admin", "recent-users"] as const,
     referralSettings: ["admin", "referral-settings"] as const,
     tappingSettings: ["admin", "tapping-settings"] as const,
+  },
+  crypto: {
+    all: ["crypto"] as const,
+    paymentStatus: (paymentId: string) => ["crypto", "payment-status", paymentId] as const,
+    currencies: ["crypto", "currencies"] as const,
   },
 };
 
@@ -430,5 +439,39 @@ export const useUpdateTappingSettings = () => {
     },
     invalidateKeys: [{ queryKey: queryKeys.admin.tappingSettings }],
     displaySuccess: true,
+  });
+};
+
+// ------------------------------ Crypto Payment Queries & Mutations ---------------------------------------------
+
+export const useCreateCryptoOrder = () => {
+  return useMutateData<CryptoPaymentResponse, CryptoPaymentPayload>({
+    mutationFn: async (payload) => {
+      const response = await backApis.createCryptoOrder(payload);
+      return response.data;
+    },
+    displaySuccess: false, // We'll handle success display manually
+  });
+};
+
+export const useGetCryptoPaymentStatus = (paymentId: string, enabled = false) => {
+  return useFetchData<{ data: CryptoPaymentStatus }>({
+    queryKey: queryKeys.crypto.paymentStatus(paymentId),
+    queryFn: async () => {
+      const response = await backApis.getCryptoPaymentStatus(paymentId);
+      return response.data;
+    },
+    enableCondition: enabled && !!paymentId,
+    refetchOnMount: true,
+  });
+};
+
+export const useGetSupportedCurrencies = () => {
+  return useFetchData<{ data: SupportedCurrency[] }>({
+    queryKey: queryKeys.crypto.currencies,
+    queryFn: async () => {
+      const response = await backApis.getSupportedCurrencies();
+      return response.data;
+    },
   });
 };

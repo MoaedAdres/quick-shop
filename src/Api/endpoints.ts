@@ -10,6 +10,7 @@ import type {
   CheckoutSessionResponse,
   ReferralSettingsPayload,
   TappingSettingsPayload,
+  CryptoPaymentPayload,
 } from "@/Types/types";
 
 export const backApis = {
@@ -86,4 +87,9 @@ export const backApis = {
   getTappingSettings: () => get("admin-dashboard/tapping/settings"),
   updateTappingSettings: (payload: TappingSettingsPayload) => 
     put("admin-dashboard/tapping/settings", payload),
+
+  // ------------------------------ Crypto Payments (NOWPayments) ---------------------------------------------
+  createCryptoOrder: (payload: CryptoPaymentPayload) => post("orders", payload),
+  getCryptoPaymentStatus: (paymentId: string) => get(`payments/crypto/${paymentId}/status`),
+  getSupportedCurrencies: () => get("payments/crypto/currencies"),
 };
