@@ -10,7 +10,8 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
 });
-
+// const constantToken =
+//   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU1MzYwNjk1LCJpYXQiOjE3NTUyNzQyOTUsImp0aSI6ImU4Nzc5NGUwMDg5NDQ1NGRhYmRlY2Q0OWI0OWQ4OTY0IiwidXNlcl9pZCI6NH0.w-t0h_a5zsI1B90lacHGT2H3TdpyeKSOs5iuKhlNc18";
 // Request interceptor to add authentication token to all requests
 api.interceptors.request.use(
   (config) => {

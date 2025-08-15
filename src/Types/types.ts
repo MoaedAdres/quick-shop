@@ -636,7 +636,35 @@ export interface StripeOrderResponse {
     client_secret: string;
     order_ids: string[];
   };
-  message: string;
+}
+
+// Tap To Earn Types
+export interface TappingInfoResponse {
+  data: {
+    user_state: {
+      current_taps: number;
+      remaining_taps_today: number;
+    };
+    settings: {
+      points_per_tap: number;
+      taps_for_reward: number;
+      reward_amount: number;
+      daily_tap_limit: number;
+    };
+  };
+  message: string | null;
+}
+
+export interface ProcessTapResponse {
+  data: {
+    reward_issued: boolean;
+    reward_amount: string;
+    new_balance: number;
+    current_taps: number;
+    remaining_taps_today: number;
+    taps_for_reward: number;
+  };
+  message: string | null;
 }
 
 export interface StripePaymentMethod {

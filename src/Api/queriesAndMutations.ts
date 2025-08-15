@@ -27,6 +27,8 @@ import type {
   PrintifyProductsResponse,
   PrintifyProduct,
   PrintifyProductDetailsResponse,
+  TappingInfoResponse,
+  ProcessTapResponse,
 } from "@/Types/types";
 
 // Query Keys
@@ -58,6 +60,10 @@ export const queryKeys = {
   },
   payments: {
     all: ["payments"] as const,
+  },
+  tasks: {
+    all: ["tasks"] as const,
+    info: ["tasks", "info"] as const,
   },
 };
 
@@ -324,5 +330,28 @@ export const useGetOrderDetails = (orderId: number) => {
       const response = await backApis.getOrderById(orderId);
       return response?.data?.data;
     },
+  });
+};
+
+// ------------------------------ Tap To Earn Queries & Mutations ---------------------------------------------
+
+export const useGetTappingInfo = () => {
+  return useFetchData<TappingInfoResponse>({
+    queryKey: queryKeys.tasks.info,
+    queryFn: async () => {
+      const response = await backApis.getTappingInfo();
+      return response.data;
+    },
+  });
+};
+
+export const useProcessTap = () => {
+  return useMutateData<ProcessTapResponse>({
+    mutationFn: async () => {
+      const response = await backApis.processTap();
+      return response.data;
+    },
+    invalidateKeys: [{ queryKey: queryKeys.tasks.info }],
+    displaySuccess: false, // We'll handle success display manually
   });
 };
