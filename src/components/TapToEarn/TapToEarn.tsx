@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Coins, Zap } from 'lucide-react';
+import { Coins, Zap, Target } from 'lucide-react';
+import { useGetTappingInfo, useProcessTap } from '@/Api/queriesAndMutations';
+import { toast } from 'sonner';
 
 interface FloatingText {
   id: string;
@@ -25,34 +27,35 @@ interface Particle {
 }
 
 const TapToEarn: React.FC = () => {
-  const [coins, setCoins] = useState(0);
-  const [energy, setEnergy] = useState(1000);
-  const [maxEnergy] = useState(1000);
-  const [coinsPerTap, setCoinsPerTap] = useState(1);
+  // API hooks
+  const { data: tappingInfo, isLoading: isLoadingInfo } = useGetTappingInfo();
+  const processTapMutation = useProcessTap();
+
+  // Local state for UI effects
   const [floatingTexts, setFloatingTexts] = useState<FloatingText[]>([]);
   const [clickEffects, setClickEffects] = useState<ClickEffect[]>([]);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [isPressed, setIsPressed] = useState(false);
-  const [combo, setCombo] = useState(0);
-  const [lastTapTime, setLastTapTime] = useState(0);
 
-  // Energy regeneration
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setEnergy(prev => Math.min(prev + 2, maxEnergy));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [maxEnergy]);
+  // Extract data from API response
+  const userState = tappingInfo?.data?.user_state;
+  const settings = tappingInfo?.data?.settings;
+  const remainingTaps = userState?.remaining_taps_today ?? 0;
+  const currentTaps = userState?.current_taps ?? 0;
+  const pointsPerTap = settings?.points_per_tap ?? 1;
+  const rewardAmount = settings?.reward_amount ?? 10;
+  const tapsForReward = settings?.taps_for_reward ?? 5;
 
-  // Combo reset timer
+  // Balance state to track locally for immediate UI feedback
+  const [localBalance, setLocalBalance] = useState<number | null>(null);
+
+  // Initialize local balance from API when data loads
   useEffect(() => {
-    if (combo > 0) {
-      const timer = setTimeout(() => {
-        setCombo(0);
-      }, 2000);
-      return () => clearTimeout(timer);
+    if (tappingInfo?.data && localBalance === null) {
+      // We'll use current_taps as balance for now, or you can add balance field to API
+      setLocalBalance(currentTaps);
     }
-  }, [combo, lastTapTime]);
+  }, [tappingInfo, currentTaps, localBalance]);
 
   // Particle animation
   useEffect(() => {
@@ -73,68 +76,71 @@ const TapToEarn: React.FC = () => {
     return () => clearInterval(interval);
   }, [particles.length]);
 
-  const handleTap = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    if (energy < 1) return;
+  const handleTap = useCallback(async (event: React.MouseEvent<HTMLDivElement>) => {
+    if (remainingTaps < 1 || processTapMutation.isPending) return;
 
-    const now = Date.now();
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    // Combo system
-    if (now - lastTapTime < 500) {
-      setCombo(prev => Math.min(prev + 1, 10));
-    } else {
-      setCombo(1);
+    try {
+      // Process the tap via API
+      const response = await processTapMutation.mutateAsync(undefined);
+      const tapData = response.data;
+
+      // Update local balance for immediate feedback
+      setLocalBalance(tapData.new_balance);
+
+      // Add floating text showing points earned
+      const textId = `text-${Date.now()}-${Math.random()}`;
+      setFloatingTexts(prev => [...prev, { id: textId, x, y, value: pointsPerTap }]);
+
+      // Add click effect
+      const effectId = `effect-${Date.now()}-${Math.random()}`;
+      setClickEffects(prev => [...prev, { id: effectId, x, y }]);
+
+      // Add particles
+      const newParticles: Particle[] = [];
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        const speed = 2 + Math.random() * 2;
+        newParticles.push({
+          id: `particle-${Date.now()}-${i}`,
+          x: x,
+          y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 1,
+          life: 1,
+        });
+      }
+      setParticles(prev => [...prev, ...newParticles]);
+
+      // Show reward notification if reward was issued
+      if (tapData.reward_issued) {
+        toast.success(`🎉 Reward earned! +${tapData.reward_amount} coins!`, {
+          duration: 3000,
+        });
+      }
+
+      // Remove floating text after animation
+      setTimeout(() => {
+        setFloatingTexts(prev => prev.filter(text => text.id !== textId));
+      }, 2000);
+
+      // Remove click effect after animation
+      setTimeout(() => {
+        setClickEffects(prev => prev.filter(effect => effect.id !== effectId));
+      }, 1000);
+
+      // Haptic feedback for mobile
+      if ('vibrate' in navigator) {
+        navigator.vibrate(tapData.reward_issued ? [100, 50, 100] : 50);
+      }
+
+    } catch (error) {
+      console.error('Tap processing failed:', error);
     }
-    setLastTapTime(now);
-
-    const bonusMultiplier = 1 + (combo * 0.1);
-    const earnedCoins = Math.floor(coinsPerTap * bonusMultiplier);
-
-    // Update coins and energy
-    setCoins(prev => prev + earnedCoins);
-    setEnergy(prev => Math.max(prev - 1, 0));
-
-    // Add floating text
-    const textId = `text-${Date.now()}-${Math.random()}`;
-    setFloatingTexts(prev => [...prev, { id: textId, x, y, value: earnedCoins }]);
-
-    // Add click effect
-    const effectId = `effect-${Date.now()}-${Math.random()}`;
-    setClickEffects(prev => [...prev, { id: effectId, x, y }]);
-
-    // Add particles
-    const newParticles: Particle[] = [];
-    for (let i = 0; i < 8; i++) {
-      const angle = (i / 8) * Math.PI * 2;
-      const speed = 3 + Math.random() * 3;
-      newParticles.push({
-        id: `particle-${Date.now()}-${i}`,
-        x: x,
-        y: y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 2,
-        life: 1,
-      });
-    }
-    setParticles(prev => [...prev, ...newParticles]);
-
-    // Remove floating text after animation
-    setTimeout(() => {
-      setFloatingTexts(prev => prev.filter(text => text.id !== textId));
-    }, 2000);
-
-    // Remove click effect after animation
-    setTimeout(() => {
-      setClickEffects(prev => prev.filter(effect => effect.id !== effectId));
-    }, 1000);
-
-    // Haptic feedback for mobile
-    if ('vibrate' in navigator) {
-      navigator.vibrate(combo > 5 ? [50, 30, 50] : 50);
-    }
-  }, [energy, coinsPerTap, combo, lastTapTime]);
+  }, [remainingTaps, processTapMutation, pointsPerTap]);
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -149,51 +155,57 @@ const TapToEarn: React.FC = () => {
         <div className="flex items-center gap-2 bg-black/30 rounded-full px-4 py-2 backdrop-blur-sm">
           <Coins className="w-6 h-6 text-yellow-400" />
           <motion.span 
-            key={coins}
+            key={localBalance}
             initial={{ scale: 1.2, color: '#fbbf24' }}
             animate={{ scale: 1, color: '#ffffff' }}
             className="text-xl font-bold"
           >
-            {formatNumber(coins)}
+            {isLoadingInfo ? '...' : formatNumber(localBalance ?? 0)}
           </motion.span>
         </div>
         
         <div className="flex items-center gap-2 bg-black/30 rounded-full px-4 py-2 backdrop-blur-sm">
           <Zap className="w-5 h-5 text-blue-400" />
           <span className="text-lg font-semibold">
-            {energy}/{maxEnergy}
+            {remainingTaps}/{settings?.daily_tap_limit ?? 0}
           </span>
         </div>
       </div>
 
-      {/* Combo Display */}
+      {/* Reward Progress Display */}
       <AnimatePresence>
-        {combo > 1 && (
+        {tapsForReward > 0 && (
           <motion.div
             initial={{ opacity: 0, scale: 0.5, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.5, y: -20 }}
             className="mb-4"
           >
-            <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-full px-6 py-2 shadow-lg">
-              <span className="text-white font-bold text-lg">
-                🔥 COMBO x{combo}! 
-              </span>
-              <span className="text-yellow-200 text-sm ml-2">
-                +{Math.floor(combo * 10)}% bonus
-              </span>
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-full px-6 py-2 shadow-lg">
+              <div className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-white" />
+                <span className="text-white font-bold text-lg">
+                  {currentTaps}/{tapsForReward} taps to reward!
+                </span>
+              </div>
+              <div className="text-yellow-200 text-sm text-center mt-1">
+                {rewardAmount} coins reward
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Energy Bar */}
+      {/* Remaining Taps Bar */}
       <div className="w-full max-w-md mb-8">
+        <div className="text-center text-sm text-gray-300 mb-2">
+          Remaining Taps Today
+        </div>
         <div className="bg-black/30 rounded-full h-3 overflow-hidden backdrop-blur-sm">
           <motion.div
             className="h-full bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"
             initial={{ width: '100%' }}
-            animate={{ width: `${(energy / maxEnergy) * 100}%` }}
+            animate={{ width: `${(remainingTaps / (settings?.daily_tap_limit ?? 1)) * 100}%` }}
             transition={{ duration: 0.3 }}
           />
         </div>
@@ -215,7 +227,7 @@ const TapToEarn: React.FC = () => {
           
           {/* Main Coin */}
           <motion.div
-            className={`relative w-64 h-64 rounded-full bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-600 border-8 border-yellow-200 shadow-2xl ${energy < 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`relative w-64 h-64 rounded-full bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-600 border-8 border-yellow-200 shadow-2xl ${remainingTaps < 1 || processTapMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
             animate={{
               scale: isPressed ? 0.95 : 1,
               boxShadow: isPressed 
@@ -307,11 +319,6 @@ const TapToEarn: React.FC = () => {
                 transition={{ duration: 2, ease: "easeOut" }}
               >
                 +{text.value}
-                {combo > 1 && (
-                  <span className="text-orange-400 text-lg ml-1">
-                    ×{combo}
-                  </span>
-                )}
               </motion.div>
             ))}
           </AnimatePresence>
@@ -321,24 +328,37 @@ const TapToEarn: React.FC = () => {
       {/* Stats Section */}
       <div className="grid grid-cols-2 gap-4 w-full max-w-md">
         <div className="bg-black/30 rounded-xl p-4 backdrop-blur-sm text-center">
-          <div className="text-sm text-gray-300 mb-1">Coins per Tap</div>
-          <div className="text-xl font-bold text-yellow-400">{coinsPerTap}</div>
+          <div className="text-sm text-gray-300 mb-1">Points per Tap</div>
+          <div className="text-xl font-bold text-yellow-400">{pointsPerTap}</div>
         </div>
         
         <div className="bg-black/30 rounded-xl p-4 backdrop-blur-sm text-center">
-          <div className="text-sm text-gray-300 mb-1">Total Taps</div>
-          <div className="text-xl font-bold text-cyan-400">{coins}</div>
+          <div className="text-sm text-gray-300 mb-1">Current Taps</div>
+          <div className="text-xl font-bold text-cyan-400">{currentTaps}</div>
         </div>
       </div>
 
-      {/* Energy Warning */}
-      {energy < 50 && (
+      {/* Taps Warning */}
+      {remainingTaps < 10 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mt-4 text-red-400 text-center"
         >
-          ⚡ Low Energy! Wait for regeneration...
+          {remainingTaps === 0 
+            ? "🚫 No taps remaining today! Come back tomorrow!" 
+            : `⚠️ Only ${remainingTaps} taps remaining today!`}
+        </motion.div>
+      )}
+
+      {/* Loading State */}
+      {isLoadingInfo && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-4 text-blue-400 text-center"
+        >
+          Loading your tapping data...
         </motion.div>
       )}
     </div>

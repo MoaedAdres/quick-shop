@@ -70,4 +70,8 @@ export const backApis = {
   // ------------------------------ Orders ---------------------------------------------
   getOrders: (status?: string) => get("orders", { params: { status } }),
   getOrderById: (orderId: number) => get(`orders/${orderId}`),
+
+  // ------------------------------ Tap To Earn ---------------------------------------------
+  getTappingInfo: () => get("tasks/info"),
+  processTap: () => post("tasks/tap"),
 };
