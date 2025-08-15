@@ -677,3 +677,85 @@ export interface StripePaymentMethod {
     exp_year: number;
   };
 }
+
+// Admin Dashboard Types
+export interface AdminUser {
+  id: number;
+  username: string;
+  firstname: string | null;
+  lastname: string | null;
+  balance: string;
+  referral_code: string;
+  created_at: string;
+}
+
+export interface AdminOrder {
+  id: number;
+  user: {
+    id: number;
+    username: string;
+    firstname: string;
+    lastname: string;
+  };
+  status: string;
+  total_price: number;
+  payment_method: string;
+  created_at: string;
+  supplier: {
+    name: string;
+    code: string;
+  };
+  failure_reason: string | null;
+}
+
+export interface AdminRecentOrdersResponse {
+  data: {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: AdminOrder[];
+  };
+  message: string | null;
+}
+
+export interface AdminRecentUsersResponse {
+  data: {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: AdminUser[];
+  };
+  message: string | null;
+}
+
+export interface ReferralSettings {
+  reward_amount: string;
+}
+
+export interface ReferralSettingsResponse {
+  data: ReferralSettings;
+  message: string | null;
+}
+
+export interface ReferralSettingsPayload {
+  reward_amount: number;
+}
+
+export interface TappingSettings {
+  points_per_tap: number;
+  taps_for_reward: number;
+  reward_amount: number;
+  daily_tap_limit: number;
+}
+
+export interface TappingSettingsResponse {
+  data: TappingSettings;
+  message: string | null;
+}
+
+export interface TappingSettingsPayload {
+  points_per_tap: number;
+  taps_for_reward: number;
+  reward_amount: number;
+  daily_tap_limit: number;
+}

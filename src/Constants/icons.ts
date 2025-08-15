@@ -74,4 +74,5 @@ export const icons = {
   image: "fa-solid fa-image",
   coins: "fa-solid fa-coins",
   gamepad: "fa-solid fa-gamepad",
+  dashboard: "fa-solid fa-chart-line",
 } as const;

@@ -1,4 +1,4 @@
-import { get, post, destroy } from "@/Config/axios";
+import { get, post, put, destroy } from "@/Config/axios";
 import type {
   SearchParams,
   RecommendedProductsParams,
@@ -8,6 +8,8 @@ import type {
   RefreshTokenPayload,
   CreateCheckoutSessionPayload,
   CheckoutSessionResponse,
+  ReferralSettingsPayload,
+  TappingSettingsPayload,
 } from "@/Types/types";
 
 export const backApis = {
@@ -74,4 +76,14 @@ export const backApis = {
   // ------------------------------ Tap To Earn ---------------------------------------------
   getTappingInfo: () => get("tasks/info"),
   processTap: () => post("tasks/tap"),
+
+  // ------------------------------ Admin Dashboard ---------------------------------------------
+  getRecentOrders: () => get("admin-dashboard/recent-orders"),
+  getRecentUsers: () => get("admin-dashboard/recent-users"),
+  getReferralSettings: () => get("admin-dashboard/referrals/settings"),
+  updateReferralSettings: (payload: ReferralSettingsPayload) => 
+    put("admin-dashboard/referrals/settings", payload),
+  getTappingSettings: () => get("admin-dashboard/tapping/settings"),
+  updateTappingSettings: (payload: TappingSettingsPayload) => 
+    put("admin-dashboard/tapping/settings", payload),
 };
