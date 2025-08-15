@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Coins, Zap, Target } from 'lucide-react';
 import { useGetTappingInfo, useProcessTap } from '@/Api/queriesAndMutations';
@@ -27,9 +27,19 @@ interface Particle {
 }
 
 const TapToEarn: React.FC = () => {
+  // Mobile detection for performance optimization
+  const isMobile = useMemo(() => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           window.innerWidth <= 768;
+  }, []);
+
   // API hooks
   const { data: tappingInfo, isLoading: isLoadingInfo } = useGetTappingInfo();
   const processTapMutation = useProcessTap();
+
+  // Performance refs
+  const animationRef = useRef<number | undefined>(undefined);
+  const lastTapTime = useRef(0);
 
   // Local state for UI effects
   const [floatingTexts, setFloatingTexts] = useState<FloatingText[]>([]);
@@ -57,26 +67,43 @@ const TapToEarn: React.FC = () => {
     }
   }, [tappingInfo, currentTaps, localBalance]);
 
-  // Particle animation
+  // Optimized particle animation using requestAnimationFrame
   useEffect(() => {
     if (particles.length === 0) return;
 
-    const interval = setInterval(() => {
-      setParticles(prev => 
-        prev.map(particle => ({
+    const animateParticles = () => {
+      setParticles(prev => {
+        const updated = prev.map(particle => ({
           ...particle,
           x: particle.x + particle.vx,
           y: particle.y + particle.vy,
-          vy: particle.vy + 0.5, // gravity
-          life: particle.life - 0.02,
-        })).filter(particle => particle.life > 0)
-      );
-    }, 16);
+          vy: particle.vy + 0.3, // reduced gravity for performance
+          life: particle.life - (isMobile ? 0.03 : 0.02), // faster cleanup on mobile
+        })).filter(particle => particle.life > 0);
+        
+        if (updated.length > 0) {
+          animationRef.current = requestAnimationFrame(animateParticles);
+        }
+        
+        return updated;
+      });
+    };
 
-    return () => clearInterval(interval);
-  }, [particles.length]);
+    animationRef.current = requestAnimationFrame(animateParticles);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [particles.length, isMobile]);
 
   const handleTap = useCallback(async (event: React.MouseEvent<HTMLDivElement>) => {
+    // Debounce rapid taps
+    const now = Date.now();
+    if (now - lastTapTime.current < 100) return; // 100ms debounce
+    lastTapTime.current = now;
+
     if (remainingTaps < 1 || processTapMutation.isPending) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
@@ -88,32 +115,43 @@ const TapToEarn: React.FC = () => {
       const response = await processTapMutation.mutateAsync(undefined);
       const tapData = response.data;
 
-      // Update local balance for immediate feedback
-      setLocalBalance(tapData.new_balance);
+      // Batch state updates for better performance
+      const textId = `text-${now}-${Math.random()}`;
+      const effectId = `effect-${now}-${Math.random()}`;
 
-      // Add floating text showing points earned
-      const textId = `text-${Date.now()}-${Math.random()}`;
-      setFloatingTexts(prev => [...prev, { id: textId, x, y, value: pointsPerTap }]);
-
-      // Add click effect
-      const effectId = `effect-${Date.now()}-${Math.random()}`;
-      setClickEffects(prev => [...prev, { id: effectId, x, y }]);
-
-      // Add particles
+      // Reduce particles on mobile for performance
+      const particleCount = isMobile ? 3 : 6;
       const newParticles: Particle[] = [];
-      for (let i = 0; i < 6; i++) {
-        const angle = (i / 6) * Math.PI * 2;
-        const speed = 2 + Math.random() * 2;
+      
+      for (let i = 0; i < particleCount; i++) {
+        const angle = (i / particleCount) * Math.PI * 2;
+        const speed = isMobile ? 1.5 + Math.random() : 2 + Math.random() * 2;
         newParticles.push({
-          id: `particle-${Date.now()}-${i}`,
+          id: `particle-${now}-${i}`,
           x: x,
           y: y,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed - 1,
-          life: 1,
+          life: isMobile ? 0.8 : 1, // shorter life on mobile
         });
       }
-      setParticles(prev => [...prev, ...newParticles]);
+
+      // Update local balance for immediate feedback
+      setLocalBalance(tapData.new_balance);
+
+      // Batch UI state updates with limits to prevent performance issues
+      setFloatingTexts(prev => {
+        const updated = [...prev, { id: textId, x, y, value: pointsPerTap }];
+        return updated.slice(-5); // Keep only last 5 floating texts
+      });
+      setClickEffects(prev => {
+        const updated = [...prev, { id: effectId, x, y }];
+        return updated.slice(-3); // Keep only last 3 click effects
+      });
+      setParticles(prev => {
+        const updated = [...prev, ...newParticles];
+        return updated.slice(isMobile ? -15 : -30); // Limit particles: 15 on mobile, 30 on desktop
+      });
 
       // Show reward notification if reward was issued
       if (tapData.reward_issued) {
@@ -122,31 +160,43 @@ const TapToEarn: React.FC = () => {
         });
       }
 
-      // Remove floating text after animation
+      // Optimized cleanup with single timeout
       setTimeout(() => {
         setFloatingTexts(prev => prev.filter(text => text.id !== textId));
-      }, 2000);
-
-      // Remove click effect after animation
-      setTimeout(() => {
         setClickEffects(prev => prev.filter(effect => effect.id !== effectId));
-      }, 1000);
+      }, isMobile ? 1500 : 2000); // faster cleanup on mobile
 
-      // Haptic feedback for mobile
+      // Haptic feedback for mobile (reduced intensity)
       if ('vibrate' in navigator) {
-        navigator.vibrate(tapData.reward_issued ? [100, 50, 100] : 50);
+        navigator.vibrate(tapData.reward_issued ? [50, 25, 50] : 25);
       }
 
     } catch (error) {
       console.error('Tap processing failed:', error);
     }
-  }, [remainingTaps, processTapMutation, pointsPerTap]);
+  }, [remainingTaps, processTapMutation, pointsPerTap, isMobile]);
 
-  const formatNumber = (num: number) => {
+  const formatNumber = useCallback((num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
     return num.toString();
-  };
+  }, []);
+
+  // Optimized animation configs for mobile
+  const animationConfig = useMemo(() => ({
+    transition: {
+      duration: isMobile ? 0.15 : 0.3,
+      ease: "easeOut" as const
+    },
+    floatingText: {
+      duration: isMobile ? 1.5 : 2,
+      ease: "easeOut" as const
+    },
+    clickEffect: {
+      duration: isMobile ? 0.8 : 1,
+      ease: "easeOut" as const
+    }
+  }), [isMobile]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-purple-900 via-blue-900 to-black text-white p-4">
@@ -206,7 +256,7 @@ const TapToEarn: React.FC = () => {
             className="h-full bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"
             initial={{ width: '100%' }}
             animate={{ width: `${(remainingTaps / (settings?.daily_tap_limit ?? 1)) * 100}%` }}
-            transition={{ duration: 0.3 }}
+            transition={animationConfig.transition}
           />
         </div>
       </div>
@@ -231,29 +281,31 @@ const TapToEarn: React.FC = () => {
             animate={{
               scale: isPressed ? 0.95 : 1,
               boxShadow: isPressed 
-                ? '0 10px 40px rgba(234, 179, 8, 0.6)' 
-                : '0 20px 60px rgba(234, 179, 8, 0.4)',
+                ? (isMobile ? '0 5px 20px rgba(234, 179, 8, 0.5)' : '0 10px 40px rgba(234, 179, 8, 0.6)')
+                : (isMobile ? '0 10px 30px rgba(234, 179, 8, 0.3)' : '0 20px 60px rgba(234, 179, 8, 0.4)'),
             }}
-            transition={{ duration: 0.1 }}
+            transition={{ duration: isMobile ? 0.05 : 0.1 }}
           >
             {/* Coin Inner Design */}
             <div className="absolute inset-4 rounded-full bg-gradient-to-br from-yellow-200 to-yellow-500 flex items-center justify-center">
               <div className="text-6xl font-bold text-yellow-800 drop-shadow-lg">₵</div>
             </div>
 
-            {/* Shine Effect */}
-            <motion.div
-              className="absolute top-4 left-4 w-16 h-16 bg-white/30 rounded-full blur-md"
-              animate={{
-                opacity: [0.3, 0.6, 0.3],
-                scale: [1, 1.1, 1],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
+            {/* Shine Effect - Simplified on mobile */}
+            {!isMobile && (
+              <motion.div
+                className="absolute top-4 left-4 w-16 h-16 bg-white/30 rounded-full blur-md"
+                animate={{
+                  opacity: [0.3, 0.6, 0.3],
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+            )}
           </motion.div>
 
           {/* Click Effects */}
@@ -272,7 +324,7 @@ const TapToEarn: React.FC = () => {
                   opacity: [1, 0.5, 0],
                 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 1, ease: "easeOut" }}
+                transition={animationConfig.clickEffect}
               >
                 {/* Ripple Effect */}
                 <div className="w-16 h-16 border-4 border-yellow-400 rounded-full" />
@@ -316,7 +368,7 @@ const TapToEarn: React.FC = () => {
                   x: (Math.random() - 0.5) * 40 
                 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 2, ease: "easeOut" }}
+                transition={animationConfig.floatingText}
               >
                 +{text.value}
               </motion.div>
