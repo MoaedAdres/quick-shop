@@ -93,7 +93,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <RFlex className="flex-col h-full pb-20 md:pb-0">
+    <RFlex className="flex-col h-full pb-20">
       {/* Header */}
       <div className="bg-card border-b border-border p-4">
         <div className="flex items-center justify-between">

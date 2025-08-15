@@ -103,7 +103,7 @@ const ProductDetails = () => {
 
   if (isLoading) {
     return (
-      <RFlex className="flex-col h-full pb-20 md:pb-0">
+      <RFlex className="flex-col h-full pb-20 ">
         <div className="bg-card border-b border-border p-4">
           <h1 className="text-xl font-semibold text-foreground">
             Product Details
@@ -120,7 +120,7 @@ const ProductDetails = () => {
 
   if (!productData) {
     return (
-      <RFlex className="flex-col h-full pb-20 md:pb-0">
+      <RFlex className="flex-col h-full pb-20 ">
         <div className="bg-card border-b border-border p-4">
           <h1 className="text-xl font-semibold text-foreground">
             Product Details
@@ -141,7 +141,7 @@ const ProductDetails = () => {
   const product = productData.data;
 
   return (
-    <RFlex className="flex-col h-full pb-20 md:pb-0">
+    <RFlex className="flex-col h-full pb-20 ">
       {/* Header */}
       <div className="bg-card border-b border-border p-4">
         <h1 className="text-xl font-semibold text-foreground">

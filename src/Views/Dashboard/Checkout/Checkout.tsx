@@ -149,7 +149,7 @@ const Checkout = () => {
 
   if (isLoading) {
     return (
-      <RFlex className="flex-col h-full pb-20 md:pb-0">
+      <RFlex className="flex-col h-full pb-20 ">
         <div className="bg-card border-b border-border p-4">
           <h1 className="text-xl font-semibold text-foreground">Checkout</h1>
         </div>
@@ -164,7 +164,7 @@ const Checkout = () => {
 
   if (error || !cartData || !cartData.items || cartData.items.length === 0) {
     return (
-      <RFlex className="flex-col h-full pb-20 md:pb-0">
+      <RFlex className="flex-col h-full pb-20 ">
         <div className="bg-card border-b border-border p-4">
           <h1 className="text-xl font-semibold text-foreground">Checkout</h1>
         </div>
@@ -189,7 +189,7 @@ const Checkout = () => {
   const totals = calculateCartTotals();
 
   return (
-    <RFlex className="flex-col h-full pb-20 md:pb-0">
+    <RFlex className="flex-col h-full pb-20 ">
       {/* Header */}
       <div className="bg-card border-b border-border p-4">
         <div className="flex items-center gap-3">

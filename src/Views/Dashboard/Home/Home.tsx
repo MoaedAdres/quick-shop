@@ -132,7 +132,7 @@ const Home = () => {
   const printifyProducts = printifyProductsQuery.data || [];
 
   return (
-    <RFlex className="flex-col h-full pb-20 md:pb-0 relative">
+    <RFlex className="flex-col h-full pb-20 relative">
       {/* Top Bar */}
       <TopBar />
 

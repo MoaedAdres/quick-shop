@@ -76,7 +76,7 @@ const SearchPage = () => {
   const error = searchProductsQuery.error;
 
   return (
-    <RFlex className="flex-col h-full pb-20 md:pb-0 relative">
+    <RFlex className="flex-col h-full pb-20 relative">
       {/* Header */}
       <div className="bg-card border-b border-border p-4">
         <div className="flex items-center gap-3 mb-4">
