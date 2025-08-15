@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const { t } = useTranslation();
-  const { user, logout } = useAuthStore();
+  const { user, logout, isAdmin, setIsAdmin } = useAuthStore();
   const navigate = useNavigate();
   // Use Telegram user data if available
   const displayName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : mockUser.name;
@@ -234,6 +234,51 @@ const Profile = () => {
                 </motion.div>
               ))}
             </div>
+          </motion.div>
+
+          {/* Admin Toggle (For Testing) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="bg-card rounded-lg border border-border p-4"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <i className={`${icons.settings} text-lg text-muted-foreground`} />
+                <div>
+                  <span className="text-foreground font-medium">Admin Mode</span>
+                  <p className="text-sm text-muted-foreground">Toggle admin access for testing</p>
+                </div>
+              </div>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsAdmin(!isAdmin)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  isAdmin ? 'bg-blue-600' : 'bg-gray-300'
+                }`}
+              >
+                <motion.div
+                  animate={{
+                    x: isAdmin ? 20 : 2,
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  className="inline-block h-4 w-4 transform rounded-full bg-white shadow-lg"
+                />
+              </motion.button>
+            </div>
+            {isAdmin && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="mt-3 pt-3 border-t border-border"
+              >
+                <p className="text-sm text-green-600 font-medium">
+                  ✅ Admin mode is active. You can access the admin dashboard from the bottom navigation.
+                </p>
+              </motion.div>
+            )}
           </motion.div>
 
           {/* Logout Button */}

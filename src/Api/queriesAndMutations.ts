@@ -29,6 +29,12 @@ import type {
   PrintifyProductDetailsResponse,
   TappingInfoResponse,
   ProcessTapResponse,
+  AdminRecentOrdersResponse,
+  AdminRecentUsersResponse,
+  ReferralSettingsResponse,
+  ReferralSettingsPayload,
+  TappingSettingsResponse,
+  TappingSettingsPayload,
 } from "@/Types/types";
 
 // Query Keys
@@ -64,6 +70,13 @@ export const queryKeys = {
   tasks: {
     all: ["tasks"] as const,
     info: ["tasks", "info"] as const,
+  },
+  admin: {
+    all: ["admin"] as const,
+    recentOrders: ["admin", "recent-orders"] as const,
+    recentUsers: ["admin", "recent-users"] as const,
+    referralSettings: ["admin", "referral-settings"] as const,
+    tappingSettings: ["admin", "tapping-settings"] as const,
   },
 };
 
@@ -353,5 +366,69 @@ export const useProcessTap = () => {
     },
     invalidateKeys: [{ queryKey: queryKeys.tasks.info }],
     displaySuccess: false, // We'll handle success display manually
+  });
+};
+
+// ------------------------------ Admin Dashboard Queries & Mutations ---------------------------------------------
+
+export const useGetRecentOrders = () => {
+  return useFetchData<AdminRecentOrdersResponse>({
+    queryKey: queryKeys.admin.recentOrders,
+    queryFn: async () => {
+      const response = await backApis.getRecentOrders();
+      return response.data;
+    },
+  });
+};
+
+export const useGetRecentUsers = () => {
+  return useFetchData<AdminRecentUsersResponse>({
+    queryKey: queryKeys.admin.recentUsers,
+    queryFn: async () => {
+      const response = await backApis.getRecentUsers();
+      return response.data;
+    },
+  });
+};
+
+export const useGetReferralSettings = () => {
+  return useFetchData<ReferralSettingsResponse>({
+    queryKey: queryKeys.admin.referralSettings,
+    queryFn: async () => {
+      const response = await backApis.getReferralSettings();
+      return response.data;
+    },
+  });
+};
+
+export const useUpdateReferralSettings = () => {
+  return useMutateData<ReferralSettingsResponse, ReferralSettingsPayload>({
+    mutationFn: async (payload) => {
+      const response = await backApis.updateReferralSettings(payload);
+      return response.data;
+    },
+    invalidateKeys: [{ queryKey: queryKeys.admin.referralSettings }],
+    displaySuccess: true,
+  });
+};
+
+export const useGetTappingSettings = () => {
+  return useFetchData<TappingSettingsResponse>({
+    queryKey: queryKeys.admin.tappingSettings,
+    queryFn: async () => {
+      const response = await backApis.getTappingSettings();
+      return response.data;
+    },
+  });
+};
+
+export const useUpdateTappingSettings = () => {
+  return useMutateData<TappingSettingsResponse, TappingSettingsPayload>({
+    mutationFn: async (payload) => {
+      const response = await backApis.updateTappingSettings(payload);
+      return response.data;
+    },
+    invalidateKeys: [{ queryKey: queryKeys.admin.tappingSettings }],
+    displaySuccess: true,
   });
 };

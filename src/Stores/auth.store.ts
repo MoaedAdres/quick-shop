@@ -13,8 +13,10 @@ interface AuthState {
   isTelegramApp: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isAdmin: boolean;
   login: () => Promise<void>;
   logout: () => void;
+  setIsAdmin: (isAdmin: boolean) => void;
 }
 
 const initState: AuthState = {
@@ -24,8 +26,10 @@ const initState: AuthState = {
   isTelegramApp: false,
   isAuthenticated: false,
   isLoading: false,
+  isAdmin: true,
   login: async () => {},
   logout: () => {},
+  setIsAdmin: () => {},
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -122,10 +126,15 @@ export const useAuthStore = create<AuthState>()(
             user: null,
             isAuthenticated: false,
             isLoading: false,
+            isAdmin: false,
           });
           if (get().isTelegramApp) {
             telegramService.close();
           }
+        },
+
+        setIsAdmin: (isAdmin: boolean) => {
+          set({ isAdmin });
         },
       }),
       { name: "auth-devtools" }
@@ -138,6 +147,7 @@ export const useAuthStore = create<AuthState>()(
         refreshToken: state.refreshToken,
         isTelegramApp: state.isTelegramApp,
         isAuthenticated: state.isAuthenticated,
+        isAdmin: state.isAdmin,
       }),
     }
   )

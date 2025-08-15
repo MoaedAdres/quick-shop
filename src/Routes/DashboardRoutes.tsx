@@ -89,4 +89,12 @@ export const dashboardRoutes: RouteObject[] = [
       return { element: <module.default /> };
     },
   },
+  {
+    id: "admin-dashboard",
+    path: "admin-dashboard",
+    lazy: async () => {
+      const module = await import("@/Views/Dashboard/Admin/AdminDashboard");
+      return { element: <module.default /> };
+    },
+  },
 ] as const;
