@@ -34,7 +34,7 @@ const SearchPage = () => {
 
   const handleCategoryClick = (category: any) => {
     setSelectedCategory(category);
-    setSearchQuery("");
+    setSearchQuery(category.name);
   };
 
   const handleProductClick = (product: any) => {
