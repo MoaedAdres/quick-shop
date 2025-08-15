@@ -395,7 +395,7 @@ const TapToEarn: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-4 text-red-400 text-center"
+          className=" text-red-400 text-center"
         >
           {remainingTaps === 0 
             ? "🚫 No taps remaining today! Come back tomorrow!" 
