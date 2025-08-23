@@ -113,7 +113,7 @@ const Profile = () => {
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-4">
+            {/* <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary">12</div>
                 <div className="text-xs text-muted-foreground">Orders</div>
@@ -126,11 +126,11 @@ const Profile = () => {
                 <div className="text-2xl font-bold text-primary">4.8</div>
                 <div className="text-xs text-muted-foreground">Rating</div>
               </div>
-            </div>
+            </div> */}
           </motion.div>
 
           {/* Settings Menu */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
@@ -185,7 +185,7 @@ const Profile = () => {
                 <i className={`${icons.chevronRight} text-muted-foreground`} />
               </motion.button>
             </div>
-          </motion.div>
+          </motion.div> */}
 
           {/* Order History */}
           <motion.div
