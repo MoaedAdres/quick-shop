@@ -63,44 +63,35 @@ const SearchPage = () => {
 
   // Intersection Observer for infinite scroll
   const { ref: lastElementRef, inView } = useInView({
-    threshold: 0,
-    rootMargin: "100px",
+    threshold: 0.1,
+    rootMargin: "50px",
+    triggerOnce: false,
   });
 
   // Trigger fetch when last element comes into view
   useEffect(() => {
-    if (inView) {
-      if (searchQuery.trim() && !selectedCategory) {
-        // Handle search infinite scroll
-        if (
-          searchProductsQuery.hasNextPage &&
-          !searchProductsQuery.isFetchingNextPage
-        ) {
-          searchProductsQuery.fetchNextPage();
-        }
-      } else if (selectedCategory) {
-        // Handle category infinite scroll
-        if (
-          categoryProductsQuery.hasNextPage &&
-          !categoryProductsQuery.isFetchingNextPage
-        ) {
-          categoryProductsQuery.fetchNextPage();
-        }
+    if (!inView) return;
+
+    if (searchQuery.trim() && !selectedCategory) {
+      // Handle search infinite scroll
+      if (
+        searchProductsQuery.hasNextPage &&
+        !searchProductsQuery.isFetchingNextPage &&
+        !searchProductsQuery.isLoading
+      ) {
+        searchProductsQuery.fetchNextPage();
+      }
+    } else if (selectedCategory) {
+      // Handle category infinite scroll
+      if (
+        categoryProductsQuery.hasNextPage &&
+        !categoryProductsQuery.isFetchingNextPage &&
+        !categoryProductsQuery.isLoading
+      ) {
+        categoryProductsQuery.fetchNextPage();
       }
     }
-  }, [
-    inView,
-    searchQuery,
-    selectedCategory,
-    searchProductsQuery.hasNextPage,
-    searchProductsQuery.isFetchingNextPage,
-    searchProductsQuery.fetchNextPage,
-    categoryProductsQuery.hasNextPage,
-    categoryProductsQuery.isFetchingNextPage,
-    categoryProductsQuery.fetchNextPage,
-    categoryProductsQuery,
-    searchProductsQuery,
-  ]);
+  }, [inView]); // Only depend on inView to prevent multiple triggers
 
   // Determine which data to display
   const getDisplayData = () => {
