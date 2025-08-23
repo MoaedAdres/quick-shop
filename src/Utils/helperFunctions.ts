@@ -8,7 +8,7 @@ export function getQueryParamsFromURL(url: string): URLSearchParams {
   const queryParams = new URLSearchParams(`?${queryParamString[1]}`);
   return queryParams;
 }
-export function truncatePargraph(pargraph: string, count: number = 20) {
+export function truncateParagraph(pargraph: string, count: number = 20) {
   const cutedParagraph = pargraph.slice(0, count);
   return pargraph.length <= count ? pargraph : `${cutedParagraph}...`;
 }

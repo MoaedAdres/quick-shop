@@ -77,11 +77,11 @@
 }
 
 html[data-theme="dark"] {
-  --background: #0B0A12;
+  --background: #0b0a12;
   --foreground: oklch(0.985 0 0);
-  --card: #0D0A1D;
+  --card: #0d0a1d;
   --card-foreground: oklch(0.985 0 0);
-  --popover: #0D0A1D;
+  --popover: #0d0a1d;
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.4859 0.2835 278.7);
   --primary-foreground: oklch(0.985 0 0);
@@ -100,9 +100,10 @@ html[data-theme="dark"] {
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: #0E0A1B;
+  --sidebar: #0e0a1b;
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: #5019F8;
+  --sidebar-primary: #5019f8;
+  --sidebar-primary-hover: #7a50f9;
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
@@ -127,14 +128,14 @@ html[data-theme="dark"] {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
   }
-  
+
   .line-clamp-2 {
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
-  
+
   .line-clamp-3 {
     overflow: hidden;
     display: -webkit-box;
@@ -147,26 +148,29 @@ html[data-theme="dark"] {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+    width: 0px;
+    height: 0px;
   }
 
-  /* Custom scrollbar */
-  .custom-scrollbar::-webkit-scrollbar {
+  ::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
   }
-  
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
+
+  ::-webkit-scrollbar-track {
+    background-color: transparent;
   }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: var(--muted-foreground);
-    border-radius: 3px;
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--sidebar-primary);
+    border-radius: 20px;
+    background-clip: content-box;
   }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: var(--foreground);
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--sidebar-primary-hover);
   }
 }

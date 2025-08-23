@@ -48,7 +48,7 @@ const HeroBanner = ({ banners, className = "" }: HeroBannerProps) => {
                 <img
                   src={banner.image}
                   alt={banner.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover lg:object-fill"
                 />
                 <div className="absolute inset-0 bg-black/30" />
               </div>
