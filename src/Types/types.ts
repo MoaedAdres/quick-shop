@@ -349,9 +349,12 @@ export interface ShippingAddress {
 }
 
 export interface UnshippableProduct {
-  id: number;
-  product: CartProduct;
-  quantity: number;
+  product: {
+    id: number;
+    product: CartProduct;
+    quantity: number;
+  };
+  reason: string;
 }
 
 export interface ShippingPreviewError {
