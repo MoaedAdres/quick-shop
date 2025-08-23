@@ -154,7 +154,11 @@ html[data-theme="dark"] {
     width: 0px;
     height: 0px;
   }
-
+  .scrollbar-show::-webkit-scrollbar {
+    display: block;
+    width: 6px;
+    height: 6px;
+  }
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;

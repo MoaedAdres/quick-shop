@@ -296,7 +296,7 @@ const PrintifyProductDetails = () => {
                       <img
                         src={image.src}
                         alt={`${product.title} - ${image.position}`}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-fill"
                       />
                     </SwiperSlide>
                   ))}
@@ -305,7 +305,7 @@ const PrintifyProductDetails = () => {
 
               {/* Thumbnail Gallery */}
               {images.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="flex gap-2 overflow-x-auto pb-2">
                   {images.map((image, index) => (
                     <button
                       key={index}
@@ -319,7 +319,7 @@ const PrintifyProductDetails = () => {
                       <img
                         src={image.src}
                         alt={`${product.title} - ${image.position}`}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-fill"
                       />
                       {selectedImageIndex === index && (
                         <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">

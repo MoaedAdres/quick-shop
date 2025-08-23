@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { useGetProductDetails, useAddToCart } from "@/Api/queriesAndMutations";
@@ -15,8 +15,10 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { truncateParagraph } from "@/Utils/helperFunctions";
+import { Button } from "@/components/ui/button";
 
 const ProductDetails = () => {
+  const navigate = useNavigate();
   const { productId } = useParams<{ productId: string }>();
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -76,7 +78,9 @@ const ProductDetails = () => {
       setQuantity(newQuantity);
     }
   };
-
+  const handleBack = () => {
+    navigate(-1);
+  };
   const handleAddToCart = async () => {
     if (!selectedSku) {
       toast.error("Please select a variant");
@@ -145,17 +149,27 @@ const ProductDetails = () => {
   return (
     <RFlex className="flex-col h-full pb-20 ">
       {/* Header */}
-      <div className="bg-card border-b border-border p-4">
+      <div className="bg-card border-b border-border p-4 flex items-center justify-between">
+        <Button
+          onClick={handleBack}
+          variant="ghost"
+          size="sm"
+          className="flex items-center gap-2"
+        >
+          <i className={`${icons.arrowLeft} text-lg`} />
+          Back
+        </Button>
         <h1 className="text-xl font-semibold text-foreground">
           Product Details
         </h1>
+        <div className="w-10" /> {/* Spacer for centering */}
       </div>
 
       {/* Product Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-4 md:p-6 pb-10">
           {/* Product Images */}
-          <div className="mb-6">
+          <div className="mb-6 flex flex-col gap-2">
             {/* Main Image Swiper */}
             <div className="relative">
               <Swiper
@@ -182,7 +196,7 @@ const ProductDetails = () => {
                     <img
                       src={image}
                       alt={`${product.title} - ${index + 1}`}
-                      className="w-full h-full object-cover lg:object-fill"
+                      className="w-full h-full object-fill"
                     />
                   </SwiperSlide>
                 ))}
@@ -190,8 +204,9 @@ const ProductDetails = () => {
             </div>
 
             {/* Thumbnail Gallery */}
+
             {product.media_info.images.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide md:justify-center">
+              <div className="flex gap-2 overflow-x-auto pb-2 md:justify-center">
                 {product.media_info.images.map((image, index) => (
                   <motion.button
                     key={index}
@@ -310,7 +325,7 @@ const ProductDetails = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Quantity */}
             <div className="space-y-2">
               <h3 className="font-medium text-foreground">Quantity</h3>
@@ -352,7 +367,10 @@ const ProductDetails = () => {
                 <>
                   <i className={icons.cart} />
                   Add to Cart ($
-                  {(parseFloat(selectedSku?.price || "0") * quantity).toFixed(2)})
+                  {(parseFloat(selectedSku?.price || "0") * quantity).toFixed(
+                    2
+                  )}
+                  )
                 </>
               )}
             </motion.button>

@@ -164,7 +164,7 @@ const Home = () => {
 
               {/* Horizontal Scrollable Products */}
               <div className="relative">
-                <div className="flex gap-4 overflow-x-auto pb-4 !lg:scrollbar-hide scroll-smooth">
+                <div className="flex gap-4 overflow-x-auto pb-4 scroll-smooth">
                   {products.map((product: Product, index: number) => (
                     <div
                       key={product.product_id}
@@ -209,7 +209,7 @@ const Home = () => {
 
               {/* Horizontal Scrollable Products */}
               <div className="relative">
-                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth">
+                <div className="flex gap-4 overflow-x-auto pb-4 scroll-smooth">
                   {printifyProducts.map(
                     (product: PrintifyProduct, index: number) => (
                       <div
