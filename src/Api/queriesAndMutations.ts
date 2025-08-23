@@ -39,6 +39,7 @@ import type {
   CryptoPaymentPayload,
   CryptoPaymentStatus,
   SupportedCurrency,
+  TappingStatusResponse,
 } from "@/Types/types";
 
 // Query Keys
@@ -74,6 +75,7 @@ export const queryKeys = {
   tasks: {
     all: ["tasks"] as const,
     info: ["tasks", "info"] as const,
+    status: ["tasks", "status"] as const,
   },
   admin: {
     all: ["admin"] as const,
@@ -378,6 +380,15 @@ export const useProcessTap = () => {
   });
 };
 
+export const useGetTappingStatus = ()=>{
+  return useFetchData<TappingStatusResponse>({
+    queryKey: queryKeys.tasks.status,
+    queryFn: async () => {
+      const response = await backApis.getTappingStatus();
+      return response.data;
+    },
+  });
+}
 // ------------------------------ Admin Dashboard Queries & Mutations ---------------------------------------------
 
 export const useGetRecentOrders = () => {

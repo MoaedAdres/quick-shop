@@ -657,6 +657,13 @@ export interface TappingInfoResponse {
   message: string | null;
 }
 
+export interface TappingStatusResponse {
+  data: {
+    status: boolean;
+  };
+  message: string | null;
+}
+
 export interface ProcessTapResponse {
   data: {
     reward_issued: boolean;

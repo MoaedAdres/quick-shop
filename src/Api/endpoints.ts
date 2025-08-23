@@ -77,19 +77,20 @@ export const backApis = {
   // ------------------------------ Tap To Earn ---------------------------------------------
   getTappingInfo: () => get("tasks/info"),
   processTap: () => post("tasks/tap"),
-
+  getTappingStatus: () => get("tasks/tapping-status"),
   // ------------------------------ Admin Dashboard ---------------------------------------------
   getRecentOrders: () => get("admin-dashboard/recent-orders"),
   getRecentUsers: () => get("admin-dashboard/recent-users"),
   getReferralSettings: () => get("admin-dashboard/referrals/settings"),
-  updateReferralSettings: (payload: ReferralSettingsPayload) => 
+  updateReferralSettings: (payload: ReferralSettingsPayload) =>
     put("admin-dashboard/referrals/settings", payload),
   getTappingSettings: () => get("admin-dashboard/tapping/settings"),
-  updateTappingSettings: (payload: TappingSettingsPayload) => 
+  updateTappingSettings: (payload: TappingSettingsPayload) =>
     put("admin-dashboard/tapping/settings", payload),
 
   // ------------------------------ Crypto Payments (NOWPayments) ---------------------------------------------
   createCryptoOrder: (payload: CryptoPaymentPayload) => post("orders", payload),
-  getCryptoPaymentStatus: (paymentId: string) => get(`payments/crypto/${paymentId}/status`),
+  getCryptoPaymentStatus: (paymentId: string) =>
+    get(`payments/crypto/${paymentId}/status`),
   getSupportedCurrencies: () => get("payments/crypto/currencies"),
 };
