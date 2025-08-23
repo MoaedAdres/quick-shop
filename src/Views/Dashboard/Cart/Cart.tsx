@@ -173,7 +173,7 @@ const Cart = () => {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => navigate("/dashboard/checkout")}
+          onClick={() => navigate("/dashboard/checkout/shipping")}
           className="w-full bg-primary text-primary-foreground py-4 rounded-lg font-semibold text-lg"
         >
           Checkout - {formatPrice(totals.total)}
