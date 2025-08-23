@@ -11,6 +11,7 @@ import type {
   ReferralSettingsPayload,
   TappingSettingsPayload,
   CryptoPaymentPayload,
+  PaginationParams,
 } from "@/Types/types";
 
 export const backApis = {
@@ -33,6 +34,8 @@ export const backApis = {
 
   // ------------------------------ Categories ---------------------------------------------
   getCategories: () => get("products/aliexpress/categories"),
+  getCategoryProducts: (categoryId: string, params: PaginationParams) =>
+    get(`products/aliexpress/categories/${categoryId}`, { params }),
 
   // ------------------------------ Cart ---------------------------------------------
   getCart: () => get("orders/cart"),

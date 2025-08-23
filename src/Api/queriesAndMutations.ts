@@ -40,6 +40,7 @@ import type {
   CryptoPaymentStatus,
   SupportedCurrency,
   TappingStatusResponse,
+  PaginationParams,
 } from "@/Types/types";
 
 // Query Keys
@@ -54,6 +55,8 @@ export const queryKeys = {
   },
   categories: {
     all: ["categories"] as const,
+    products: (categoryId: string, params: PaginationParams) =>
+      ["categories", "products", categoryId, params] as const,
   },
   cart: {
     all: ["cart"] as const,
@@ -86,7 +89,8 @@ export const queryKeys = {
   },
   crypto: {
     all: ["crypto"] as const,
-    paymentStatus: (paymentId: string) => ["crypto", "payment-status", paymentId] as const,
+    paymentStatus: (paymentId: string) =>
+      ["crypto", "payment-status", paymentId] as const,
     currencies: ["crypto", "currencies"] as const,
   },
 };
@@ -161,7 +165,7 @@ export const useSearchProducts = (params: SearchParams) => {
       });
       return response.data;
     },
-    enableCondition: !!params.search.trim() || !!params.cat_id, // Run if search query or category ID exists
+    enableCondition: !!params.search.trim() || !params.cat_id, // Run if search query or category ID exists
     selectFn: (data) => data.pages.flatMap((page) => page.data.products),
     initialPageParam: 1,
     getNextPageParam: (lastPage: SearchProductsResponse) => {
@@ -203,6 +207,35 @@ export const useGetCategories = () => {
     queryFn: async () => {
       const response = await backApis.getCategories();
       return response.data;
+    },
+  });
+};
+
+export const useGetCategoryProducts = (
+  categoryId: string,
+  pageSize: number,
+  enabled: boolean
+) => {
+  return useInfiniteData<ProductsResponse, unknown, Product[]>({
+    queryKey: queryKeys.categories.products(categoryId, {
+      page: 1,
+      page_size: pageSize || 20,
+    }),
+    queryFn: async ({ pageParam }: { pageParam?: unknown }) => {
+      const response = await backApis.getCategoryProducts(categoryId, {
+        page: (pageParam as number) ?? 1,
+        page_size: pageSize || 20,
+      });
+      return response.data;
+    },
+    enableCondition: enabled,
+    selectFn: (data) => data.pages.flatMap((page) => page.data.products),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: ProductsResponse) => {
+      if (lastPage?.data?.total_products <= lastPage?.data?.page_size) {
+        return undefined;
+      }
+      return Number(lastPage?.data?.page) + 1;
     },
   });
 };
@@ -380,7 +413,7 @@ export const useProcessTap = () => {
   });
 };
 
-export const useGetTappingStatus = ()=>{
+export const useGetTappingStatus = () => {
   return useFetchData<TappingStatusResponse>({
     queryKey: queryKeys.tasks.status,
     queryFn: async () => {
@@ -388,7 +421,7 @@ export const useGetTappingStatus = ()=>{
       return response.data;
     },
   });
-}
+};
 // ------------------------------ Admin Dashboard Queries & Mutations ---------------------------------------------
 
 export const useGetRecentOrders = () => {
@@ -465,7 +498,10 @@ export const useCreateCryptoOrder = () => {
   });
 };
 
-export const useGetCryptoPaymentStatus = (paymentId: string, enabled = false) => {
+export const useGetCryptoPaymentStatus = (
+  paymentId: string,
+  enabled = false
+) => {
   return useFetchData<{ data: CryptoPaymentStatus }>({
     queryKey: queryKeys.crypto.paymentStatus(paymentId),
     queryFn: async () => {

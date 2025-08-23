@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
-import { useGetCategories, useSearchProducts } from "@/Api/queriesAndMutations";
+import {
+  useGetCategories,
+  useGetCategoryProducts,
+  useSearchProducts,
+} from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import RSearchInput from "@/RComponents/RSearchInput";
 import CategoryCard from "@/components/ui/category-card";
@@ -26,6 +30,11 @@ const SearchPage = () => {
     currency: "USD",
     cat_id: selectedCategory?.id,
   });
+  const {
+    data: categoryProducts,
+    isLoading: categoryProductsLoading,
+    isFetchingNextPage: categoryProductsFetchingNextPage,
+  } = useGetCategoryProducts(selectedCategory?.id, 20, !!selectedCategory?.id);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);

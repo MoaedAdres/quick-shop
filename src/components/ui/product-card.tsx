@@ -45,6 +45,7 @@ const ProductCard = ({
       {/* Product Image */}
       <div className="relative aspect-square overflow-hidden">
         <img
+          referrerPolicy="no-referrer"
           src={main_image}
           alt={title}
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
@@ -108,7 +109,6 @@ const ProductCard = ({
             </div>
             <span className="text-[10px] text-muted-foreground">(4.5)</span>
           </div>
-
         </div>
       </div>
     </motion.div>
