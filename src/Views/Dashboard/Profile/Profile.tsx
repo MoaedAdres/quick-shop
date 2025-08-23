@@ -5,6 +5,7 @@ import RFlex from "@/RComponents/RFlex";
 import { useAuthStore } from "@/Stores/auth.store";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import AddressManagement from "@/components/ui/address-management";
 
 const Profile = () => {
   const { t } = useTranslation();
@@ -234,6 +235,16 @@ const Profile = () => {
                 </motion.div>
               ))}
             </div>
+          </motion.div>
+
+          {/* Address Management */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-card rounded-lg border border-border p-6"
+          >
+            <AddressManagement />
           </motion.div>
 
           {/* Admin Toggle (For Testing) */}

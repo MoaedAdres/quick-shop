@@ -422,6 +422,44 @@ export interface Address {
   isDefault: boolean;
 }
 
+// User Address Types
+export interface UserAddress {
+  id: number;
+  address: string;
+  address2?: string | null;
+  city: string;
+  province: string;
+  country: string;
+  zip: string;
+  contact_person: string;
+  full_name: string;
+  mobile_no: string;
+  phone_country: string;
+}
+
+export interface CreateAddressPayload {
+  address: string;
+  address2?: string | null;
+  city: string;
+  province: string;
+  country: string;
+  zip: string;
+  contact_person: string;
+  full_name: string;
+  mobile_no: string;
+  phone_country: string;
+}
+
+export interface AddressesResponse {
+  data: UserAddress[];
+  message: string | null;
+}
+
+export interface CreateAddressResponse {
+  data: UserAddress;
+  message: string | null;
+}
+
 // Wallet Types
 export interface Wallet {
   id: string;

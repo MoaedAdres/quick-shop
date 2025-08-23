@@ -41,6 +41,9 @@ import type {
   SupportedCurrency,
   TappingStatusResponse,
   PaginationParams,
+  AddressesResponse,
+  CreateAddressResponse,
+  CreateAddressPayload,
 } from "@/Types/types";
 
 // Query Keys
@@ -523,5 +526,28 @@ export const useGetSupportedCurrencies = () => {
       const response = await backApis.getSupportedCurrencies();
       return response.data;
     },
+  });
+};
+
+// ------------------------------ Address Management Queries & Mutations ---------------------------------------------
+
+export const useGetUserAddresses = () => {
+  return useFetchData<AddressesResponse>({
+    queryKey: ["user-addresses"],
+    queryFn: async () => {
+      const response = await backApis.getUserAddresses();
+      return response.data;
+    },
+  });
+};
+
+export const useCreateAddress = () => {
+  return useMutateData<CreateAddressResponse, CreateAddressPayload>({
+    mutationFn: async (payload) => {
+      const response = await backApis.createAddress(payload);
+      return response.data;
+    },
+    invalidateKeys: [{ queryKey: ["user-addresses"] }],
+    displaySuccess: false,
   });
 };

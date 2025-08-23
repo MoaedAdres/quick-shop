@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
-import { useShippingPreview } from "@/Api/queriesAndMutations";
+import { useShippingPreview, useGetUserAddresses } from "@/Api/queriesAndMutations";
 import type {
   ShippingAddress,
   ShippingPreviewSuccess,
   ShippingPreviewError,
+  UserAddress,
 } from "@/Types/types";
 
 interface ShippingPreviewFormProps {
@@ -34,6 +35,38 @@ const ShippingPreviewForm = ({
   });
 
   const shippingPreviewMutation = useShippingPreview();
+  const { data: addressesData } = useGetUserAddresses();
+  const [showSavedAddresses, setShowSavedAddresses] = useState(false);
+
+  const handleAddressSelect = (address: UserAddress) => {
+    const shippingAddress: ShippingAddress = {
+      address: address.address,
+      address2: address.address2 || "",
+      city: address.city,
+      province: address.province,
+      country: address.country,
+      zip: address.zip,
+      contact_person: address.contact_person,
+      full_name: address.full_name,
+      mobile_no: address.mobile_no,
+      phone_country: address.phone_country,
+      order_comment: "",
+    };
+    setFormData(shippingAddress);
+    setShowSavedAddresses(false);
+  };
+
+  const formatAddress = (address: UserAddress) => {
+    const parts = [
+      address.address,
+      address.address2,
+      address.city,
+      address.province,
+      address.country,
+      address.zip,
+    ].filter(Boolean);
+    return parts.join(", ");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +90,60 @@ const ShippingPreviewForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Saved Addresses Section */}
+      {addressesData?.data && addressesData.data.length > 0 && (
+        <div className="bg-muted/30 rounded-lg p-4 border border-border">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium text-foreground">Saved Addresses</h3>
+            <motion.button
+              type="button"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowSavedAddresses(!showSavedAddresses)}
+              className="text-primary text-sm font-medium flex items-center gap-1"
+            >
+              <i className={`${showSavedAddresses ? icons.chevronUp : icons.chevronDown} text-xs`} />
+              {showSavedAddresses ? "Hide" : "Show"} Saved Addresses
+            </motion.button>
+          </div>
+          
+          {showSavedAddresses && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-2"
+            >
+              {addressesData.data.map((address) => (
+                <motion.button
+                  key={address.id}
+                  type="button"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleAddressSelect(address)}
+                  className="w-full text-left p-3 bg-background rounded-lg border border-border hover:border-primary transition-colors"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="font-medium text-foreground text-sm mb-1">
+                        {address.full_name}
+                      </div>
+                      <div className="text-xs text-muted-foreground mb-1">
+                        {formatAddress(address)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {address.phone_country} {address.mobile_no} • {address.contact_person}
+                      </div>
+                    </div>
+                    <i className={`${icons.check} text-primary text-sm`} />
+                  </div>
+                </motion.button>
+              ))}
+            </motion.div>
+          )}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Full Name */}
         <div>
