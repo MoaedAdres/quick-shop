@@ -305,6 +305,7 @@ export interface CartProduct {
   product_id: string;
   sku_id?: string;
   sku_attr?: string;
+  image_url?: string;
 }
 
 export interface CartItem {
@@ -328,6 +329,7 @@ export interface AddToCartPayload {
     sku_id: string;
     sku_attr: string;
     price: number;
+    image_url?: string;
   };
   quantity: number;
 }

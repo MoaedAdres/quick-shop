@@ -230,7 +230,7 @@ export const useDeleteCartItem = () => {
   return useMutateData({
     mutationFn: (itemId: number) => backApis.removeFromCart(itemId),
     invalidateKeys: [{ queryKey: queryKeys.cart.all }],
-    displaySuccess: true,
+    displaySuccess: false,
   });
 };
 

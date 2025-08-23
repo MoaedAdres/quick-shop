@@ -95,6 +95,7 @@ const ProductDetails = () => {
         sku_id: selectedSku.sku_id,
         sku_attr: selectedSku.sku_attr,
         price: parseFloat(selectedSku.price),
+        image_url: productData?.data.media_info.images[0],
       },
       quantity,
     };
@@ -328,7 +329,19 @@ const ProductDetails = () => {
 
             {/* Quantity */}
             <div className="space-y-2">
-              <h3 className="font-medium text-foreground">Quantity</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium text-foreground">Quantity</h3>
+                {selectedSku && (
+                  <div className="text-right">
+                    <div className="text-sm text-muted-foreground">
+                      Total Price
+                    </div>
+                    <div className="text-lg font-bold text-primary">
+                      ${(parseFloat(selectedSku.price) * quantity).toFixed(2)}
+                    </div>
+                  </div>
+                )}
+              </div>{" "}
               <div className="flex items-center gap-3">
                 <motion.button
                   whileTap={{ scale: 0.9 }}
@@ -366,11 +379,7 @@ const ProductDetails = () => {
               ) : (
                 <>
                   <i className={icons.cart} />
-                  Add to Cart ($
-                  {(parseFloat(selectedSku?.price || "0") * quantity).toFixed(
-                    2
-                  )}
-                  )
+                  Add to Cart
                 </>
               )}
             </motion.button>
