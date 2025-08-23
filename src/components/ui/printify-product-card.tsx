@@ -78,13 +78,13 @@ const PrintifyProductCard = ({ product, onClick }: PrintifyProductCardProps) => 
           </span>
           
           {/* Add to Cart Button */}
-          <motion.button
+          {/* <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="w-8 h-8 bg-primary rounded-full flex items-center justify-center"
           >
             <i className={`${icons.cart} text-sm text-primary-foreground`} />
-          </motion.button>
+          </motion.button> */}
         </div>
 
         {/* Tags */}
