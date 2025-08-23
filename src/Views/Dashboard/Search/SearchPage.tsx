@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import {
@@ -18,6 +18,7 @@ const SearchPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
   const navigate = useNavigate();
+  const fetchingRef = useRef(false);
 
   // React Query hooks
   const categoriesQuery = useGetCategories();
@@ -63,44 +64,41 @@ const SearchPage = () => {
 
   // Intersection Observer for infinite scroll
   const { ref: lastElementRef, inView } = useInView({
-    threshold: 0,
-    rootMargin: "100px",
+    threshold: 0.1,
+    rootMargin: "50px",
+    triggerOnce: false,
   });
 
   // Trigger fetch when last element comes into view
   useEffect(() => {
-    if (inView) {
-      if (searchQuery.trim() && !selectedCategory) {
-        // Handle search infinite scroll
-        if (
-          searchProductsQuery.hasNextPage &&
-          !searchProductsQuery.isFetchingNextPage
-        ) {
-          searchProductsQuery.fetchNextPage();
-        }
-      } else if (selectedCategory) {
-        // Handle category infinite scroll
-        if (
-          categoryProductsQuery.hasNextPage &&
-          !categoryProductsQuery.isFetchingNextPage
-        ) {
-          categoryProductsQuery.fetchNextPage();
-        }
+    if (!inView || fetchingRef.current) return;
+
+    if (searchQuery.trim() && !selectedCategory) {
+      // Handle search infinite scroll
+      if (
+        searchProductsQuery.hasNextPage &&
+        !searchProductsQuery.isFetchingNextPage &&
+        !searchProductsQuery.isLoading
+      ) {
+        fetchingRef.current = true;
+        searchProductsQuery.fetchNextPage().finally(() => {
+          fetchingRef.current = false;
+        });
+      }
+    } else if (selectedCategory) {
+      // Handle category infinite scroll
+      if (
+        categoryProductsQuery.hasNextPage &&
+        !categoryProductsQuery.isFetchingNextPage &&
+        !categoryProductsQuery.isLoading
+      ) {
+        fetchingRef.current = true;
+        categoryProductsQuery.fetchNextPage().finally(() => {
+          fetchingRef.current = false;
+        });
       }
     }
-  }, [
-    inView,
-    searchQuery,
-    selectedCategory,
-    searchProductsQuery.hasNextPage,
-    searchProductsQuery.isFetchingNextPage,
-    searchProductsQuery.fetchNextPage,
-    categoryProductsQuery.hasNextPage,
-    categoryProductsQuery.isFetchingNextPage,
-    categoryProductsQuery.fetchNextPage,
-    categoryProductsQuery,
-    searchProductsQuery,
-  ]);
+  }, [inView]); // Only depend on inView to prevent multiple triggers
 
   // Determine which data to display
   const getDisplayData = () => {
