@@ -155,7 +155,10 @@ export const useGetPrintifyProductsInfinite = (params: {
   });
 };
 
-export const useSearchProducts = (params: SearchParams) => {
+export const useSearchProducts = (
+  params: SearchParams,
+  enabled: boolean = false
+) => {
   return useInfiniteData<SearchProductsResponse, unknown, Product[]>({
     queryKey: queryKeys.products.search(params),
     queryFn: async ({ pageParam }: { pageParam?: unknown }) => {
@@ -165,7 +168,7 @@ export const useSearchProducts = (params: SearchParams) => {
       });
       return response.data;
     },
-    enableCondition: !!params.search.trim() || !params.cat_id, // Run if search query or category ID exists
+    enableCondition: enabled,
     selectFn: (data) => data.pages.flatMap((page) => page.data.products),
     initialPageParam: 1,
     getNextPageParam: (lastPage: SearchProductsResponse) => {
