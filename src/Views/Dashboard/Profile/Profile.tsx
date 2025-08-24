@@ -1,4 +1,4 @@
-import React, { useState, memo } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { mockUser } from "@/data/mock-data";
@@ -10,6 +10,7 @@ import AddressManagement from "@/components/ui/address-management";
 import {
   useGetOrders,
   useSetUserCountry,
+  useGetUserProfile,
 } from "@/Api/queriesAndMutations";
 import CountrySelector from "@/components/ui/country-selector";
 import type { AliExpressCountry } from "@/Constants/aliexpressCountries";
@@ -18,8 +19,19 @@ import { toast } from "sonner";
 
 const Profile = () => {
   const { t } = useTranslation();
-  const { user, profile, logout, updateCountry } = useAuthStore();
+  const { user, profile, userCountry, logout, setUserCountry, updateProfile } =
+    useAuthStore();
   const navigate = useNavigate();
+
+  // Fetch profile data using the hook
+  const { data: profileData } = useGetUserProfile();
+
+  // Update auth store when profile data is fetched
+  useEffect(() => {
+    if (profileData?.data && !profile) {
+      updateProfile(profileData.data);
+    }
+  }, [profileData, profile, updateProfile]);
 
   // Fetch recent orders (limit to 3 most recent)
   const { data: orders, isLoading: ordersLoading } = useGetOrders();
@@ -35,8 +47,7 @@ const Profile = () => {
     : user
     ? `${user.first_name} ${user.last_name || ""}`.trim()
     : mockUser.name;
-  const avatar =
-    profile?.picture_url || user?.photo_url || mockUser.avatar;
+  const avatar = profile?.picture_url || user?.photo_url || mockUser.avatar;
   const email = user?.username ? `@${user.username}` : mockUser.email;
 
   const handleLogout = () => {
@@ -51,10 +62,10 @@ const Profile = () => {
 
     try {
       await setUserCountryMutation.mutateAsync({ country: selectedCountry });
-      
-      // Use the optimized country update function
-      updateCountry(selectedCountry);
-      
+
+      // Update only the country state separately
+      setUserCountry(selectedCountry);
+
       toast.success(
         "Country updated successfully! This will improve your browsing experience."
       );
@@ -68,12 +79,12 @@ const Profile = () => {
     setSelectedCountry(country.code);
   };
 
-  // Set selected country when profile loads
+  // Set selected country when userCountry loads
   React.useEffect(() => {
-    if (profile?.country) {
-      setSelectedCountry(profile.country);
+    if (userCountry) {
+      setSelectedCountry(userCountry);
     }
-  }, [profile]);
+  }, [userCountry]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -193,7 +204,7 @@ const Profile = () => {
 
             <div className="space-y-4">
               {/* Current Country Display */}
-              {profile?.country && (
+              {userCountry && (
                 <div className="bg-muted/50 rounded-lg p-3 mb-4">
                   <div className="flex items-center gap-2">
                     <i
@@ -203,8 +214,7 @@ const Profile = () => {
                       Current Country:
                     </span>
                     <span className="text-sm font-medium text-foreground">
-                      {getCountryByCode(profile.country)?.name ||
-                        profile.country}
+                      {getCountryByCode(userCountry)?.name || userCountry}
                     </span>
                   </div>
                 </div>
@@ -217,12 +227,12 @@ const Profile = () => {
                 <CountrySelector
                   selectedCountry={selectedCountry}
                   onCountrySelect={handleCountrySelect}
-                  placeholder="Choose your country for better product recommendations"
+                  placeholder="Choose your country"
                 />
                 <p className="text-xs text-muted-foreground mt-2">
                   Setting your country helps us provide better product
-                  recommendations, shipping estimates, and localized content
-                  for AliExpress products.
+                  recommendations, shipping estimates, and localized content for
+                  AliExpress products.
                 </p>
               </div>
 
@@ -230,9 +240,7 @@ const Profile = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleCountryUpdate}
-                disabled={
-                  setUserCountryMutation.isPending || !selectedCountry
-                }
+                disabled={setUserCountryMutation.isPending || !selectedCountry}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
               >
                 {setUserCountryMutation.isPending ? (
@@ -468,4 +476,4 @@ const Profile = () => {
   );
 };
 
-export default memo(Profile);
+export default Profile;

@@ -1,5 +1,7 @@
+import { useGetUserProfile } from "@/Api/queriesAndMutations";
 import BottomNavbar from "@/Layouts/DashboardLayout.tsx/BottomNavbar";
 import RFlex from "@/RComponents/RFlex";
+import { useAuthStore } from "@/Stores/auth.store";
 import { createContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router-dom";
@@ -41,7 +43,17 @@ const DashboardLayout = () => {
   };
 
   const { i18n } = useTranslation();
-  
+  const { profile, updateProfile } = useAuthStore();
+
+  // Use the hook to fetch profile data
+  const { data: profileData } = useGetUserProfile();
+
+  // Update auth store when profile data is fetched
+  useEffect(() => {
+    if (profileData?.data && !profile) {
+      updateProfile(profileData.data);
+    }
+  }, [profileData, profile, updateProfile]);
   useEffect(() => {
     const language = localStorage.getItem("lang");
     if (language) {
@@ -54,10 +66,7 @@ const DashboardLayout = () => {
     <DashboardContext.Provider
       value={{ theme, toggleTheme, activeLanguage, switchLanguage }}
     >
-      <RFlex 
-        id="dashboard container" 
-        className="flex-col h-screen w-full"
-      >
+      <RFlex id="dashboard container" className="flex-col h-screen w-full">
         <div className="flex-1 overflow-hidden">
           <Outlet />
         </div>
