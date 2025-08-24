@@ -96,13 +96,22 @@ const ShippingPreviewForm = ({
   };
 
   const handleCountrySelect = (country: AliExpressCountry) => {
-    setFormData((prev) => ({ ...prev, country: country.name }));
+    setFormData((prev) => ({ 
+      ...prev, 
+      country: country.name,
+      phone_country: country.phone_code || "+1" // Auto-populate phone code
+    }));
   };
 
   const getCountryCodeByName = (countryName: string): string | undefined => {
     const country = ALIEXPRESS_COUNTRIES.find(c => c.name === countryName);
     return country?.code;
   };
+
+  // const getPhoneCodeByCountryName = (countryName: string): string => {
+  //   const country = ALIEXPRESS_COUNTRIES.find(c => c.name === countryName);
+  //   return country?.phone_code || "+1";
+  // };
 
   return (
     <>
@@ -190,42 +199,19 @@ const ShippingPreviewForm = ({
             />
           </div>
 
-          {/* Phone */}
-          <div className="flex gap-2">
-            <div className="w-24">
-              <label
-                htmlFor="phone_country"
-                className="block text-sm font-medium text-foreground mb-1"
-              >
-                Code
-              </label>
-              <input
-                type="text"
-                id="phone_country"
-                name="phone_country"
-                value={formData.phone_country}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 rounded-md border border-border bg-background text-foreground"
-              />
-            </div>
-            <div className="flex-1">
-              <label
-                htmlFor="mobile_no"
-                className="block text-sm font-medium text-foreground mb-1"
-              >
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                id="mobile_no"
-                name="mobile_no"
-                value={formData.mobile_no}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 rounded-md border border-border bg-background text-foreground"
-              />
-            </div>
+          {/* Country */}
+          <div className="md:col-span-2">
+            <label
+              htmlFor="country"
+              className="block text-sm font-medium text-foreground mb-1"
+            >
+              Country
+            </label>
+            <CountrySelector
+              selectedCountry={formData.country ? getCountryCodeByName(formData.country) : undefined}
+              onCountrySelect={handleCountrySelect}
+              placeholder="Select your country"
+            />
           </div>
 
           {/* Address */}
@@ -303,23 +289,8 @@ const ShippingPreviewForm = ({
             />
           </div>
 
-          {/* Country */}
-          <div>
-            <label
-              htmlFor="country"
-              className="block text-sm font-medium text-foreground mb-1"
-            >
-              Country
-            </label>
-            <CountrySelector
-              selectedCountry={formData.country ? getCountryCodeByName(formData.country) : undefined}
-              onCountrySelect={handleCountrySelect}
-              placeholder="Select your country"
-            />
-          </div>
-
           {/* ZIP/Postal Code */}
-          <div>
+          <div className="md:col-span-2">
             <label
               htmlFor="zip"
               className="block text-sm font-medium text-foreground mb-1"
@@ -335,6 +306,43 @@ const ShippingPreviewForm = ({
               required
               className="w-full px-3 py-2 rounded-md border border-border bg-background text-foreground"
             />
+          </div>
+
+          {/* Phone */}
+          <div className="flex gap-2 md:col-span-2">
+            <div className="w-28">
+              <label
+                htmlFor="phone_country"
+                className="block text-sm font-medium text-foreground mb-1"
+              >
+                Code
+              </label>
+              <input
+                type="text"
+                id="phone_country"
+                name="phone_country"
+                value={formData.phone_country}
+                disabled
+                className="w-full px-3 py-2 rounded-md border border-border bg-muted text-muted-foreground cursor-not-allowed text-center"
+              />
+            </div>
+            <div className="flex-1">
+              <label
+                htmlFor="mobile_no"
+                className="block text-sm font-medium text-foreground mb-1"
+              >
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                id="mobile_no"
+                name="mobile_no"
+                value={formData.mobile_no}
+                onChange={handleInputChange}
+                required
+                className="w-full px-3 py-2 rounded-md border border-border bg-background text-foreground"
+              />
+            </div>
           </div>
 
           {/* Order Comment */}

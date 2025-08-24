@@ -7,7 +7,11 @@ import { useAuthStore } from "@/Stores/auth.store";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import AddressManagement from "@/components/ui/address-management";
-import { useGetOrders, useSetUserCountry, useGetUserProfile } from "@/Api/queriesAndMutations";
+import {
+  useGetOrders,
+  useSetUserCountry,
+  useGetUserProfile,
+} from "@/Api/queriesAndMutations";
 import CountrySelector from "@/components/ui/country-selector";
 import type { AliExpressCountry } from "@/Constants/aliexpressCountries";
 import { getCountryByCode } from "@/Constants/aliexpressCountries";
@@ -15,7 +19,7 @@ import { toast } from "sonner";
 
 const Profile = () => {
   const { t } = useTranslation();
-  const { user, logout, isAdmin, setIsAdmin } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
   // Fetch recent orders (limit to 3 most recent)
@@ -35,7 +39,8 @@ const Profile = () => {
     : user
     ? `${user.first_name} ${user.last_name || ""}`.trim()
     : mockUser.name;
-  const avatar = userProfile?.data?.picture_url || user?.photo_url || mockUser.avatar;
+  const avatar =
+    userProfile?.data?.picture_url || user?.photo_url || mockUser.avatar;
   const email = user?.username ? `@${user.username}` : mockUser.email;
 
   const handleLogout = () => {
@@ -47,10 +52,12 @@ const Profile = () => {
       toast.error("Please select a country");
       return;
     }
-    
+
     try {
       await setUserCountryMutation.mutateAsync({ country: selectedCountry });
-      toast.success("Country updated successfully! This will improve your browsing experience.");
+      toast.success(
+        "Country updated successfully! This will improve your browsing experience."
+      );
     } catch (error) {
       console.error("Failed to update country:", error);
     }
@@ -169,71 +176,81 @@ const Profile = () => {
             </div> */}
           </motion.div>
 
-                     {/* Country Settings */}
-           <motion.div
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             transition={{ delay: 0.1 }}
-             className="bg-card rounded-lg p-6 border border-border"
-           >
-             <div className="flex items-center gap-3 mb-4">
-               <i className={`${icons.location} text-lg text-blue-600`} />
-               <h3 className="text-lg font-semibold text-foreground">
-                 Country Settings
-               </h3>
-             </div>
-             
-             {profileLoading ? (
-               <div className="flex items-center justify-center py-8">
-                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-               </div>
-             ) : (
-               <div className="space-y-4">
-                 {/* Current Country Display */}
-                 {userProfile?.data?.country && (
-                   <div className="bg-muted/50 rounded-lg p-3 mb-4">
-                     <div className="flex items-center gap-2">
-                       <i className={`${icons.location} text-sm text-muted-foreground`} />
-                       <span className="text-sm text-muted-foreground">Current Country:</span>
-                       <span className="text-sm font-medium text-foreground">
-                         {getCountryByCode(userProfile.data.country)?.name || userProfile.data.country}
-                       </span>
-                     </div>
-                   </div>
-                 )}
-                 
-                 <div>
-                   <label className="block text-sm font-medium text-foreground mb-2">
-                     Select Your Country
-                   </label>
-                   <CountrySelector
-                     selectedCountry={selectedCountry}
-                     onCountrySelect={handleCountrySelect}
-                     placeholder="Choose your country for better product recommendations"
-                   />
-                   <p className="text-xs text-muted-foreground mt-2">
-                     Setting your country helps us provide better product recommendations, 
-                     shipping estimates, and localized content for AliExpress products.
-                   </p>
-                 </div>
-                 
-                 <motion.button
-                   whileHover={{ scale: 1.02 }}
-                   whileTap={{ scale: 0.98 }}
-                   onClick={handleCountryUpdate}
-                   disabled={setUserCountryMutation.isPending || !selectedCountry}
-                   className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-                 >
-                   {setUserCountryMutation.isPending ? (
-                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                   ) : (
-                     <i className={`${icons.location} text-lg`} />
-                   )}
-                   {setUserCountryMutation.isPending ? "Updating..." : "Update Country Settings"}
-                 </motion.button>
-               </div>
-             )}
-           </motion.div>
+          {/* Country Settings */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-card rounded-lg p-6 border border-border"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <i className={`${icons.location} text-lg text-blue-600`} />
+              <h3 className="text-lg font-semibold text-foreground">
+                Country Settings
+              </h3>
+            </div>
+
+            {profileLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Current Country Display */}
+                {userProfile?.data?.country && (
+                  <div className="bg-muted/50 rounded-lg p-3 mb-4">
+                    <div className="flex items-center gap-2">
+                      <i
+                        className={`${icons.location} text-sm text-muted-foreground`}
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        Current Country:
+                      </span>
+                      <span className="text-sm font-medium text-foreground">
+                        {getCountryByCode(userProfile.data.country)?.name ||
+                          userProfile.data.country}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Select Your Country
+                  </label>
+                  <CountrySelector
+                    selectedCountry={selectedCountry}
+                    onCountrySelect={handleCountrySelect}
+                    placeholder="Choose your country for better product recommendations"
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Setting your country helps us provide better product
+                    recommendations, shipping estimates, and localized content
+                    for AliExpress products.
+                  </p>
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleCountryUpdate}
+                  disabled={
+                    setUserCountryMutation.isPending || !selectedCountry
+                  }
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  {setUserCountryMutation.isPending ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : (
+                    <i className={`${icons.location} text-lg`} />
+                  )}
+                  {setUserCountryMutation.isPending
+                    ? "Updating..."
+                    : "Update Country Settings"}
+                </motion.button>
+              </div>
+            )}
+          </motion.div>
 
           {/* Settings Menu */}
           {/* <motion.div

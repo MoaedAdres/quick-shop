@@ -28,7 +28,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
 
   const filteredCountries = useMemo(() => {
     if (!searchQuery.trim()) {
-      return ALIEXPRESS_COUNTRIES.slice(0, 50); // Show first 50 countries by default
+      return ALIEXPRESS_COUNTRIES
     }
     return searchCountries(searchQuery);
   }, [searchQuery]);

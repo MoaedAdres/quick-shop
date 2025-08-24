@@ -13,7 +13,7 @@ import type {
 import { toast } from "sonner";
 import CountrySelector from "./country-selector";
 import type { AliExpressCountry } from "@/Constants/aliexpressCountries";
-import { getCountryByCode, ALIEXPRESS_COUNTRIES } from "@/Constants/aliexpressCountries";
+import { ALIEXPRESS_COUNTRIES } from "@/Constants/aliexpressCountries";
 
 interface AddressManagementProps {
   onAddressSelect?: (address: ShippingAddress) => void;
@@ -41,14 +41,23 @@ const AddressManagement = ({
   });
 
   const handleCountrySelect = (country: AliExpressCountry) => {
-    setFormData((prev) => ({ ...prev, country: country.name }));
+    setFormData((prev) => ({
+      ...prev,
+      country: country.name,
+      phone_country: country.phone_code || "+1", // Auto-populate phone code
+    }));
   };
 
   const getCountryCodeByName = (countryName: string): string | undefined => {
     // Find the country by name and return its code
-    const country = ALIEXPRESS_COUNTRIES.find(c => c.name === countryName);
+    const country = ALIEXPRESS_COUNTRIES.find((c) => c.name === countryName);
     return country?.code;
   };
+
+  // const getPhoneCodeByCountryName = (countryName: string): string => {
+  //   const country = ALIEXPRESS_COUNTRIES.find(c => c.name === countryName);
+  //   return country?.phone_code || "+1";
+  // };
 
   const handleInputChange = (
     field: keyof CreateAddressPayload,
@@ -278,6 +287,22 @@ const AddressManagement = ({
                   </div>
                 </div>
 
+                {/* Country */}
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Country *
+                  </label>
+                  <CountrySelector
+                    selectedCountry={
+                      formData.country
+                        ? getCountryCodeByName(formData.country)
+                        : undefined
+                    }
+                    onCountrySelect={handleCountrySelect}
+                    placeholder="Select your country"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">
                     Address *
@@ -338,47 +363,33 @@ const AddressManagement = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Country *
-                    </label>
-                    <CountrySelector
-                      selectedCountry={formData.country ? getCountryCodeByName(formData.country) : undefined}
-                      onCountrySelect={handleCountrySelect}
-                      placeholder="Select your country"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      ZIP/Postal Code *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.zip}
-                      onChange={(e) => handleInputChange("zip", e.target.value)}
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    ZIP/Postal Code *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.zip}
+                    onChange={(e) => handleInputChange("zip", e.target.value)}
+                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
+                <div className="flex gap-4">
+                  <div className="w-32">
                     <label className="block text-sm font-medium text-foreground mb-1">
-                      Phone Country Code *
+                      Phone Code *
                     </label>
                     <input
                       type="text"
                       required
                       value={formData.phone_country}
-                      onChange={(e) =>
-                        handleInputChange("phone_country", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      disabled
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-muted text-muted-foreground cursor-not-allowed text-center"
                     />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Mobile Number *
                     </label>

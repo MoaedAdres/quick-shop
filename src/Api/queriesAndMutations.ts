@@ -589,6 +589,6 @@ export const useSetUserCountry = () => {
       return response.data;
     },
     invalidateKeys: [{ queryKey: queryKeys.user.profile }],
-    displaySuccess: true,
+    displaySuccess: false,
   });
 };
