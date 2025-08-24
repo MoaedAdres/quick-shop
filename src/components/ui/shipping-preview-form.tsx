@@ -229,6 +229,44 @@ const ShippingPreviewForm = ({
             />
           </div>
 
+          {/* Province/State */}
+          <div>
+            <label
+              htmlFor="province"
+              className="block text-sm font-medium text-foreground mb-1"
+            >
+              Province/State
+            </label>
+            <input
+              type="text"
+              id="province"
+              name="province"
+              value={formData.province}
+              onChange={handleInputChange}
+              required
+              className="w-full px-3 py-2 rounded-md border border-border bg-background text-foreground"
+            />
+          </div>
+
+          {/* City */}
+          <div>
+            <label
+              htmlFor="city"
+              className="block text-sm font-medium text-foreground mb-1"
+            >
+              City
+            </label>
+            <input
+              type="text"
+              id="city"
+              name="city"
+              value={formData.city}
+              onChange={handleInputChange}
+              required
+              className="w-full px-3 py-2 rounded-md border border-border bg-background text-foreground"
+            />
+          </div>
+
           {/* Address */}
           <div className="md:col-span-2">
             <label
@@ -262,44 +300,6 @@ const ShippingPreviewForm = ({
               name="address2"
               value={formData.address2}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 rounded-md border border-border bg-background text-foreground"
-            />
-          </div>
-
-          {/* City */}
-          <div>
-            <label
-              htmlFor="city"
-              className="block text-sm font-medium text-foreground mb-1"
-            >
-              City
-            </label>
-            <input
-              type="text"
-              id="city"
-              name="city"
-              value={formData.city}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 rounded-md border border-border bg-background text-foreground"
-            />
-          </div>
-
-          {/* Province/State */}
-          <div>
-            <label
-              htmlFor="province"
-              className="block text-sm font-medium text-foreground mb-1"
-            >
-              Province/State
-            </label>
-            <input
-              type="text"
-              id="province"
-              name="province"
-              value={formData.province}
-              onChange={handleInputChange}
-              required
               className="w-full px-3 py-2 rounded-md border border-border bg-background text-foreground"
             />
           </div>

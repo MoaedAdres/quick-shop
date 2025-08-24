@@ -303,6 +303,37 @@ const AddressManagement = ({
                   />
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Province/State *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.province}
+                      onChange={(e) =>
+                        handleInputChange("province", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      City *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.city}
+                      onChange={(e) =>
+                        handleInputChange("city", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">
                     Address *
@@ -330,37 +361,6 @@ const AddressManagement = ({
                     }
                     className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      City *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.city}
-                      onChange={(e) =>
-                        handleInputChange("city", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Province/State *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.province}
-                      onChange={(e) =>
-                        handleInputChange("province", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
                 </div>
 
                 <div>
