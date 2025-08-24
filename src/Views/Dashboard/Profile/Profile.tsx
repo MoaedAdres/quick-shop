@@ -281,7 +281,7 @@ const Profile = () => {
           </motion.div>
 
           {/* Admin Toggle (For Testing) */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
@@ -330,7 +330,7 @@ const Profile = () => {
                 </p>
               </motion.div>
             )}
-          </motion.div>
+          </motion.div> */}
 
           {/* Logout Button */}
           <motion.button

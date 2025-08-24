@@ -26,7 +26,7 @@ const initState: AuthState = {
   isTelegramApp: false,
   isAuthenticated: false,
   isLoading: false,
-  isAdmin: true,
+  isAdmin: false,
   login: async () => {},
   logout: () => {},
   setIsAdmin: () => {},
