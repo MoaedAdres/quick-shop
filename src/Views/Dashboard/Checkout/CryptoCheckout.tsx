@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Wallet } from "lucide-react";
 import { icons } from "@/Constants/icons";
-import { useGetCart, useCreateCryptoOrder } from "@/Api/queriesAndMutations";
+import { useCreateCryptoOrder } from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import CryptoPayment from "@/components/ui/crypto-payment";
 import CryptoCurrencySelector from "@/components/ui/crypto-currency-selector";
@@ -17,19 +17,23 @@ import { toast } from "sonner";
 
 const CryptoCheckout = () => {
   const navigate = useNavigate();
-  const { data: cartData, isLoading, error } = useGetCart();
-  const [shippingPreview, setShippingPreview] = useState<ShippingPreviewSuccess | null>(null);
-  const [shippingAddress, setShippingAddress] = useState<ShippingAddress | null>(null);
-  const [selectedCryptoCurrency, setSelectedCryptoCurrency] = useState<SupportedCurrency | null>(null);
-  const [cryptoPaymentData, setCryptoPaymentData] = useState<CryptoPaymentResponse['data'] | null>(null);
+  const [shippingPreview, setShippingPreview] =
+    useState<ShippingPreviewSuccess | null>(null);
+  const [shippingAddress, setShippingAddress] =
+    useState<ShippingAddress | null>(null);
+  const [selectedCryptoCurrency, setSelectedCryptoCurrency] =
+    useState<SupportedCurrency | null>(null);
+  const [cryptoPaymentData, setCryptoPaymentData] = useState<
+    CryptoPaymentResponse["data"] | null
+  >(null);
   const [orderIds, setOrderIds] = useState<string[]>([]);
   const createCryptoOrderMutation = useCreateCryptoOrder();
 
   useEffect(() => {
     // Load data from localStorage
-    const storedPreview = localStorage.getItem('checkout_shipping_preview');
-    const storedAddress = localStorage.getItem('checkout_shipping_address');
-    
+    const storedPreview = localStorage.getItem("checkout_shipping_preview");
+    const storedAddress = localStorage.getItem("checkout_shipping_address");
+
     if (storedPreview && storedAddress) {
       setShippingPreview(JSON.parse(storedPreview));
       setShippingAddress(JSON.parse(storedAddress));
@@ -60,10 +64,10 @@ const CryptoCheckout = () => {
 
   const handlePaymentComplete = () => {
     // Clear checkout data from localStorage
-    localStorage.removeItem('checkout_shipping_preview');
-    localStorage.removeItem('checkout_shipping_address');
-    localStorage.removeItem('checkout_payment_method');
-    
+    localStorage.removeItem("checkout_shipping_preview");
+    localStorage.removeItem("checkout_shipping_address");
+    localStorage.removeItem("checkout_payment_method");
+
     toast.success(`Payment successful! Your order has been placed.`);
     navigate("/dashboard/orders");
   };
@@ -72,51 +76,18 @@ const CryptoCheckout = () => {
     toast.error(error);
   };
 
-  if (isLoading) {
-    return (
-      <RFlex className="flex-col h-full pb-20">
-        <div className="bg-card border-b border-border p-4">
-          <h1 className="text-xl font-semibold text-foreground">Cryptocurrency Payment</h1>
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <i className={`${icons.spinner} text-2xl text-primary animate-spin`} />
-        </div>
-      </RFlex>
-    );
-  }
-
-  if (error || !cartData || !cartData.items || cartData.items.length === 0) {
-    return (
-      <RFlex className="flex-col h-full pb-20">
-        <div className="bg-card border-b border-border p-4">
-          <h1 className="text-xl font-semibold text-foreground">Cryptocurrency Payment</h1>
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <i className={`${icons.error} text-3xl text-red-500 mb-2`} />
-            <p className="text-muted-foreground">No items in cart</p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => navigate("/dashboard/cart")}
-              className="mt-4 bg-primary text-primary-foreground px-4 py-2 rounded-lg"
-            >
-              Back to Cart
-            </motion.button>
-          </div>
-        </div>
-      </RFlex>
-    );
-  }
-
   if (!shippingPreview || !shippingAddress) {
     return (
       <RFlex className="flex-col h-full pb-20">
         <div className="bg-card border-b border-border p-4">
-          <h1 className="text-xl font-semibold text-foreground">Cryptocurrency Payment</h1>
+          <h1 className="text-xl font-semibold text-foreground">
+            Cryptocurrency Payment
+          </h1>
         </div>
         <div className="flex-1 flex items-center justify-center">
-          <i className={`${icons.spinner} text-2xl text-primary animate-spin`} />
+          <i
+            className={`${icons.spinner} text-2xl text-primary animate-spin`}
+          />
         </div>
       </RFlex>
     );
@@ -135,7 +106,9 @@ const CryptoCheckout = () => {
           >
             <i className={`${icons.arrowLeft} text-muted-foreground`} />
           </motion.button>
-          <h1 className="text-xl font-semibold text-foreground">Cryptocurrency Payment</h1>
+          <h1 className="text-xl font-semibold text-foreground">
+            Cryptocurrency Payment
+          </h1>
         </div>
       </div>
 
@@ -161,7 +134,7 @@ const CryptoCheckout = () => {
                     onCurrencySelect={setSelectedCryptoCurrency}
                   />
                 </div>
-                
+
                 {selectedCryptoCurrency && (
                   <motion.button
                     initial={{ opacity: 0, y: 10 }}
@@ -177,7 +150,9 @@ const CryptoCheckout = () => {
                     ) : (
                       <Wallet className="w-5 h-5" />
                     )}
-                    {createCryptoOrderMutation.isPending ? "Creating Payment..." : "Create Crypto Payment"}
+                    {createCryptoOrderMutation.isPending
+                      ? "Creating Payment..."
+                      : "Create Crypto Payment"}
                   </motion.button>
                 )}
 
@@ -195,8 +170,12 @@ const CryptoCheckout = () => {
                         </span>
                       </div>
                       <div>
-                        <div className="font-medium text-foreground">{selectedCryptoCurrency.name}</div>
-                        <div className="text-sm text-muted-foreground">{selectedCryptoCurrency.id.toUpperCase()}</div>
+                        <div className="font-medium text-foreground">
+                          {selectedCryptoCurrency.name}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {selectedCryptoCurrency.id.toUpperCase()}
+                        </div>
                       </div>
                     </div>
                   </motion.div>
