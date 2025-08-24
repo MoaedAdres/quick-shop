@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { mockUser } from "@/data/mock-data";
@@ -19,13 +19,13 @@ import { toast } from "sonner";
 
 const Profile = () => {
   const { t } = useTranslation();
-  const { user, profile, userCountry, logout, setUserCountry, updateProfile } =
+  const { user, profile, logout, setUserCountry, updateProfile } =
     useAuthStore();
   const navigate = useNavigate();
 
   // Fetch profile data using the hook
   const { data: profileData } = useGetUserProfile();
-
+  const userCountry = profile?.country;
   // Update auth store when profile data is fetched
   useEffect(() => {
     if (profileData?.data && !profile) {
@@ -38,7 +38,9 @@ const Profile = () => {
   const recentOrders = orders?.slice(0, 3) || [];
 
   // Country selection state
-  const [selectedCountry, setSelectedCountry] = useState<string>("");
+  const [selectedCountry, setSelectedCountry] = useState<string>(
+    userCountry ?? ""
+  );
   const setUserCountryMutation = useSetUserCountry();
 
   // Use profile data if available, fallback to Telegram user data
@@ -78,13 +80,6 @@ const Profile = () => {
   const handleCountrySelect = (country: AliExpressCountry) => {
     setSelectedCountry(country.code);
   };
-
-  // Set selected country when userCountry loads
-  React.useEffect(() => {
-    if (userCountry) {
-      setSelectedCountry(userCountry);
-    }
-  }, [userCountry]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
