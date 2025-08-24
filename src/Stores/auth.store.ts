@@ -15,6 +15,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   isAdmin: boolean;
+  profileFetched: boolean; // Track if profile has been fetched
   login: () => Promise<void>;
   logout: () => void;
   setIsAdmin: (isAdmin: boolean) => void;
@@ -31,6 +32,7 @@ const initState: AuthState = {
   isAuthenticated: false,
   isLoading: false,
   isAdmin: false,
+  profileFetched: false,
   login: async () => {},
   logout: () => {},
   setIsAdmin: () => {},
@@ -134,6 +136,7 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             isLoading: false,
             isAdmin: false,
+            profileFetched: false,
           });
           if (get().isTelegramApp) {
             telegramService.close();
@@ -152,12 +155,14 @@ export const useAuthStore = create<AuthState>()(
             set({
               profile: profileData.data,
               isAdmin: profileData.data.is_admin || false,
+              profileFetched: true,
             });
             
             console.log('Profile fetched successfully:', profileData);
           } catch (error) {
             console.error('Failed to fetch profile:', error);
-            // Don't set isAdmin to false on error, keep existing state
+            // Set profileFetched to true even on error to prevent infinite retries
+            set({ profileFetched: true });
           }
         },
 
@@ -180,6 +185,7 @@ export const useAuthStore = create<AuthState>()(
         isTelegramApp: state.isTelegramApp,
         isAuthenticated: state.isAuthenticated,
         isAdmin: state.isAdmin,
+        profileFetched: state.profileFetched,
       }),
     }
   )
