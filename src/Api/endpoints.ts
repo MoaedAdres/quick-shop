@@ -78,6 +78,9 @@ export const backApis = {
   getUserAddresses: () => get("users/addresses"),
   createAddress: (payload: CreateAddressPayload) => post("users/addresses", payload),
 
+  // ------------------------------ User Settings ---------------------------------------------
+  setUserCountry: (payload: { country: string }) => post("users/country", payload),
+
   // ------------------------------ Orders ---------------------------------------------
   getOrders: (status?: string) => get("orders", { params: { status } }),
   getOrderById: (orderId: number) => get(`orders/${orderId}`),

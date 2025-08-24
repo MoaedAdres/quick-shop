@@ -566,3 +566,13 @@ export const useCreateAddress = () => {
     displaySuccess: false,
   });
 };
+
+export const useSetUserCountry = () => {
+  return useMutateData<{ message: string }, { country: string }>({
+    mutationFn: async (payload) => {
+      const response = await backApis.setUserCountry(payload);
+      return response.data;
+    },
+    displaySuccess: false,
+  });
+};

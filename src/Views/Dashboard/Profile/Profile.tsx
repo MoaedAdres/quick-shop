@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { mockUser } from "@/data/mock-data";
@@ -6,7 +7,10 @@ import { useAuthStore } from "@/Stores/auth.store";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import AddressManagement from "@/components/ui/address-management";
-import { useGetOrders } from "@/Api/queriesAndMutations";
+import { useGetOrders, useSetUserCountry } from "@/Api/queriesAndMutations";
+import CountrySelector from "@/components/ui/country-selector";
+import type { AliExpressCountry } from "@/Constants/aliexpressCountries";
+import { toast } from "sonner";
 
 const Profile = () => {
   const { t } = useTranslation();
@@ -17,6 +21,10 @@ const Profile = () => {
   const { data: orders, isLoading: ordersLoading } = useGetOrders();
   const recentOrders = orders?.slice(0, 3) || [];
 
+  // Country selection state
+  const [selectedCountry, setSelectedCountry] = useState<string>("");
+  const setUserCountryMutation = useSetUserCountry();
+
   // Use Telegram user data if available
   const displayName = user
     ? `${user.first_name} ${user.last_name || ""}`.trim()
@@ -26,6 +34,24 @@ const Profile = () => {
 
   const handleLogout = () => {
     logout();
+  };
+
+  const handleCountryUpdate = async () => {
+    if (!selectedCountry) {
+      toast.error("Please select a country");
+      return;
+    }
+    
+    try {
+      await setUserCountryMutation.mutateAsync({ country: selectedCountry });
+      toast.success("Country updated successfully! This will improve your browsing experience.");
+    } catch (error) {
+      console.error("Failed to update country:", error);
+    }
+  };
+
+  const handleCountrySelect = (country: AliExpressCountry) => {
+    setSelectedCountry(country.code);
   };
 
   const formatDate = (dateString: string) => {
@@ -128,6 +154,53 @@ const Profile = () => {
                 <div className="text-xs text-muted-foreground">Rating</div>
               </div>
             </div> */}
+          </motion.div>
+
+          {/* Country Settings */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-card rounded-lg p-6 border border-border"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <i className={`${icons.location} text-lg text-blue-600`} />
+              <h3 className="text-lg font-semibold text-foreground">
+                Country Settings
+              </h3>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Select Your Country
+                </label>
+                <CountrySelector
+                  selectedCountry={selectedCountry}
+                  onCountrySelect={handleCountrySelect}
+                  placeholder="Choose your country for better product recommendations"
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Setting your country helps us provide better product recommendations, 
+                  shipping estimates, and localized content for AliExpress products.
+                </p>
+              </div>
+              
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleCountryUpdate}
+                disabled={setUserCountryMutation.isPending || !selectedCountry}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+              >
+                {setUserCountryMutation.isPending ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : (
+                  <i className={`${icons.location} text-lg`} />
+                )}
+                {setUserCountryMutation.isPending ? "Updating..." : "Update Country Settings"}
+              </motion.button>
+            </div>
           </motion.div>
 
           {/* Settings Menu */}

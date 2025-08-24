@@ -11,6 +11,9 @@ import type {
   ShippingPreviewError,
   UserAddress,
 } from "@/Types/types";
+import CountrySelector from "./country-selector";
+import type { AliExpressCountry } from "@/Constants/aliexpressCountries";
+import { ALIEXPRESS_COUNTRIES } from "@/Constants/aliexpressCountries";
 
 interface ShippingPreviewFormProps {
   onSuccess?: (data: ShippingPreviewSuccess) => void;
@@ -90,6 +93,15 @@ const ShippingPreviewForm = ({
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCountrySelect = (country: AliExpressCountry) => {
+    setFormData((prev) => ({ ...prev, country: country.name }));
+  };
+
+  const getCountryCodeByName = (countryName: string): string | undefined => {
+    const country = ALIEXPRESS_COUNTRIES.find(c => c.name === countryName);
+    return country?.code;
   };
 
   return (
@@ -299,14 +311,10 @@ const ShippingPreviewForm = ({
             >
               Country
             </label>
-            <input
-              type="text"
-              id="country"
-              name="country"
-              value={formData.country}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 rounded-md border border-border bg-background text-foreground"
+            <CountrySelector
+              selectedCountry={formData.country ? getCountryCodeByName(formData.country) : undefined}
+              onCountrySelect={handleCountrySelect}
+              placeholder="Select your country"
             />
           </div>
 

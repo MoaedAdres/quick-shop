@@ -11,6 +11,9 @@ import type {
   ShippingAddress,
 } from "@/Types/types";
 import { toast } from "sonner";
+import CountrySelector from "./country-selector";
+import type { AliExpressCountry } from "@/Constants/aliexpressCountries";
+import { getCountryByCode, ALIEXPRESS_COUNTRIES } from "@/Constants/aliexpressCountries";
 
 interface AddressManagementProps {
   onAddressSelect?: (address: ShippingAddress) => void;
@@ -36,6 +39,16 @@ const AddressManagement = ({
     mobile_no: "",
     phone_country: "+1",
   });
+
+  const handleCountrySelect = (country: AliExpressCountry) => {
+    setFormData((prev) => ({ ...prev, country: country.name }));
+  };
+
+  const getCountryCodeByName = (countryName: string): string | undefined => {
+    // Find the country by name and return its code
+    const country = ALIEXPRESS_COUNTRIES.find(c => c.name === countryName);
+    return country?.code;
+  };
 
   const handleInputChange = (
     field: keyof CreateAddressPayload,
@@ -330,14 +343,10 @@ const AddressManagement = ({
                     <label className="block text-sm font-medium text-foreground mb-1">
                       Country *
                     </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.country}
-                      onChange={(e) =>
-                        handleInputChange("country", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    <CountrySelector
+                      selectedCountry={formData.country ? getCountryCodeByName(formData.country) : undefined}
+                      onCountrySelect={handleCountrySelect}
+                      placeholder="Select your country"
                     />
                   </div>
                   <div>
