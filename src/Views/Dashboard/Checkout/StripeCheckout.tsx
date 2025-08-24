@@ -50,7 +50,7 @@ const StripeCheckout = () => {
         setStripeClientSecret(clientSecret);
         setOrderIds(JSON.parse(orderIdsParam));
         setIsPaymentSessionRestored(true);
-        
+
         // Restore stored totals if available
         if (totalsParam) {
           setStoredTotals(JSON.parse(totalsParam));
@@ -128,20 +128,12 @@ const StripeCheckout = () => {
     if (storedTotals) {
       return storedTotals;
     }
-    
+
     // Otherwise calculate from current cart data
     return calculateCartTotals();
   };
 
   const handlePaymentSuccess = () => {
-    // Clear all checkout data from localStorage
-    localStorage.removeItem("checkout_shipping_preview");
-    localStorage.removeItem("checkout_shipping_address");
-    localStorage.removeItem("checkout_payment_method");
-
-    // Clear query parameters
-    setSearchParams({});
-
     toast.success(
       `Payment successful! Your order${
         orderIds.length > 1 ? "s" : ""

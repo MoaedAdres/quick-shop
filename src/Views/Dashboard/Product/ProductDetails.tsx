@@ -74,7 +74,7 @@ const ProductDetails = () => {
 
   const handleQuantityChange = (delta: number) => {
     const newQuantity = quantity + delta;
-    if (newQuantity >= 1 && newQuantity <= 100) {
+    if (newQuantity >= 1 && newQuantity <= 10) {
       setQuantity(newQuantity);
     }
   };
@@ -297,7 +297,7 @@ const ProductDetails = () => {
                         price: sku.offer_sale_price,
                       })
                     }
-                    className={`p-3 rounded-lg border text-sm ${
+                    className={`p-3 rounded-lg border text-sm w-fit ${
                       selectedSku?.sku_id === sku.sku_id
                         ? "border-primary bg-primary/10 text-primary"
                         : "border-border text-muted-foreground"

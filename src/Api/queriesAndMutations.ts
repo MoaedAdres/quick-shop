@@ -296,6 +296,10 @@ export const useCreateStripeOrder = () => {
       const response = await backApis.createStripeOrder(payload);
       return response.data;
     },
+    invalidateKeys: [
+      { queryKey: queryKeys.cart.all },
+      { queryKey: queryKeys.orders.list() },
+    ],
     displaySuccess: false,
   });
 };
@@ -371,7 +375,7 @@ export const useShippingPreview = () => {
       const response = await backApis.shippingPreview(address);
       return response?.data;
     },
-    dontShowError:true
+    dontShowError: true,
   });
 };
 
@@ -501,6 +505,10 @@ export const useCreateCryptoOrder = () => {
       const response = await backApis.createCryptoOrder(payload);
       return response.data;
     },
+    invalidateKeys: [
+      { queryKey: queryKeys.cart.all },
+      { queryKey: queryKeys.orders.list() },
+    ],
     displaySuccess: false, // We'll handle success display manually
   });
 };

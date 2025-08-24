@@ -321,7 +321,7 @@ const Shipping = () => {
                 onClick={() => setShowErrorModal(false)}
                 className="w-full py-3 rounded-lg font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
-                Continue Shopping
+                Cancel
               </button>
             </div>
           </motion.div>
