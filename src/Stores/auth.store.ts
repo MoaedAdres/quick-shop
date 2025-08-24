@@ -11,6 +11,7 @@ interface AuthState {
   refreshToken: string | null;
   user: TelegramUser | null;
   profile: UserProfileResponse["data"] | null;
+  userCountry: string | null; // Separate country state
   isTelegramApp: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -18,8 +19,8 @@ interface AuthState {
   login: () => Promise<void>;
   logout: () => void;
   setIsAdmin: (isAdmin: boolean) => void;
-  fetchProfile: () => Promise<void>;
   updateProfile: (updatedProfile: UserProfileResponse["data"]) => void;
+  setUserCountry: (country: string) => void;
 }
 
 const initState: AuthState = {
@@ -27,6 +28,7 @@ const initState: AuthState = {
   refreshToken: null,
   user: null,
   profile: null,
+  userCountry: null,
   isTelegramApp: false,
   isAuthenticated: false,
   isLoading: false,
@@ -34,8 +36,8 @@ const initState: AuthState = {
   login: async () => {},
   logout: () => {},
   setIsAdmin: () => {},
-  fetchProfile: async () => {},
   updateProfile: () => {},
+  setUserCountry: () => {},
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -131,6 +133,7 @@ export const useAuthStore = create<AuthState>()(
             refreshToken: null,
             user: null,
             profile: null,
+            userCountry: null,
             isAuthenticated: false,
             isLoading: false,
             isAdmin: false,
@@ -144,28 +147,16 @@ export const useAuthStore = create<AuthState>()(
           set({ isAdmin });
         },
 
-        fetchProfile: async () => {
-          try {
-            const response = await backApis.getUserProfile();
-            const profileData = response.data;
-            
-            set({
-              profile: profileData.data,
-              isAdmin: profileData.data.is_admin || false,
-            });
-            
-            console.log('Profile fetched successfully:', profileData);
-          } catch (error) {
-            console.error('Failed to fetch profile:', error);
-            // Don't set isAdmin to false on error, keep existing state
-          }
-        },
-
         updateProfile: (updatedProfile: UserProfileResponse["data"]) => {
           set({
             profile: updatedProfile,
+            userCountry: updatedProfile.country || null, // Update country separately
             isAdmin: updatedProfile.is_admin || false,
           });
+        },
+
+        setUserCountry: (country: string) => {
+          set({ userCountry: country });
         },
       }),
       { name: "auth-devtools" }
@@ -177,6 +168,7 @@ export const useAuthStore = create<AuthState>()(
         token: state.token,
         refreshToken: state.refreshToken,
         profile: state.profile,
+        userCountry: state.userCountry,
         isTelegramApp: state.isTelegramApp,
         isAuthenticated: state.isAuthenticated,
         isAdmin: state.isAdmin,
