@@ -32,6 +32,19 @@ const CryptoCheckout = () => {
   >(null);
   const [orderIds, setOrderIds] = useState<string[]>([]);
   const [isPollingOrder, setIsPollingOrder] = useState(false);
+  const [productError, setProductError] = useState<{
+    message: string;
+    data: {
+      id: number;
+      name: string;
+      price: string;
+      supplier: { name: string; code: string };
+      product_id: string;
+      sku_id: string;
+      sku_attr: string;
+      image_url: string;
+    };
+  } | null>(null);
   const createCryptoOrderMutation = useCreateCryptoOrder();
   console.log("orderIds", orderIds);
   // Get order details with automatic polling when we have order IDs and are polling
@@ -115,9 +128,16 @@ const CryptoCheckout = () => {
       });
 
       toast.success("Crypto payment session created successfully!");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to create crypto order:", error);
-      toast.error("Failed to initialize crypto payment. Please try again.");
+      
+      // Handle 406 error with product information
+      if (error?.status === 406 && error?.productInfo) {
+        setProductError(error.productInfo);
+        toast.error("Product availability issue detected");
+      } else {
+        toast.error("Failed to initialize crypto payment. Please try again.");
+      }
     }
   };
 
@@ -177,7 +197,75 @@ const CryptoCheckout = () => {
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-4">
-          {!cryptoPaymentData ? (
+          {productError ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-card border border-border rounded-lg p-6"
+            >
+              <div className="text-center mb-6">
+                <i className={`${icons.error} text-3xl text-red-500 mb-4`} />
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Product Availability Issue
+                </h3>
+                <p className="text-muted-foreground">
+                  One or more products in your cart are no longer available
+                </p>
+              </div>
+              
+                             {/* Product Error Display */}
+               <div className="bg-muted/50 rounded-lg p-4 mb-6">
+                 <div className="flex items-start gap-4">
+                   <img
+                     src={productError.data.image_url}
+                     alt={productError.data.name}
+                     className="w-16 h-16 object-cover rounded-lg"
+                     onError={(e) => {
+                       e.currentTarget.src = "https://via.placeholder.com/64x64?text=No+Image";
+                     }}
+                   />
+                   <div className="flex-1 min-w-0">
+                     <h4 className="font-medium text-foreground mb-1 line-clamp-2">
+                       {productError.data.name}
+                     </h4>
+                     <div className="text-sm text-muted-foreground space-y-1">
+                       <p>Price: ${productError.data.price}</p>
+                       <p>Product ID: {productError.data.product_id}</p>
+                       <p>SKU: {productError.data.sku_id}</p>
+                       {productError.data.sku_attr && (
+                         <p>Attributes: {productError.data.sku_attr}</p>
+                       )}
+                     </div>
+                   </div>
+                 </div>
+               </div>
+              
+              <div className="flex gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    setProductError(null);
+                    navigate("/dashboard/cart");
+                  }}
+                  className="flex-1 bg-primary text-primary-foreground px-6 py-2 rounded-lg"
+                >
+                  Update Cart
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    setProductError(null);
+                    handleCryptoOrderCreate();
+                  }}
+                  className="flex-1 bg-muted text-foreground px-6 py-2 rounded-lg"
+                >
+                  Try Again
+                </motion.button>
+              </div>
+            </motion.div>
+          ) : !cryptoPaymentData ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

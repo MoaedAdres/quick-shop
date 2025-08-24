@@ -298,14 +298,27 @@ export const useCreateStripeOrder = () => {
     { payment_method: "stripe"; delivery_address: ShippingAddress }
   >({
     mutationFn: async (payload) => {
-      const response = await backApis.createStripeOrder(payload);
-      return response.data;
+      try {
+        const response = await backApis.createStripeOrder(payload);
+        return response.data;
+      } catch (error: any) {
+        // Handle 406 error with product information
+        if (error?.response?.status === 406 && error?.response?.data) {
+          throw {
+            status: 406,
+            productInfo: error.response.data,
+            message: "Product availability issue"
+          };
+        }
+        throw error;
+      }
     },
     invalidateKeys: [
       { queryKey: queryKeys.cart.all },
       { queryKey: queryKeys.orders.list() },
     ],
     displaySuccess: false,
+    dontShowError: true,
   });
 };
 
@@ -513,14 +526,27 @@ export const useUpdateTappingSettings = () => {
 export const useCreateCryptoOrder = () => {
   return useMutateData<CryptoPaymentResponse, CryptoPaymentPayload>({
     mutationFn: async (payload) => {
-      const response = await backApis.createCryptoOrder(payload);
-      return response.data;
+      try {
+        const response = await backApis.createCryptoOrder(payload);
+        return response.data;
+      } catch (error: any) {
+        // Handle 406 error with product information
+        if (error?.response?.status === 406 && error?.response?.data) {
+          throw {
+            status: 406,
+            productInfo: error.response.data,
+            message: "Product availability issue"
+          };
+        }
+        throw error;
+      }
     },
     invalidateKeys: [
       { queryKey: queryKeys.cart.all },
       { queryKey: queryKeys.orders.list() },
     ],
     displaySuccess: false, // We'll handle success display manually
+    dontShowError: true,
   });
 };
 
@@ -569,6 +595,7 @@ export const useCreateAddress = () => {
     },
     invalidateKeys: [{ queryKey: ["user-addresses"] }],
     displaySuccess: false,
+    dontShowError: true,
   });
 };
 
