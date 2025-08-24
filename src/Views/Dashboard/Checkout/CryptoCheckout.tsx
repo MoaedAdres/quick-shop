@@ -3,7 +3,10 @@ import { motion } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Wallet } from "lucide-react";
 import { icons } from "@/Constants/icons";
-import { useCreateCryptoOrder, useGetOrderDetails } from "@/Api/queriesAndMutations";
+import {
+  useCreateCryptoOrder,
+  useGetOrderDetails,
+} from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import CryptoPayment from "@/components/ui/crypto-payment";
 import CryptoCurrencySelector from "@/components/ui/crypto-currency-selector";
@@ -30,11 +33,12 @@ const CryptoCheckout = () => {
   const [orderIds, setOrderIds] = useState<string[]>([]);
   const [isPollingOrder, setIsPollingOrder] = useState(false);
   const createCryptoOrderMutation = useCreateCryptoOrder();
-
+  console.log("orderIds", orderIds);
   // Get order details with automatic polling when we have order IDs and are polling
   const { data: orderDetails, refetch: refetchOrder } = useGetOrderDetails(
     orderIds.length > 0 ? Number(orderIds[0]) : 0,
-    isPollingOrder ? 5000 : false // Poll every 10 seconds when polling is enabled
+    isPollingOrder ? 5000 : false, // Poll every 10 seconds when polling is enabled
+    orderIds?.length > 0
   );
 
   useEffect(() => {
@@ -73,11 +77,11 @@ const CryptoCheckout = () => {
   useEffect(() => {
     if (orderDetails && isPollingOrder) {
       const status = orderDetails.status;
-      
+
       if (status === "paid") {
         setIsPollingOrder(false);
         handlePaymentComplete();
-        toast.success('Payment confirmed successfully!');
+        toast.success("Payment confirmed successfully!");
       } else if (status === "cancelled" || status === "Payment_failed") {
         setIsPollingOrder(false);
         handlePaymentFailed(status);
@@ -134,18 +138,6 @@ const CryptoCheckout = () => {
     toast.error(error);
   };
 
-  const handlePaymentCancel = () => {
-    // Clear payment session data from query parameters
-    setSearchParams({});
-    setCryptoPaymentData(null);
-    setOrderIds([]);
-    setIsPollingOrder(false);
-    setSelectedCryptoCurrency(null);
-
-    // Navigate to home page since user can't change payment method
-    navigate("/dashboard/home");
-  };
-
   if (!shippingPreview || !shippingAddress) {
     return (
       <RFlex className="flex-col h-full pb-20">
@@ -169,7 +161,7 @@ const CryptoCheckout = () => {
       <div className="bg-card border-b border-border p-4">
         <div className="flex items-center gap-3">
           <motion.button
-            onClick={() => navigate("/dashboard/checkout/payment")}
+            onClick={() => navigate("/dashboard/home")}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center"

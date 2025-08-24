@@ -391,13 +391,18 @@ export const useGetOrders = (status?: string) => {
   });
 };
 
-export const useGetOrderDetails = (orderId: number, refetchInterval?: number | false) => {
+export const useGetOrderDetails = (
+  orderId: number,
+  refetchInterval?: number | false,
+  enableCondition: boolean = true
+) => {
   return useFetchData<OrderDetailsResponse, Error, Order>({
     queryKey: queryKeys.orders.details(orderId),
     queryFn: async () => {
       const response = await backApis.getOrderById(orderId);
       return response?.data?.data;
     },
+    enableCondition,
     refetchInterval,
   });
 };
