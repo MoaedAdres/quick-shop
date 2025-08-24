@@ -1,7 +1,6 @@
 import { useGetOrders } from "@/Api/queriesAndMutations";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import RFlex from "@/RComponents/RFlex";
 import { icons } from "@/Constants/icons";
@@ -25,7 +24,7 @@ export default function Orders() {
 
   if (isLoading) {
     return (
-      <RFlex className="flex-col h-full pb-20 md:pb-0">
+      <RFlex className="flex-col h-full pb-20 ">
         <div className="bg-card border-b border-border p-4">
           <h1 className="text-xl font-semibold text-foreground">My Orders</h1>
         </div>
@@ -37,7 +36,7 @@ export default function Orders() {
   }
 
   return (
-    <RFlex className="flex-col h-full pb-20 md:pb-0">
+    <RFlex className="flex-col h-full pb-20 ">
       {/* Header */}
       <div className="bg-card border-b border-border p-4">
         <div className="flex items-center gap-3">
@@ -57,16 +56,21 @@ export default function Orders() {
       <div className="flex-1 overflow-y-auto">
         <div className="p-4 space-y-6">
           {/* Status Filter */}
-          <div className="flex gap-2 overflow-x-auto pb-4">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2  ">
             {ORDER_STATUS_OPTIONS.map((status) => (
-              <Button
+              <motion.button
                 key={status.value}
-                variant={selectedStatus === status.value ? "default" : "outline"}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setSelectedStatus(status.value)}
-                className="whitespace-nowrap"
+                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                  selectedStatus === status.value
+                    ? "bg-primary text-primary-foreground shadow-lg"
+                    : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
               >
                 {status.label}
-              </Button>
+              </motion.button>
             ))}
           </div>
 

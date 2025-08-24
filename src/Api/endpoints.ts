@@ -10,6 +10,9 @@ import type {
   CheckoutSessionResponse,
   ReferralSettingsPayload,
   TappingSettingsPayload,
+  CryptoPaymentPayload,
+  PaginationParams,
+  CreateAddressPayload,
 } from "@/Types/types";
 
 export const backApis = {
@@ -32,6 +35,8 @@ export const backApis = {
 
   // ------------------------------ Categories ---------------------------------------------
   getCategories: () => get("products/aliexpress/categories"),
+  getCategoryProducts: (categoryId: string, params: PaginationParams) =>
+    get(`products/aliexpress/categories/${categoryId}`, { params }),
 
   // ------------------------------ Cart ---------------------------------------------
   getCart: () => get("orders/cart"),
@@ -69,6 +74,14 @@ export const backApis = {
   // getUserProfile: () => get("user/profile"),
   // updateUserProfile: (payload: UpdateProfilePayload) => put("user/profile", payload),
 
+  // ------------------------------ User Addresses ---------------------------------------------
+  getUserAddresses: () => get("users/addresses"),
+  createAddress: (payload: CreateAddressPayload) => post("users/addresses", payload),
+
+  // ------------------------------ User Settings ---------------------------------------------
+  getUserProfile: () => get("users/profile"),
+  setUserCountry: (payload: { country: string }) => post("users/country", payload),
+
   // ------------------------------ Orders ---------------------------------------------
   getOrders: (status?: string) => get("orders", { params: { status } }),
   getOrderById: (orderId: number) => get(`orders/${orderId}`),
@@ -76,14 +89,20 @@ export const backApis = {
   // ------------------------------ Tap To Earn ---------------------------------------------
   getTappingInfo: () => get("tasks/info"),
   processTap: () => post("tasks/tap"),
-
+  getTappingStatus: () => get("tasks/tapping-status"),
   // ------------------------------ Admin Dashboard ---------------------------------------------
   getRecentOrders: () => get("admin-dashboard/recent-orders"),
   getRecentUsers: () => get("admin-dashboard/recent-users"),
   getReferralSettings: () => get("admin-dashboard/referrals/settings"),
-  updateReferralSettings: (payload: ReferralSettingsPayload) => 
+  updateReferralSettings: (payload: ReferralSettingsPayload) =>
     put("admin-dashboard/referrals/settings", payload),
   getTappingSettings: () => get("admin-dashboard/tapping/settings"),
-  updateTappingSettings: (payload: TappingSettingsPayload) => 
+  updateTappingSettings: (payload: TappingSettingsPayload) =>
     put("admin-dashboard/tapping/settings", payload),
+
+  // ------------------------------ Crypto Payments (NOWPayments) ---------------------------------------------
+  createCryptoOrder: (payload: CryptoPaymentPayload) => post("orders", payload),
+  getCryptoPaymentStatus: (paymentId: string) =>
+    get(`payments/crypto/${paymentId}/status`),
+  getSupportedCurrencies: () => get("payments/crypto/currencies"),
 };

@@ -132,7 +132,7 @@ const Home = () => {
   const printifyProducts = printifyProductsQuery.data || [];
 
   return (
-    <RFlex className="flex-col h-full pb-20 md:pb-0 relative">
+    <RFlex className="flex-col h-full pb-20 relative">
       {/* Top Bar */}
       <TopBar />
 
@@ -164,7 +164,7 @@ const Home = () => {
 
               {/* Horizontal Scrollable Products */}
               <div className="relative">
-                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth">
+                <div className="flex gap-4 overflow-x-auto pb-4 scroll-smooth">
                   {products.map((product: Product, index: number) => (
                     <div
                       key={product.product_id}
@@ -209,7 +209,7 @@ const Home = () => {
 
               {/* Horizontal Scrollable Products */}
               <div className="relative">
-                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth">
+                <div className="flex gap-4 overflow-x-auto pb-4 scroll-smooth">
                   {printifyProducts.map(
                     (product: PrintifyProduct, index: number) => (
                       <div

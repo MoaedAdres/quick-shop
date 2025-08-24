@@ -35,6 +35,16 @@ import type {
   ReferralSettingsPayload,
   TappingSettingsResponse,
   TappingSettingsPayload,
+  CryptoPaymentResponse,
+  CryptoPaymentPayload,
+  CryptoPaymentStatus,
+  SupportedCurrency,
+  TappingStatusResponse,
+  PaginationParams,
+  AddressesResponse,
+  CreateAddressResponse,
+  CreateAddressPayload,
+  UserProfileResponse,
 } from "@/Types/types";
 
 // Query Keys
@@ -49,6 +59,8 @@ export const queryKeys = {
   },
   categories: {
     all: ["categories"] as const,
+    products: (categoryId: string, params: PaginationParams) =>
+      ["categories", "products", categoryId, params] as const,
   },
   cart: {
     all: ["cart"] as const,
@@ -70,6 +82,7 @@ export const queryKeys = {
   tasks: {
     all: ["tasks"] as const,
     info: ["tasks", "info"] as const,
+    status: ["tasks", "status"] as const,
   },
   admin: {
     all: ["admin"] as const,
@@ -77,6 +90,16 @@ export const queryKeys = {
     recentUsers: ["admin", "recent-users"] as const,
     referralSettings: ["admin", "referral-settings"] as const,
     tappingSettings: ["admin", "tapping-settings"] as const,
+  },
+  crypto: {
+    all: ["crypto"] as const,
+    paymentStatus: (paymentId: string) =>
+      ["crypto", "payment-status", paymentId] as const,
+    currencies: ["crypto", "currencies"] as const,
+  },
+  user: {
+    all: ["user"] as const,
+    profile: ["user", "profile"] as const,
   },
 };
 
@@ -140,7 +163,10 @@ export const useGetPrintifyProductsInfinite = (params: {
   });
 };
 
-export const useSearchProducts = (params: SearchParams) => {
+export const useSearchProducts = (
+  params: SearchParams,
+  enabled: boolean = false
+) => {
   return useInfiniteData<SearchProductsResponse, unknown, Product[]>({
     queryKey: queryKeys.products.search(params),
     queryFn: async ({ pageParam }: { pageParam?: unknown }) => {
@@ -150,7 +176,7 @@ export const useSearchProducts = (params: SearchParams) => {
       });
       return response.data;
     },
-    enableCondition: !!params.search.trim() || !!params.cat_id, // Run if search query or category ID exists
+    enableCondition: enabled,
     selectFn: (data) => data.pages.flatMap((page) => page.data.products),
     initialPageParam: 1,
     getNextPageParam: (lastPage: SearchProductsResponse) => {
@@ -196,6 +222,35 @@ export const useGetCategories = () => {
   });
 };
 
+export const useGetCategoryProducts = (
+  categoryId: string,
+  pageSize: number,
+  enabled: boolean
+) => {
+  return useInfiniteData<ProductsResponse, unknown, Product[]>({
+    queryKey: queryKeys.categories.products(categoryId, {
+      page: 1,
+      page_size: pageSize || 20,
+    }),
+    queryFn: async ({ pageParam }: { pageParam?: unknown }) => {
+      const response = await backApis.getCategoryProducts(categoryId, {
+        page: (pageParam as number) ?? 1,
+        page_size: pageSize || 20,
+      });
+      return response.data;
+    },
+    enableCondition: enabled,
+    selectFn: (data) => data.pages.flatMap((page) => page.data.products),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: ProductsResponse) => {
+      if (lastPage?.data?.total_products <= lastPage?.data?.page_size) {
+        return undefined;
+      }
+      return Number(lastPage?.data?.page) + 1;
+    },
+  });
+};
+
 // ------------------------------ Cart Queries & Mutations ---------------------------------------------
 
 export const useGetCart = (enabled = true) => {
@@ -221,7 +276,7 @@ export const useDeleteCartItem = () => {
   return useMutateData({
     mutationFn: (itemId: number) => backApis.removeFromCart(itemId),
     invalidateKeys: [{ queryKey: queryKeys.cart.all }],
-    displaySuccess: true,
+    displaySuccess: false,
   });
 };
 
@@ -243,10 +298,27 @@ export const useCreateStripeOrder = () => {
     { payment_method: "stripe"; delivery_address: ShippingAddress }
   >({
     mutationFn: async (payload) => {
-      const response = await backApis.createStripeOrder(payload);
-      return response.data;
+      try {
+        const response = await backApis.createStripeOrder(payload);
+        return response.data;
+      } catch (error: any) {
+        // Handle 406 error with product information
+        if (error?.response?.status === 406 && error?.response?.data) {
+          throw {
+            status: 406,
+            productInfo: error.response.data,
+            message: "Product availability issue"
+          };
+        }
+        throw error;
+      }
     },
+    invalidateKeys: [
+      { queryKey: queryKeys.cart.all },
+      { queryKey: queryKeys.orders.list() },
+    ],
     displaySuccess: false,
+    dontShowError: true,
   });
 };
 
@@ -321,6 +393,7 @@ export const useShippingPreview = () => {
       const response = await backApis.shippingPreview(address);
       return response?.data;
     },
+    dontShowError: true,
   });
 };
 
@@ -336,13 +409,19 @@ export const useGetOrders = (status?: string) => {
   });
 };
 
-export const useGetOrderDetails = (orderId: number) => {
+export const useGetOrderDetails = (
+  orderId: number,
+  refetchInterval?: number | false,
+  enableCondition: boolean = true
+) => {
   return useFetchData<OrderDetailsResponse, Error, Order>({
     queryKey: queryKeys.orders.details(orderId),
     queryFn: async () => {
       const response = await backApis.getOrderById(orderId);
       return response?.data?.data;
     },
+    enableCondition,
+    refetchInterval,
   });
 };
 
@@ -369,6 +448,15 @@ export const useProcessTap = () => {
   });
 };
 
+export const useGetTappingStatus = () => {
+  return useFetchData<TappingStatusResponse>({
+    queryKey: queryKeys.tasks.status,
+    queryFn: async () => {
+      const response = await backApis.getTappingStatus();
+      return response.data;
+    },
+  });
+};
 // ------------------------------ Admin Dashboard Queries & Mutations ---------------------------------------------
 
 export const useGetRecentOrders = () => {
@@ -408,7 +496,7 @@ export const useUpdateReferralSettings = () => {
       return response.data;
     },
     invalidateKeys: [{ queryKey: queryKeys.admin.referralSettings }],
-    displaySuccess: true,
+    displaySuccess: false,
   });
 };
 
@@ -429,6 +517,105 @@ export const useUpdateTappingSettings = () => {
       return response.data;
     },
     invalidateKeys: [{ queryKey: queryKeys.admin.tappingSettings }],
-    displaySuccess: true,
+    displaySuccess: false,
+  });
+};
+
+// ------------------------------ Crypto Payment Queries & Mutations ---------------------------------------------
+
+export const useCreateCryptoOrder = () => {
+  return useMutateData<CryptoPaymentResponse, CryptoPaymentPayload>({
+    mutationFn: async (payload) => {
+      try {
+        const response = await backApis.createCryptoOrder(payload);
+        return response.data;
+      } catch (error: any) {
+        // Handle 406 error with product information
+        if (error?.response?.status === 406 && error?.response?.data) {
+          throw {
+            status: 406,
+            productInfo: error.response.data,
+            message: "Product availability issue"
+          };
+        }
+        throw error;
+      }
+    },
+    invalidateKeys: [
+      { queryKey: queryKeys.cart.all },
+      { queryKey: queryKeys.orders.list() },
+    ],
+    displaySuccess: false, // We'll handle success display manually
+    dontShowError: true,
+  });
+};
+
+export const useGetCryptoPaymentStatus = (
+  paymentId: string,
+  enabled = false
+) => {
+  return useFetchData<{ data: CryptoPaymentStatus }>({
+    queryKey: queryKeys.crypto.paymentStatus(paymentId),
+    queryFn: async () => {
+      const response = await backApis.getCryptoPaymentStatus(paymentId);
+      return response.data;
+    },
+    enableCondition: enabled && !!paymentId,
+    refetchOnMount: true,
+  });
+};
+
+export const useGetSupportedCurrencies = () => {
+  return useFetchData<{ data: SupportedCurrency[] }>({
+    queryKey: queryKeys.crypto.currencies,
+    queryFn: async () => {
+      const response = await backApis.getSupportedCurrencies();
+      return response.data;
+    },
+  });
+};
+
+// ------------------------------ Address Management Queries & Mutations ---------------------------------------------
+
+export const useGetUserAddresses = () => {
+  return useFetchData<AddressesResponse>({
+    queryKey: ["user-addresses"],
+    queryFn: async () => {
+      const response = await backApis.getUserAddresses();
+      return response.data;
+    },
+  });
+};
+
+export const useCreateAddress = () => {
+  return useMutateData<CreateAddressResponse, CreateAddressPayload>({
+    mutationFn: async (payload) => {
+      const response = await backApis.createAddress(payload);
+      return response.data;
+    },
+    invalidateKeys: [{ queryKey: ["user-addresses"] }],
+    displaySuccess: false,
+    dontShowError: true,
+  });
+};
+
+export const useGetUserProfile = () => {
+  return useFetchData<UserProfileResponse>({
+    queryKey: queryKeys.user.profile,
+    queryFn: async () => {
+      const response = await backApis.getUserProfile();
+      return response.data;
+    },
+  });
+};
+
+export const useSetUserCountry = () => {
+  return useMutateData<{ message: string }, { country: string }>({
+    mutationFn: async (payload) => {
+      const response = await backApis.setUserCountry(payload);
+      return response.data;
+    },
+    invalidateKeys: [{ queryKey: queryKeys.user.profile }],
+    displaySuccess: false,
   });
 };

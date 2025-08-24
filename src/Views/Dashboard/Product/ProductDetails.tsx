@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { useGetProductDetails, useAddToCart } from "@/Api/queriesAndMutations";
@@ -14,8 +14,11 @@ import type { SwiperRef } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { truncateParagraph } from "@/Utils/helperFunctions";
+import { Button } from "@/components/ui/button";
 
 const ProductDetails = () => {
+  const navigate = useNavigate();
   const { productId } = useParams<{ productId: string }>();
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -64,7 +67,8 @@ const ProductDetails = () => {
   // Handle swiper slide change
   const handleSlideChange = (swiper: any) => {
     // When in loop mode, we need to get the real index
-    const realIndex = swiper.realIndex !== undefined ? swiper.realIndex : swiper.activeIndex;
+    const realIndex =
+      swiper.realIndex !== undefined ? swiper.realIndex : swiper.activeIndex;
     setSelectedImageIndex(realIndex);
   };
 
@@ -74,7 +78,9 @@ const ProductDetails = () => {
       setQuantity(newQuantity);
     }
   };
-
+  const handleBack = () => {
+    navigate(-1);
+  };
   const handleAddToCart = async () => {
     if (!selectedSku) {
       toast.error("Please select a variant");
@@ -89,6 +95,7 @@ const ProductDetails = () => {
         sku_id: selectedSku.sku_id,
         sku_attr: selectedSku.sku_attr,
         price: parseFloat(selectedSku.price),
+        image_url: productData?.data.media_info.images[0],
       },
       quantity,
     };
@@ -103,7 +110,7 @@ const ProductDetails = () => {
 
   if (isLoading) {
     return (
-      <RFlex className="flex-col h-full pb-20 md:pb-0">
+      <RFlex className="flex-col h-full pb-20 ">
         <div className="bg-card border-b border-border p-4">
           <h1 className="text-xl font-semibold text-foreground">
             Product Details
@@ -120,7 +127,7 @@ const ProductDetails = () => {
 
   if (!productData) {
     return (
-      <RFlex className="flex-col h-full pb-20 md:pb-0">
+      <RFlex className="flex-col h-full pb-20 ">
         <div className="bg-card border-b border-border p-4">
           <h1 className="text-xl font-semibold text-foreground">
             Product Details
@@ -141,44 +148,56 @@ const ProductDetails = () => {
   const product = productData.data;
 
   return (
-    <RFlex className="flex-col h-full pb-20 md:pb-0">
+    <RFlex className="flex-col h-full pb-20 ">
       {/* Header */}
-      <div className="bg-card border-b border-border p-4">
+      <div className="bg-card border-b border-border p-4 flex items-center justify-between">
+        <Button
+          onClick={handleBack}
+          variant="ghost"
+          size="sm"
+          className="flex items-center gap-2"
+        >
+          <i className={`${icons.arrowLeft} text-lg`} />
+          Back
+        </Button>
         <h1 className="text-xl font-semibold text-foreground">
           Product Details
         </h1>
+        <div className="w-10" /> {/* Spacer for centering */}
       </div>
 
-             {/* Product Content */}
-       <div className="flex-1 overflow-y-auto">
-         <div className="p-4 md:p-6 pb-20 md:pb-6">
+      {/* Product Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-4 md:p-6 pb-10">
           {/* Product Images */}
-          <div className="mb-6">
+          <div className="mb-6 flex flex-col gap-2">
             {/* Main Image Swiper */}
             <div className="relative">
               <Swiper
                 ref={swiperRef}
                 modules={[Pagination, Autoplay]}
-                pagination={{ 
-                  clickable: true, 
+                pagination={{
+                  clickable: true,
                   dynamicBullets: true,
-                  el: '.swiper-pagination',
-                  type: 'bullets'
+                  el: ".swiper-pagination",
+                  type: "bullets",
                 }}
                 loop={true}
                 autoplay={{ delay: 5000, disableOnInteraction: false }}
                 onSlideChange={handleSlideChange}
                 className="h-96 rounded-lg overflow-hidden"
-                style={{
-                  "--swiper-pagination-color": "hsl(var(--primary))",
-                } as React.CSSProperties}
+                style={
+                  {
+                    "--swiper-pagination-color": "hsl(var(--primary))",
+                  } as React.CSSProperties
+                }
               >
                 {product.media_info.images.map((image, index) => (
                   <SwiperSlide key={index}>
                     <img
                       src={image}
                       alt={`${product.title} - ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-fill"
                     />
                   </SwiperSlide>
                 ))}
@@ -186,15 +205,16 @@ const ProductDetails = () => {
             </div>
 
             {/* Thumbnail Gallery */}
+
             {product.media_info.images.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              <div className="flex gap-2 overflow-x-auto pb-2 md:justify-center">
                 {product.media_info.images.map((image, index) => (
                   <motion.button
                     key={index}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleThumbnailClick(index)}
-                    className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all relative ${
+                    className={`flex-shrink-0 w-16 h-16 rounded-lg md:w-20 md:h-20 lg:w-24 lg:h-24 overflow-hidden border-2 transition-all relative ${
                       selectedImageIndex === index
                         ? "border-primary ring-2 ring-primary/20"
                         : "border-border hover:border-primary/50"
@@ -222,7 +242,7 @@ const ProductDetails = () => {
               {product.title}
             </h2>
 
-            {/* Store Info */}
+            {/* Store Info
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <i className={icons.store} />
               <span>{product.store_info.store_name}</span>
@@ -231,7 +251,7 @@ const ProductDetails = () => {
                 <i className={icons.star} />
                 <span>{product.store_info.item_as_described_rating}</span>
               </div>
-            </div>
+            </div> */}
 
             {/* Price and Stock */}
             {selectedSku ? (
@@ -240,7 +260,17 @@ const ProductDetails = () => {
                   ${parseFloat(selectedSku.price).toFixed(2)}
                 </div>
                 <div className="text-sm text-muted-foreground mt-1">
-                  Selected variant: {selectedSku.sku_attr}
+                  <span>Selected variant:</span>
+                  <p
+                    title={
+                      selectedSku.sku_attr?.length > 30
+                        ? selectedSku.sku_attr
+                        : undefined
+                    }
+                    className="inline"
+                  >
+                    {truncateParagraph(selectedSku.sku_attr, 30)}
+                  </p>
                 </div>
               </div>
             ) : (
@@ -267,21 +297,51 @@ const ProductDetails = () => {
                         price: sku.offer_sale_price,
                       })
                     }
-                    className={`p-3 rounded-lg border text-sm ${
+                    className={`p-3 rounded-lg border text-sm w-fit ${
                       selectedSku?.sku_id === sku.sku_id
                         ? "border-primary bg-primary/10 text-primary"
                         : "border-border text-muted-foreground"
                     }`}
                   >
-                    {sku.sku_attr}
+                    {truncateParagraph(sku.sku_attr, 30)}
                   </motion.button>
                 ))}
+              </div>
+            </div>
+            {/* Product Details */}
+            <div className="space-y-4 mt-8">
+              <h3 className="font-medium text-foreground">Product Details</h3>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <div className="flex justify-between py-2 border-b border-border">
+                  <span>Package Weight</span>
+                  <span>{product.package_info.gross_weight}kg</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-border">
+                  <span>Package Dimensions</span>
+                  <span>
+                    {product.package_info.package_length}x
+                    {product.package_info.package_width}x
+                    {product.package_info.package_height}cm
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* Quantity */}
             <div className="space-y-2">
-              <h3 className="font-medium text-foreground">Quantity</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium text-foreground">Quantity</h3>
+                {selectedSku && (
+                  <div className="text-right">
+                    <div className="text-sm text-muted-foreground">
+                      Total Price
+                    </div>
+                    <div className="text-lg font-bold text-primary">
+                      ${(parseFloat(selectedSku.price) * quantity).toFixed(2)}
+                    </div>
+                  </div>
+                )}
+              </div>{" "}
               <div className="flex items-center gap-3">
                 <motion.button
                   whileTap={{ scale: 0.9 }}
@@ -295,7 +355,7 @@ const ProductDetails = () => {
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={() => handleQuantityChange(1)}
-                  disabled={quantity >= 10}
+                  disabled={quantity >= 100}
                   className="w-8 h-8 rounded-full bg-muted flex items-center justify-center disabled:opacity-50"
                 >
                   <i className={icons.add} />
@@ -323,69 +383,6 @@ const ProductDetails = () => {
                 </>
               )}
             </motion.button>
-
-            {/* Product Details */}
-            <div className="space-y-4 mt-8">
-              <h3 className="font-medium text-foreground">Product Details</h3>
-              <div className="space-y-2 text-sm text-muted-foreground">
-                <div className="flex justify-between py-2 border-b border-border">
-                  <span>Sales</span>
-                  <span>{product.sales_count}</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-border">
-                  <span>Package Weight</span>
-                  <span>{product.package_info.gross_weight}kg</span>
-                </div>
-                <div className="flex justify-between py-2 border-b border-border">
-                  <span>Package Dimensions</span>
-                  <span>
-                    {product.package_info.package_length}x
-                    {product.package_info.package_width}x
-                    {product.package_info.package_height}cm
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Store Ratings */}
-            <div className="space-y-4 mt-8">
-              <h3 className="font-medium text-foreground">Store Ratings</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">
-                    Item as Described
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <i className={`${icons.star} text-yellow-400`} />
-                    <span className="text-sm font-medium">
-                      {product.store_info.item_as_described_rating}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">
-                    Communication
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <i className={`${icons.star} text-yellow-400`} />
-                    <span className="text-sm font-medium">
-                      {product.store_info.communication_rating}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">
-                    Shipping Speed
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <i className={`${icons.star} text-yellow-400`} />
-                    <span className="text-sm font-medium">
-                      {product.store_info.shipping_speed_rating}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

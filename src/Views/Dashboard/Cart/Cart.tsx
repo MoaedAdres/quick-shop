@@ -31,7 +31,7 @@ const Cart = () => {
 
   if (isLoading) {
     return (
-      <RFlex className="flex-col h-full pb-20 md:pb-0">
+      <RFlex className="flex-col h-full pb-20">
         <div className="bg-card border-b border-border p-4">
           <h1 className="text-xl font-semibold text-foreground">
             Shopping Cart
@@ -48,7 +48,7 @@ const Cart = () => {
 
   if (error) {
     return (
-      <RFlex className="flex-col h-full pb-20 md:pb-0">
+      <RFlex className="flex-col h-full pb-20">
         <div className="bg-card border-b border-border p-4">
           <h1 className="text-xl font-semibold text-foreground">
             Shopping Cart
@@ -66,7 +66,7 @@ const Cart = () => {
 
   if (!cart || !cart.items || cart.items.length === 0) {
     return (
-      <RFlex className="flex-col h-full pb-20 md:pb-0">
+      <RFlex className="flex-col h-full pb-20">
         {/* Header */}
         <div className="bg-card border-b border-border p-4">
           <h1 className="text-xl font-semibold text-foreground">
@@ -93,7 +93,7 @@ const Cart = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => window.history.back()}
+              onClick={() => navigate("/home")}
               className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium"
             >
               Continue Shopping
@@ -107,7 +107,7 @@ const Cart = () => {
   const totals = calculateCartTotals();
 
   return (
-    <RFlex className="flex-col h-full pb-20 md:pb-0">
+    <RFlex className="flex-col h-full pb-20">
       {/* Header */}
       <div className="bg-card border-b border-border p-4">
         <div className="flex items-center justify-between">
@@ -173,7 +173,7 @@ const Cart = () => {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => navigate("/dashboard/checkout")}
+          onClick={() => navigate("/dashboard/checkout/shipping")}
           className="w-full bg-primary text-primary-foreground py-4 rounded-lg font-semibold text-lg"
         >
           Checkout - {formatPrice(totals.total)}
@@ -183,7 +183,7 @@ const Cart = () => {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => window.history.back()}
+          onClick={() => navigate("/dashboard/home")}
           className="w-full bg-muted text-muted-foreground py-3 rounded-lg font-medium"
         >
           Continue Shopping

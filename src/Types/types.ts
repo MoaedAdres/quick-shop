@@ -305,6 +305,7 @@ export interface CartProduct {
   product_id: string;
   sku_id?: string;
   sku_attr?: string;
+  image_url?: string;
 }
 
 export interface CartItem {
@@ -328,6 +329,7 @@ export interface AddToCartPayload {
     sku_id: string;
     sku_attr: string;
     price: number;
+    image_url?: string;
   };
   quantity: number;
 }
@@ -347,9 +349,12 @@ export interface ShippingAddress {
 }
 
 export interface UnshippableProduct {
-  id: number;
-  product: CartProduct;
-  quantity: number;
+  product: {
+    id: number;
+    product: CartProduct;
+    quantity: number;
+  };
+  reason: string;
 }
 
 export interface ShippingPreviewError {
@@ -404,6 +409,21 @@ export interface User {
   updatedAt: string;
 }
 
+export interface UserProfile {
+  id: number;
+  telegram_id: string;
+  firstname: string;
+  lastname: string;
+  picture_url: string;
+  is_admin: boolean;
+  country: string;
+}
+
+export interface UserProfileResponse {
+  data: UserProfile;
+  message: string | null;
+}
+
 export interface Address {
   id: string;
   type: "home" | "work" | "other";
@@ -415,6 +435,44 @@ export interface Address {
   zipCode: string;
   country: string;
   isDefault: boolean;
+}
+
+// User Address Types
+export interface UserAddress {
+  id: number;
+  address: string;
+  address2?: string | null;
+  city: string;
+  province: string;
+  country: string;
+  zip: string;
+  contact_person: string;
+  full_name: string;
+  mobile_no: string;
+  phone_country: string;
+}
+
+export interface CreateAddressPayload {
+  address: string;
+  address2?: string | null;
+  city: string;
+  province: string;
+  country: string;
+  zip: string;
+  contact_person: string;
+  full_name: string;
+  mobile_no: string;
+  phone_country: string;
+}
+
+export interface AddressesResponse {
+  data: UserAddress[];
+  message: string | null;
+}
+
+export interface CreateAddressResponse {
+  data: UserAddress;
+  message: string | null;
 }
 
 // Wallet Types
@@ -537,6 +595,7 @@ export type UseFetchDataParams<TData = any, _ = any, TSelected = any> = {
   queryFn: () => Promise<TData>;
   enableCondition?: boolean;
   refetchOnMount?: boolean;
+  refetchInterval?: number | false;
   retry?: number;
   onSuccessFn?: (data: TSelected) => void;
   onErrorFn?: (errorMessage: string) => void;
@@ -575,6 +634,7 @@ export type UseMutateDataOptions<
   downloadFile?: boolean;
   mimeType?: string;
   fileName?: string;
+  dontShowError?: boolean;
 };
 
 export interface TelegramLoginPayload {
@@ -651,6 +711,13 @@ export interface TappingInfoResponse {
       reward_amount: number;
       daily_tap_limit: number;
     };
+  };
+  message: string | null;
+}
+
+export interface TappingStatusResponse {
+  data: {
+    status: boolean;
   };
   message: string | null;
 }
@@ -758,4 +825,73 @@ export interface TappingSettingsPayload {
   taps_for_reward: number;
   reward_amount: number;
   daily_tap_limit: number;
+}
+
+// NOWPayments Crypto Payment Types
+export interface CryptoPaymentPayload {
+  payment_method: "crypto";
+  pay_currency: string;
+  delivery_address: ShippingAddress;
+}
+
+export interface CryptoPaymentResponse {
+  data: {
+    payment_id: string;
+    payment_status: string;
+    pay_address: string;
+    price_amount: number;
+    price_currency: string;
+    pay_amount: number;
+    amount_received: number;
+    pay_currency: string;
+    order_id: string;
+    order_description: string;
+    payin_extra_id: string | null;
+    ipn_callback_url: string | null;
+    customer_email: string | null;
+    created_at: string;
+    updated_at: string;
+    purchase_id: string;
+    smart_contract: string | null;
+    network: string;
+    network_precision: number | null;
+    time_limit: string | null;
+    burning_percent: number | null;
+    expiration_estimate_date: string;
+    is_fixed_rate: boolean;
+    is_fee_paid_by_user: boolean;
+    valid_until: string;
+    type: string;
+    product: string;
+    origin_ip: string;
+  };
+  message: string;
+}
+
+export interface CryptoPaymentStatus {
+  payment_id: string;
+  payment_status: 'waiting' | 'confirming' | 'confirmed' | 'sending' | 'partially_paid' | 'finished' | 'failed' | 'refunded' | 'expired';
+  pay_address: string;
+  price_amount: number;
+  pay_amount: number;
+  amount_received: number;
+  pay_currency: string;
+  order_id: string;
+  network: string;
+  created_at: string;
+  updated_at: string;
+  expiration_estimate_date: string;
+  valid_until: string;
+}
+
+export interface SupportedCurrency {
+  id: string;
+  name: string;
+  symbol: string;
+  network: string;
+  is_popular: boolean;
+  logo_url: string;
+  min_amount?: string;
+  max_amount?: string;
+  test_wallet?: string;
 }

@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
-import { useGetCategories, useSearchProducts } from "@/Api/queriesAndMutations";
+import {
+  useGetCategories,
+  useGetCategoryProducts,
+  useSearchProducts,
+} from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import RSearchInput from "@/RComponents/RSearchInput";
 import CategoryCard from "@/components/ui/category-card";
@@ -17,24 +21,35 @@ const SearchPage = () => {
 
   // React Query hooks
   const categoriesQuery = useGetCategories();
-  const searchProductsQuery = useSearchProducts({
-    search: searchQuery,
-    page: 1,
-    page_size: 20,
-    local: "en_US",
-    country: "US",
-    currency: "USD",
-    cat_id: selectedCategory?.id,
-  });
+
+  // Search products query - only enabled when there's a search query and no selected category
+  const searchProductsQuery = useSearchProducts(
+    {
+      search: searchQuery,
+      page: 1,
+      page_size: 20,
+      local: "en_US",
+      country: "US",
+      currency: "USD",
+    },
+    !!searchQuery.trim() && !selectedCategory
+  );
+
+  // Category products query - only enabled when a category is selected
+  const categoryProductsQuery = useGetCategoryProducts(
+    selectedCategory?.id,
+    20,
+    !!selectedCategory?.id
+  );
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setSelectedCategory(null);
+    setSelectedCategory(null); // Clear category when searching
   };
 
   const handleCategoryClick = (category: any) => {
     setSelectedCategory(category);
-    setSearchQuery(category.name);
+    setSearchQuery(""); // Clear search when selecting category
   };
 
   const handleProductClick = (product: any) => {
@@ -48,35 +63,71 @@ const SearchPage = () => {
 
   // Intersection Observer for infinite scroll
   const { ref: lastElementRef, inView } = useInView({
-    threshold: 0,
-    rootMargin: "100px",
+    threshold: 0.1,
+    rootMargin: "50px",
+    triggerOnce: false,
   });
 
   // Trigger fetch when last element comes into view
   useEffect(() => {
-    if (
-      inView &&
-      searchProductsQuery.hasNextPage &&
-      !searchProductsQuery.isFetchingNextPage
-    ) {
-      searchProductsQuery.fetchNextPage();
+    if (!inView) return;
+
+    if (searchQuery.trim() && !selectedCategory) {
+      // Handle search infinite scroll
+      if (
+        searchProductsQuery.hasNextPage &&
+        !searchProductsQuery.isFetchingNextPage &&
+        !searchProductsQuery.isLoading
+      ) {
+        searchProductsQuery.fetchNextPage();
+      }
+    } else if (selectedCategory) {
+      // Handle category infinite scroll
+      if (
+        categoryProductsQuery.hasNextPage &&
+        !categoryProductsQuery.isFetchingNextPage &&
+        !categoryProductsQuery.isLoading
+      ) {
+        categoryProductsQuery.fetchNextPage();
+      }
     }
-  }, [
-    inView,
-    searchProductsQuery.hasNextPage,
-    searchProductsQuery.isFetchingNextPage,
-    searchProductsQuery.fetchNextPage,
-    searchProductsQuery,
-  ]);
+  }, [inView]); // Only depend on inView to prevent multiple triggers
+
+  // Determine which data to display
+  const getDisplayData = () => {
+    if (searchQuery.trim() && !selectedCategory) {
+      // Show search results
+      return {
+        products: searchProductsQuery.data || [],
+        loading: searchProductsQuery.isLoading,
+        error: searchProductsQuery.error,
+        isFetchingMore: searchProductsQuery.isFetchingNextPage,
+        hasNextPage: searchProductsQuery.hasNextPage,
+      };
+    } else if (selectedCategory) {
+      // Show category products
+      return {
+        products: categoryProductsQuery.data || [],
+        loading: categoryProductsQuery.isLoading,
+        error: categoryProductsQuery.error,
+        isFetchingMore: categoryProductsQuery.isFetchingNextPage,
+        hasNextPage: categoryProductsQuery.hasNextPage,
+      };
+    }
+    return {
+      products: [],
+      loading: false,
+      error: null,
+      isFetchingMore: false,
+      hasNextPage: false,
+    };
+  };
 
   const categories = categoriesQuery.data?.data;
-  const products = searchProductsQuery.data;
-  console.log("products", products);
-  const loading = searchProductsQuery.isLoading;
-  const error = searchProductsQuery.error;
+  const displayData = getDisplayData();
 
   return (
-    <RFlex className="flex-col h-full pb-20 md:pb-0 relative">
+    <RFlex className="flex-col h-full pb-20 relative">
       {/* Header */}
       <div className="bg-card border-b border-border p-4">
         <div className="flex items-center gap-3 mb-4">
@@ -156,7 +207,7 @@ const SearchPage = () => {
             </div>
 
             {/* Loading State */}
-            {loading && !searchProductsQuery.isFetchingNextPage && (
+            {displayData.loading && !displayData.isFetchingMore && (
               <div className="flex items-center justify-center py-8">
                 <i className={`${icons.spinner} text-2xl text-primary`} />
                 <span className="ml-2 text-muted-foreground">Loading...</span>
@@ -164,25 +215,28 @@ const SearchPage = () => {
             )}
 
             {/* Error State */}
-            {error && (
+            {displayData.error && (
               <div className="bg-card border border-red-200/20 rounded-lg p-4">
                 <div className="flex items-center">
                   <i className={`${icons.error} text-red-500 mr-2`} />
                   <span className="text-red-400">
-                    {(error as Error)?.message || "An error occurred"}
+                    {(displayData.error as Error)?.message ||
+                      "An error occurred"}
                   </span>
                 </div>
               </div>
             )}
 
             {/* Products Grid */}
-            {products && products.length > 0 && (
+            {displayData.products && displayData.products.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {products.map((product, index) => (
+                {displayData.products.map((product, index) => (
                   <div
                     key={product.product_id}
                     ref={
-                      index === products.length - 1 ? lastElementRef : undefined
+                      index === displayData.products.length - 1
+                        ? lastElementRef
+                        : undefined
                     }
                   >
                     <ProductCard
@@ -195,7 +249,7 @@ const SearchPage = () => {
             )}
 
             {/* Loading more indicator */}
-            {searchProductsQuery.isFetchingNextPage && (
+            {displayData.isFetchingMore && (
               <div className="flex items-center justify-center py-4">
                 <i
                   className={`${icons.spinner} text-xl text-primary animate-spin`}
@@ -207,10 +261,10 @@ const SearchPage = () => {
             )}
 
             {/* No Results */}
-            {!loading &&
-              !error &&
-              products &&
-              products.length === 0 &&
+            {!displayData.loading &&
+              !displayData.error &&
+              displayData.products &&
+              displayData.products.length === 0 &&
               (searchQuery.trim() || selectedCategory) && (
                 <div className="text-center py-8">
                   <p className="text-muted-foreground">

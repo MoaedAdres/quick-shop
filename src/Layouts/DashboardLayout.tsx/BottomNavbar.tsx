@@ -41,8 +41,8 @@ const CustomNavItem = ({
 };
 
 const BottomNavbar = () => {
-  const { isAuthenticated, isAdmin } = useAuthStore();
-  const { data: cartData } = useGetCart(isAuthenticated);
+  const { isAdmin } = useAuthStore();
+  const { data: cartData } = useGetCart(true);
   const cartItemCount =
     cartData?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
   return (
@@ -53,9 +53,18 @@ const BottomNavbar = () => {
       <CustomNavItem title="home" to="home" icon={icons.home} />
       <CustomNavItem title="earn" to="tap-to-earn" icon={icons.coins} />
       <CustomNavItem title="search" to="search" icon={icons.search} />
-      <CustomNavItem title="cart" to="cart" icon={icons.cart} badge={cartItemCount} />
+      <CustomNavItem
+        title="cart"
+        to="cart"
+        icon={icons.cart}
+        badge={cartItemCount}
+      />
       {isAdmin && (
-        <CustomNavItem title="dashboard" to="admin-dashboard" icon={icons.dashboard} />
+        <CustomNavItem
+          title="dashboard"
+          to="admin-dashboard"
+          icon={icons.dashboard}
+        />
       )}
       <CustomNavItem title="profile" to="profile" icon={icons.user} />
     </RFlex>

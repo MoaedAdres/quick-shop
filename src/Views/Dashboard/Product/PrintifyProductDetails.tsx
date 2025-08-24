@@ -90,7 +90,7 @@ const PrintifyProductDetails = () => {
   // Handle quantity change
   const handleQuantityChange = (delta: number) => {
     const newQuantity = quantity + delta;
-    if (newQuantity >= 1 && newQuantity <= 10) {
+    if (newQuantity >= 1 && newQuantity <= 100) {
       setQuantity(newQuantity);
     }
   };
@@ -191,6 +191,7 @@ const PrintifyProductDetails = () => {
         sku_id: selectedVariant.id,
         sku_attr: skuAttr,
         price: selectedVariant.price,
+        image_url: productDetails.data.images[0].src,
       },
       quantity,
     };
@@ -296,7 +297,7 @@ const PrintifyProductDetails = () => {
                       <img
                         src={image.src}
                         alt={`${product.title} - ${image.position}`}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-fill"
                       />
                     </SwiperSlide>
                   ))}
@@ -305,7 +306,7 @@ const PrintifyProductDetails = () => {
 
               {/* Thumbnail Gallery */}
               {images.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="flex gap-2 overflow-x-auto pb-2">
                   {images.map((image, index) => (
                     <button
                       key={index}
@@ -319,7 +320,7 @@ const PrintifyProductDetails = () => {
                       <img
                         src={image.src}
                         alt={`${product.title} - ${image.position}`}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-fill"
                       />
                       {selectedImageIndex === index && (
                         <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
@@ -333,7 +334,7 @@ const PrintifyProductDetails = () => {
             </div>
 
             {/* Product Info */}
-            <div className="space-y-6">
+            <div className="space-y-6 md:pb-[50px]">
               {/* Title */}
               <div>
                 <h1 className="text-2xl font-bold text-foreground mb-2">
@@ -353,7 +354,10 @@ const PrintifyProductDetails = () => {
 
               {/* Price */}
               <div className="space-y-2">
-                <h3 className="text-lg font-semibold text-foreground">Price</h3>
+                <h3 className="text-lg font-semibold text-foreground">
+                  {" "}
+                  Price
+                </h3>
                 <div className="flex items-center gap-4">
                   {selectedVariant ? (
                     <span className="text-3xl font-bold text-primary">
@@ -373,59 +377,56 @@ const PrintifyProductDetails = () => {
                   <h3 className="text-lg font-semibold text-foreground">
                     Options
                   </h3>
-                  {product.options.map((option, index) => (
-                    <div key={index} className="space-y-2">
-                      <h4 className="font-medium text-foreground">
-                        {option.name}
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {option.values.map((value) => (
-                          <button
-                            key={value.id}
-                            onClick={() =>
-                              handleOptionSelect(
-                                index.toString(),
+                  {product.options.map((option) => {
+                    const index = option?.type == "size" ? "0" : "1";
+                    return (
+                      <div key={index} className="space-y-2">
+                        <h4 className="font-medium text-foreground">
+                          {option.name}
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {option.values.map((value) => (
+                            <button
+                              key={value.id}
+                              onClick={() =>
+                                handleOptionSelect(index, value.id.toString())
+                              }
+                              className={`px-3 py-2 rounded-lg border text-sm transition-all ${
+                                selectedOptions[index.toString()] ===
                                 value.id.toString()
-                              )
-                            }
-                            className={`px-3 py-2 rounded-lg border text-sm transition-all ${
-                              selectedOptions[index.toString()] ===
-                              value.id.toString()
-                                ? "border-primary bg-primary/10 text-primary"
-                                : "border-border hover:border-primary/50"
-                            }`}
-                            style={
-                              option.type === "color" && value.colors
-                                ? {
-                                    backgroundColor: value.colors[0],
-                                    color:
-                                      value.colors[0] === "#FFFFFF"
-                                        ? "#000"
-                                        : "#FFF",
-                                  }
-                                : {}
-                            }
-                          >
-                            {value.title}
-                          </button>
-                        ))}
+                                  ? "border-primary border-2 bg-primary/10 text-primary"
+                                  : "border-[#383737] border-2 hover:border-primary/50"
+                              }`}
+                              style={
+                                option.type === "color" && value.colors
+                                  ? {
+                                      backgroundColor: value.colors[0],
+                                      color:
+                                        value.colors[0] === "#FFFFFF"
+                                          ? "#000"
+                                          : "#FFF",
+                                    }
+                                  : {}
+                              }
+                            >
+                              {option.type == "color" ? (
+                                <div
+                                  className="w-4 h-4 rounded-full"
+                                  style={{
+                                    backgroundColor: value.colors?.[0],
+                                  }}
+                                />
+                              ) : (
+                                value.title
+                              )}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
-
-              {/* Description */}
-              <div className="space-y-2">
-                <h3 className="text-lg font-semibold text-foreground">
-                  Description
-                </h3>
-                <div
-                  className="text-sm text-muted-foreground leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: product.description }}
-                />
-              </div>
-
               {/* Variants */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -482,104 +483,106 @@ const PrintifyProductDetails = () => {
                   </div>
                 )}
               </div>
+              {/* Description */}
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Description
+                </h3>
+                <div
+                  className="text-sm text-muted-foreground leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
+              </div>
+              <div className="mt-12 space-y-8">
+                {/* Product Specifications */}
+                {/* <div>
+                  <h3 className="text-xl font-semibold text-foreground mb-4">
+                    Product Specifications
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <span className="text-sm text-muted-foreground">
+                        Created
+                      </span>
+                      <p className="font-medium">
+                        {new Date(product.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <span className="text-sm text-muted-foreground">
+                        Last Updated
+                      </span>
+                      <p className="font-medium">
+                        {new Date(product.updated_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div> */}
+                {/* Quantity and Total */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-medium text-foreground">Quantity</h3>
+                    {selectedVariant && (
+                      <div className="text-right">
+                        <div className="text-sm text-muted-foreground">
+                          Total Price
+                        </div>
+                        <div className="text-lg font-bold text-primary">
+                          $
+                          {((selectedVariant.price * quantity) / 100).toFixed(
+                            2
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => handleQuantityChange(-1)}
+                      disabled={quantity <= 1}
+                      className="w-8 h-8 rounded-full bg-muted flex items-center justify-center disabled:opacity-50"
+                    >
+                      <i className={icons.remove} />
+                    </button>
+                    <span className="font-medium text-foreground">
+                      {quantity}
+                    </span>
+                    <button
+                      onClick={() => handleQuantityChange(1)}
+                      disabled={quantity >= 100}
+                      className="w-8 h-8 rounded-full bg-muted flex items-center justify-center disabled:opacity-50"
+                    >
+                      <i className={icons.add} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-4 pt-4">
+                  <Button
+                    className="flex-1"
+                    size="lg"
+                    onClick={handleAddToCart}
+                    disabled={!selectedVariant || addToCartMutation.isPending}
+                  >
+                    {addToCartMutation.isPending ? (
+                      <>
+                        <i className={`${icons.spinner} animate-spin mr-2`} />
+                        Adding to Cart...
+                      </>
+                    ) : (
+                      <>
+                        <i className={`${icons.cart} mr-2`} />
+                        Add to Cart
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
             </div>
 
             {/* Additional Details */}
-            <div className="mt-12 space-y-8">
-              {/* Product Specifications */}
-              <div>
-                <h3 className="text-xl font-semibold text-foreground mb-4">
-                  Product Specifications
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <span className="text-sm text-muted-foreground">
-                      Blueprint ID
-                    </span>
-                    <p className="font-medium">{product.blueprint_id}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <span className="text-sm text-muted-foreground">
-                      Print Provider ID
-                    </span>
-                    <p className="font-medium">{product.print_provider_id}</p>
-                  </div>
-                  <div className="space-y-2">
-                    <span className="text-sm text-muted-foreground">
-                      Created
-                    </span>
-                    <p className="font-medium">
-                      {new Date(product.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <span className="text-sm text-muted-foreground">
-                      Last Updated
-                    </span>
-                    <p className="font-medium">
-                      {new Date(product.updated_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              {/* Quantity and Total */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium text-foreground">Quantity</h3>
-                  {selectedVariant && (
-                    <div className="text-right">
-                      <div className="text-sm text-muted-foreground">
-                        Total Price
-                      </div>
-                      <div className="text-lg font-bold text-primary">
-                        ${((selectedVariant.price * quantity) / 100).toFixed(2)}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => handleQuantityChange(-1)}
-                    disabled={quantity <= 1}
-                    className="w-8 h-8 rounded-full bg-muted flex items-center justify-center disabled:opacity-50"
-                  >
-                    <i className={icons.remove} />
-                  </button>
-                  <span className="font-medium text-foreground">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => handleQuantityChange(1)}
-                    disabled={quantity >= 10}
-                    className="w-8 h-8 rounded-full bg-muted flex items-center justify-center disabled:opacity-50"
-                  >
-                    <i className={icons.add} />
-                  </button>
-                </div>
-              </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-4 pt-4">
-                <Button
-                  className="flex-1"
-                  size="lg"
-                  onClick={handleAddToCart}
-                  disabled={!selectedVariant || addToCartMutation.isPending}
-                >
-                  {addToCartMutation.isPending ? (
-                    <>
-                      <i className={`${icons.spinner} animate-spin mr-2`} />
-                      Adding to Cart...
-                    </>
-                  ) : (
-                    <>
-                      <i className={`${icons.cart} mr-2`} />
-                      Add to Cart
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
             {/* Variants Table */}
             {/* {product.variants.length > 0 && (
               <div>
