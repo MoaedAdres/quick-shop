@@ -618,6 +618,7 @@ export type UseMutateDataOptions<
   downloadFile?: boolean;
   mimeType?: string;
   fileName?: string;
+  dontShowError?: boolean;
 };
 
 export interface TelegramLoginPayload {

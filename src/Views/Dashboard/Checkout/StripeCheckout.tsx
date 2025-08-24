@@ -1,47 +1,67 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { icons } from "@/Constants/icons";
 import { useGetCart, useCreateStripeOrder } from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import StripePayment from "@/components/ui/stripe-payment";
-import type {
-  ShippingPreviewSuccess,
-  ShippingAddress,
-} from "@/Types/types";
+import type { ShippingPreviewSuccess, ShippingAddress } from "@/Types/types";
 import { toast } from "sonner";
 import { calculateTax } from "@/Constants/tax";
 
 const StripeCheckout = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: cartData, isLoading, error } = useGetCart();
-  const [shippingPreview, setShippingPreview] = useState<ShippingPreviewSuccess | null>(null);
-  const [shippingAddress, setShippingAddress] = useState<ShippingAddress | null>(null);
-  const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
+  const [shippingPreview, setShippingPreview] =
+    useState<ShippingPreviewSuccess | null>(null);
+  const [shippingAddress, setShippingAddress] =
+    useState<ShippingAddress | null>(null);
+  const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(
+    null
+  );
   const [orderIds, setOrderIds] = useState<string[]>([]);
+  const [isPaymentSessionRestored, setIsPaymentSessionRestored] =
+    useState(false);
   const createStripeOrderMutation = useCreateStripeOrder();
 
   useEffect(() => {
     // Load data from localStorage
-    const storedPreview = localStorage.getItem('checkout_shipping_preview');
-    const storedAddress = localStorage.getItem('checkout_shipping_address');
-    
+    const storedPreview = localStorage.getItem("checkout_shipping_preview");
+    const storedAddress = localStorage.getItem("checkout_shipping_address");
+
+    // Check for payment session in query parameters
+    const clientSecret = searchParams.get("client_secret");
+    const orderIdsParam = searchParams.get("order_ids");
+
     if (storedPreview && storedAddress) {
       setShippingPreview(JSON.parse(storedPreview));
       setShippingAddress(JSON.parse(storedAddress));
+
+      // Check if we have a stored payment session (for page refresh handling)
+      if (clientSecret && orderIdsParam) {
+        setStripeClientSecret(clientSecret);
+        setOrderIds(JSON.parse(orderIdsParam));
+        setIsPaymentSessionRestored(true);
+      }
     } else {
       // If no shipping data, redirect back to shipping
       navigate("/dashboard/checkout/shipping");
       return;
     }
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
   useEffect(() => {
-    // Create Stripe order when component mounts and we have all required data
-    if (shippingAddress && !stripeClientSecret && !createStripeOrderMutation.isPending) {
+    // Only create Stripe order if we don't have a restored session and we have shipping address
+    if (
+      shippingAddress &&
+      !stripeClientSecret &&
+      !createStripeOrderMutation.isPending &&
+      !isPaymentSessionRestored
+    ) {
       createStripeOrder();
     }
-  }, [shippingAddress]);
+  }, [shippingAddress, isPaymentSessionRestored]);
 
   const createStripeOrder = async () => {
     if (!shippingAddress) return;
@@ -52,8 +72,17 @@ const StripeCheckout = () => {
         delivery_address: shippingAddress,
       });
 
-      setStripeClientSecret(result.data.client_secret);
-      setOrderIds(result.data.order_ids);
+      const clientSecret = result.data.client_secret;
+      const orderIds = result.data.order_ids;
+
+      setStripeClientSecret(clientSecret);
+      setOrderIds(orderIds);
+
+      // Store the payment session data in query parameters
+      setSearchParams({
+        client_secret: clientSecret,
+        order_ids: JSON.stringify(orderIds),
+      });
     } catch (error) {
       console.error("Failed to create Stripe order:", error);
       toast.error("Failed to initialize payment. Please try again.");
@@ -78,12 +107,19 @@ const StripeCheckout = () => {
   };
 
   const handlePaymentSuccess = () => {
-    // Clear checkout data from localStorage
-    localStorage.removeItem('checkout_shipping_preview');
-    localStorage.removeItem('checkout_shipping_address');
-    localStorage.removeItem('checkout_payment_method');
-    
-    toast.success(`Payment successful! Your order${orderIds.length > 1 ? 's' : ''} has been placed.`);
+    // Clear all checkout data from localStorage
+    localStorage.removeItem("checkout_shipping_preview");
+    localStorage.removeItem("checkout_shipping_address");
+    localStorage.removeItem("checkout_payment_method");
+
+    // Clear query parameters
+    setSearchParams({});
+
+    toast.success(
+      `Payment successful! Your order${
+        orderIds.length > 1 ? "s" : ""
+      } has been placed.`
+    );
     navigate("/dashboard/orders");
   };
 
@@ -92,54 +128,76 @@ const StripeCheckout = () => {
   };
 
   const handlePaymentCancel = () => {
-    navigate("/dashboard/checkout/payment");
+    // Clear payment session data from query parameters
+    // setSearchParams({});
+    // setStripeClientSecret(null);
+    // setOrderIds([]);
+    // setIsPaymentSessionRestored(false);
+
+    // Navigate to home page since user can't change payment method
+    navigate("/dashboard/home");
   };
 
   if (isLoading) {
     return (
       <RFlex className="flex-col h-full pb-20">
         <div className="bg-card border-b border-border p-4">
-          <h1 className="text-xl font-semibold text-foreground">Credit Card Payment</h1>
+          <h1 className="text-xl font-semibold text-foreground">
+            Credit Card Payment
+          </h1>
         </div>
         <div className="flex-1 flex items-center justify-center">
-          <i className={`${icons.spinner} text-2xl text-primary animate-spin`} />
+          <i
+            className={`${icons.spinner} text-2xl text-primary animate-spin`}
+          />
         </div>
       </RFlex>
     );
   }
 
   if (error || !cartData || !cartData.items || cartData.items.length === 0) {
-    return (
-      <RFlex className="flex-col h-full pb-20">
-        <div className="bg-card border-b border-border p-4">
-          <h1 className="text-xl font-semibold text-foreground">Credit Card Payment</h1>
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <i className={`${icons.error} text-3xl text-red-500 mb-2`} />
-            <p className="text-muted-foreground">No items in cart</p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => navigate("/dashboard/cart")}
-              className="mt-4 bg-primary text-primary-foreground px-4 py-2 rounded-lg"
-            >
-              Back to Cart
-            </motion.button>
+    // If we have a restored payment session, we can still proceed even with empty cart
+    if (isPaymentSessionRestored && stripeClientSecret) {
+      // Continue with the restored session
+    } else {
+      return (
+        <RFlex className="flex-col h-full pb-20">
+          <div className="bg-card border-b border-border p-4">
+            <h1 className="text-xl font-semibold text-foreground">
+              Credit Card Payment
+            </h1>
           </div>
-        </div>
-      </RFlex>
-    );
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <i className={`${icons.error} text-3xl text-red-500 mb-2`} />
+              <p className="text-muted-foreground">No items in cart</p>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate("/dashboard/cart")}
+                className="mt-4 bg-primary text-primary-foreground px-4 py-2 rounded-lg"
+              >
+                Back to Cart
+              </motion.button>
+            </div>
+          </div>
+        </RFlex>
+      );
+    }
   }
 
   if (!shippingPreview || !shippingAddress) {
     return (
       <RFlex className="flex-col h-full pb-20">
         <div className="bg-card border-b border-border p-4">
-          <h1 className="text-xl font-semibold text-foreground">Credit Card Payment</h1>
+          <h1 className="text-xl font-semibold text-foreground">
+            Credit Card Payment
+          </h1>
         </div>
         <div className="flex-1 flex items-center justify-center">
-          <i className={`${icons.spinner} text-2xl text-primary animate-spin`} />
+          <i
+            className={`${icons.spinner} text-2xl text-primary animate-spin`}
+          />
         </div>
       </RFlex>
     );
@@ -160,7 +218,9 @@ const StripeCheckout = () => {
           >
             <i className={`${icons.arrowLeft} text-muted-foreground`} />
           </motion.button>
-          <h1 className="text-xl font-semibold text-foreground">Credit Card Payment</h1>
+          <h1 className="text-xl font-semibold text-foreground">
+            Credit Card Payment
+          </h1>
         </div>
       </div>
 
@@ -175,8 +235,12 @@ const StripeCheckout = () => {
             >
               <div className="flex items-center justify-center py-8">
                 <div className="text-center">
-                  <i className={`${icons.spinner} text-3xl text-primary animate-spin mb-4`} />
-                  <p className="text-muted-foreground">Initializing payment...</p>
+                  <i
+                    className={`${icons.spinner} text-3xl text-primary animate-spin mb-4`}
+                  />
+                  <p className="text-muted-foreground">
+                    Initializing payment...
+                  </p>
                 </div>
               </div>
             </motion.div>
@@ -194,7 +258,7 @@ const StripeCheckout = () => {
                 amount={totals.total}
                 currency="USD"
                 shippingAddress={shippingAddress}
-                cartItems={cartData.items}
+                cartItems={cartData?.items || []}
                 onSuccess={handlePaymentSuccess}
                 onError={handlePaymentError}
                 onCancel={handlePaymentCancel}
@@ -208,7 +272,9 @@ const StripeCheckout = () => {
             >
               <div className="text-center">
                 <i className={`${icons.error} text-3xl text-red-500 mb-4`} />
-                <p className="text-muted-foreground mb-4">Failed to initialize payment</p>
+                <p className="text-muted-foreground mb-4">
+                  Failed to initialize payment
+                </p>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}

@@ -93,7 +93,7 @@ const Cart = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => window.history.back()}
+              onClick={() => navigate("/home")}
               className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium"
             >
               Continue Shopping
@@ -183,7 +183,7 @@ const Cart = () => {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => window.history.back()}
+          onClick={() => navigate("/dashboard/home")}
           className="w-full bg-muted text-muted-foreground py-3 rounded-lg font-medium"
         >
           Continue Shopping

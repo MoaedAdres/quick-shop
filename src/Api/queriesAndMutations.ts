@@ -371,6 +371,7 @@ export const useShippingPreview = () => {
       const response = await backApis.shippingPreview(address);
       return response?.data;
     },
+    dontShowError:true
   });
 };
 
