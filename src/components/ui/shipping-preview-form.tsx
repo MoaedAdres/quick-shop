@@ -40,6 +40,9 @@ const ShippingPreviewForm = ({
     order_comment: "",
   });
 
+  // Store country code separately for API calls
+  const [selectedCountryCode, setSelectedCountryCode] = useState<string>("");
+
   const shippingPreviewMutation = useShippingPreview();
   const { data: addressesData, isLoading: addressesLoading } =
     useGetUserAddresses();
@@ -60,6 +63,11 @@ const ShippingPreviewForm = ({
       order_comment: "",
     };
     setFormData(shippingAddress);
+    
+    // Extract country code from the selected address
+    const countryCode = getCountryCodeByName(address.country);
+    setSelectedCountryCode(countryCode || "");
+    
     setShowSavedAddresses(false);
   };
 
@@ -78,10 +86,16 @@ const ShippingPreviewForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const result = await shippingPreviewMutation.mutateAsync(formData);
+      // Create API payload with country code instead of name
+      const apiPayload = {
+        ...formData,
+        country: selectedCountryCode, // Use country code for API
+      };
+      
+      const result = await shippingPreviewMutation.mutateAsync(apiPayload);
       console.log("result", result);
       onSuccess?.(result);
-      setShippingAddress?.(formData);
+      setShippingAddress?.(formData); // Keep original formData for display
     } catch (error) {
       console.error("Failed to get shipping preview:", error);
       onError?.(error as unknown as ShippingPreviewError);
@@ -98,9 +112,10 @@ const ShippingPreviewForm = ({
   const handleCountrySelect = (country: AliExpressCountry) => {
     setFormData((prev) => ({ 
       ...prev, 
-      country: country.name,
+      country: country.name, // Keep name for display
       phone_country: country.phone_code || "+1" // Auto-populate phone code
     }));
+    setSelectedCountryCode(country.code); // Store code for API
   };
 
   const getCountryCodeByName = (countryName: string): string | undefined => {
