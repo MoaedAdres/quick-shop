@@ -19,19 +19,18 @@ import { toast } from "sonner";
 
 const Profile = () => {
   const { t } = useTranslation();
-  const { user, profile, logout, setUserCountry, updateProfile } =
-    useAuthStore();
+  const { user, profile, logout } = useAuthStore();
   const navigate = useNavigate();
 
   // Fetch profile data using the hook
   const { data: profileData } = useGetUserProfile();
   const userCountry = profileData?.data?.country;
   // Update auth store when profile data is fetched
-  useEffect(() => {
-    if (profileData?.data && !profile) {
-      updateProfile(profileData.data);
-    }
-  }, [profileData, profile, updateProfile]);
+  // useEffect(() => {
+  //   if (profileData?.data && !profile) {
+  //     updateProfile(profileData.data);
+  //   }
+  // }, [profileData, profile, updateProfile]);
 
   // Fetch recent orders (limit to 3 most recent)
   const { data: orders, isLoading: ordersLoading } = useGetOrders();
@@ -66,8 +65,6 @@ const Profile = () => {
       await setUserCountryMutation.mutateAsync({ country: selectedCountry });
 
       // Update only the country state separately
-      setUserCountry(selectedCountry);
-
       toast.success(
         "Country updated successfully! This will improve your browsing experience."
       );

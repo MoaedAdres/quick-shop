@@ -104,5 +104,5 @@ export const backApis = {
   createCryptoOrder: (payload: CryptoPaymentPayload) => post("orders", payload),
   getCryptoPaymentStatus: (paymentId: string) =>
     get(`payments/crypto/${paymentId}/status`),
-  getSupportedCurrencies: () => get("payments/crypto/currencies"),
+  getSupportedCurrencies: () => get("payments/nowpayments/currencies"),
 };
