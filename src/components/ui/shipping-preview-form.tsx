@@ -14,6 +14,7 @@ import type {
 import CountrySelector from "./country-selector";
 import type { AliExpressCountry } from "@/Constants/aliexpressCountries";
 import { ALIEXPRESS_COUNTRIES } from "@/Constants/aliexpressCountries";
+import { toast } from "sonner";
 
 interface ShippingPreviewFormProps {
   onSuccess?: (data: ShippingPreviewSuccess) => void;
@@ -42,6 +43,7 @@ const ShippingPreviewForm = ({
 
   // Store country code separately for API calls
   const [selectedCountryCode, setSelectedCountryCode] = useState<string>("");
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
 
   const shippingPreviewMutation = useShippingPreview();
   const { data: addressesData, isLoading: addressesLoading } =
@@ -85,6 +87,16 @@ const ShippingPreviewForm = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Show validation errors if they exist
+    setShowValidationErrors(true);
+    
+    // Validate that a country is selected
+    if (!selectedCountryCode || !formData.country) {
+      toast.error("Please select a country to continue");
+      return;
+    }
+    
     try {
       // Create API payload with country code instead of name
       const apiPayload = {
@@ -116,6 +128,11 @@ const ShippingPreviewForm = ({
       phone_country: country.phone_code || "+1" // Auto-populate phone code
     }));
     setSelectedCountryCode(country.code); // Store code for API
+    
+    // Clear validation error when country is selected
+    if (showValidationErrors) {
+      setShowValidationErrors(false);
+    }
   };
 
   const getCountryCodeByName = (countryName: string): string | undefined => {
@@ -227,6 +244,9 @@ const ShippingPreviewForm = ({
               onCountrySelect={handleCountrySelect}
               placeholder="Select your country"
             />
+            {showValidationErrors && !formData.country && (
+              <p className="text-xs text-red-500 mt-1">Please select a country</p>
+            )}
           </div>
 
           {/* Province/State */}

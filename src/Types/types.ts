@@ -891,4 +891,7 @@ export interface SupportedCurrency {
   network: string;
   is_popular: boolean;
   logo_url: string;
+  min_amount?: string;
+  max_amount?: string;
+  test_wallet?: string;
 }

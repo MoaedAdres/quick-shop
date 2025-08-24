@@ -39,6 +39,7 @@ const AddressManagement = ({
     mobile_no: "",
     phone_country: "+1",
   });
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
 
   const handleCountrySelect = (country: AliExpressCountry) => {
     setFormData((prev) => ({
@@ -46,6 +47,11 @@ const AddressManagement = ({
       country: country.name,
       phone_country: country.phone_code || "+1", // Auto-populate phone code
     }));
+    
+    // Clear validation error when country is selected
+    if (showValidationErrors) {
+      setShowValidationErrors(false);
+    }
   };
 
   const getCountryCodeByName = (countryName: string): string | undefined => {
@@ -69,6 +75,15 @@ const AddressManagement = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Show validation errors if they exist
+    setShowValidationErrors(true);
+
+    // Validate that a country is selected
+    if (!formData.country) {
+      toast.error("Please select a country to continue");
+      return;
+    }
+
     try {
       await createAddressMutation.mutateAsync(formData);
       setShowAddForm(false);
@@ -84,6 +99,7 @@ const AddressManagement = ({
         mobile_no: "",
         phone_country: "+1",
       });
+      setShowValidationErrors(false);
     } catch (error) {
       console.error("Failed to create address:", error);
     }
@@ -290,7 +306,7 @@ const AddressManagement = ({
                 {/* Country */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">
-                    Country *
+                    Country 
                   </label>
                   <CountrySelector
                     selectedCountry={
@@ -301,6 +317,9 @@ const AddressManagement = ({
                     onCountrySelect={handleCountrySelect}
                     placeholder="Select your country"
                   />
+                  {showValidationErrors && !formData.country && (
+                    <p className="text-xs text-red-500 mt-1">Please select a country</p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">

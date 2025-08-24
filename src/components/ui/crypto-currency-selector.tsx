@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Search, Star } from "lucide-react";
-import { useGetSupportedCurrencies } from "@/Api/queriesAndMutations";
+import { ChevronDown, Star } from "lucide-react";
+// import { useGetSupportedCurrencies } from "@/Api/queriesAndMutations";
 import type { SupportedCurrency } from "@/Types/types";
 
 interface CryptoCurrencySelectorProps {
@@ -18,9 +18,9 @@ const CryptoCurrencySelector: React.FC<CryptoCurrencySelectorProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: currenciesResponse, isLoading } = useGetSupportedCurrencies();
-  const currencies = currenciesResponse?.data || [];
-
+  // const { data: currenciesResponse, isLoading } = useGetSupportedCurrencies();
+  const currencies: SupportedCurrency[] = [];
+  const isLoading = false;
   // Filter currencies based on search term
   const filteredCurrencies = currencies.filter(
     (currency) =>
