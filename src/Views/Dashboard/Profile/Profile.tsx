@@ -25,7 +25,7 @@ const Profile = () => {
 
   // Fetch profile data using the hook
   const { data: profileData } = useGetUserProfile();
-  const userCountry = profile?.country;
+  const userCountry = profileData?.data?.country;
   // Update auth store when profile data is fetched
   useEffect(() => {
     if (profileData?.data && !profile) {
