@@ -8,7 +8,7 @@ function ProtectedRoute() {
   useEffect(() => {
     // Fetch user profile on app initialization
     fetchProfile();
-  }, [fetchProfile]);
+  }, []);
 
   // For Telegram Mini App, always allow access if it's a Telegram app
   // For regular web app, check authentication
