@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Wallet } from "lucide-react";
 import { icons } from "@/Constants/icons";
-import { useCreateCryptoOrder } from "@/Api/queriesAndMutations";
+import { useCreateCryptoOrder, useGetOrderDetails } from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import CryptoPayment from "@/components/ui/crypto-payment";
 import CryptoCurrencySelector from "@/components/ui/crypto-currency-selector";
@@ -28,7 +28,14 @@ const CryptoCheckout = () => {
     CryptoPaymentResponse["data"] | null
   >(null);
   const [orderIds, setOrderIds] = useState<string[]>([]);
+  const [isPollingOrder, setIsPollingOrder] = useState(false);
   const createCryptoOrderMutation = useCreateCryptoOrder();
+
+  // Get order details with automatic polling when we have order IDs and are polling
+  const { data: orderDetails, refetch: refetchOrder } = useGetOrderDetails(
+    orderIds.length > 0 ? Number(orderIds[0]) : 0,
+    isPollingOrder ? 5000 : false // Poll every 10 seconds when polling is enabled
+  );
 
   useEffect(() => {
     // Load data from localStorage
@@ -48,6 +55,7 @@ const CryptoCheckout = () => {
       if (paymentDataParam && orderIdsParam) {
         setCryptoPaymentData(JSON.parse(paymentDataParam));
         setOrderIds(JSON.parse(orderIdsParam));
+        setIsPollingOrder(true); // Start polling for order status
 
         // Restore selected currency if available
         if (selectedCurrencyParam) {
@@ -60,6 +68,23 @@ const CryptoCheckout = () => {
       navigate("/dashboard/checkout/shipping");
     }
   }, [navigate, searchParams]);
+
+  // Handle order status changes
+  useEffect(() => {
+    if (orderDetails && isPollingOrder) {
+      const status = orderDetails.status;
+      
+      if (status === "paid") {
+        setIsPollingOrder(false);
+        handlePaymentComplete();
+        toast.success('Payment confirmed successfully!');
+      } else if (status === "cancelled" || status === "Payment_failed") {
+        setIsPollingOrder(false);
+        handlePaymentFailed(status);
+        toast.error(`Payment ${status}. Please try again.`);
+      }
+    }
+  }, [orderDetails, isPollingOrder]);
 
   const handleCryptoOrderCreate = async () => {
     if (!shippingAddress || !selectedCryptoCurrency) return;
@@ -76,6 +101,7 @@ const CryptoCheckout = () => {
 
       setCryptoPaymentData(paymentData);
       setOrderIds(orderIds);
+      setIsPollingOrder(true); // Start polling for order status
 
       // Store the payment session data in query parameters
       setSearchParams({
@@ -106,6 +132,18 @@ const CryptoCheckout = () => {
 
   const handlePaymentFailed = (error: string) => {
     toast.error(error);
+  };
+
+  const handlePaymentCancel = () => {
+    // Clear payment session data from query parameters
+    setSearchParams({});
+    setCryptoPaymentData(null);
+    setOrderIds([]);
+    setIsPollingOrder(false);
+    setSelectedCryptoCurrency(null);
+
+    // Navigate to home page since user can't change payment method
+    navigate("/dashboard/home");
   };
 
   if (!shippingPreview || !shippingAddress) {
@@ -166,6 +204,7 @@ const CryptoCheckout = () => {
                     onCurrencySelect={setSelectedCryptoCurrency}
                   />
                 </div>
+
                 {/* Selected Currency Info */}
                 {selectedCryptoCurrency && (
                   <motion.div
@@ -221,6 +260,9 @@ const CryptoCheckout = () => {
                 paymentData={cryptoPaymentData}
                 onPaymentComplete={handlePaymentComplete}
                 onPaymentFailed={handlePaymentFailed}
+                orderStatus={orderDetails?.status}
+                isPolling={isPollingOrder}
+                onRefreshStatus={refetchOrder}
               />
             </motion.div>
           )}

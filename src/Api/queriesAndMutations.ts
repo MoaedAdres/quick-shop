@@ -391,13 +391,14 @@ export const useGetOrders = (status?: string) => {
   });
 };
 
-export const useGetOrderDetails = (orderId: number) => {
+export const useGetOrderDetails = (orderId: number, refetchInterval?: number | false) => {
   return useFetchData<OrderDetailsResponse, Error, Order>({
     queryKey: queryKeys.orders.details(orderId),
     queryFn: async () => {
       const response = await backApis.getOrderById(orderId);
       return response?.data?.data;
     },
+    refetchInterval,
   });
 };
 
@@ -472,7 +473,7 @@ export const useUpdateReferralSettings = () => {
       return response.data;
     },
     invalidateKeys: [{ queryKey: queryKeys.admin.referralSettings }],
-    displaySuccess: true,
+    displaySuccess: false,
   });
 };
 
@@ -493,7 +494,7 @@ export const useUpdateTappingSettings = () => {
       return response.data;
     },
     invalidateKeys: [{ queryKey: queryKeys.admin.tappingSettings }],
-    displaySuccess: true,
+    displaySuccess: false,
   });
 };
 

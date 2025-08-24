@@ -3,28 +3,26 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Copy, CheckCircle, Clock, AlertCircle, RefreshCw, ExternalLink } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { toast } from 'sonner';
-import { useGetCryptoPaymentStatus, useGetSupportedCurrencies } from '@/Api/queriesAndMutations';
-import type { CryptoPaymentResponse, SupportedCurrency } from '@/Types/types';
+import type { CryptoPaymentResponse } from '@/Types/types';
 
 interface CryptoPaymentProps {
   paymentData: CryptoPaymentResponse['data'];
+  orderStatus?: string;
+  isPolling?: boolean;
+  onRefreshStatus?: () => void;
   onPaymentComplete?: () => void;
   onPaymentFailed?: (error: string) => void;
 }
 
 const CryptoPayment: React.FC<CryptoPaymentProps> = ({
   paymentData,
+  orderStatus,
+  isPolling = false,
+  onRefreshStatus,
   onPaymentComplete,
   onPaymentFailed,
 }) => {
-  const [isPolling, setIsPolling] = useState(true);
   const [timeLeft, setTimeLeft] = useState<number>(0);
-
-  // Fetch payment status with polling
-  const { data: paymentStatus, refetch: refetchStatus } = useGetCryptoPaymentStatus(
-    paymentData.payment_id,
-    isPolling
-  );
 
   // Calculate time remaining
   useEffect(() => {
@@ -37,7 +35,6 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
         setTimeLeft(Math.floor(difference / 1000));
       } else {
         setTimeLeft(0);
-        setIsPolling(false);
       }
     };
 
@@ -46,38 +43,6 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
 
     return () => clearInterval(timer);
   }, [paymentData.expiration_estimate_date]);
-
-  // Poll payment status
-  useEffect(() => {
-    if (!isPolling) return;
-
-    const pollInterval = setInterval(() => {
-      refetchStatus();
-    }, 10000); // Poll every 10 seconds
-
-    return () => clearInterval(pollInterval);
-  }, [isPolling, refetchStatus]);
-
-  // Handle payment status changes
-  useEffect(() => {
-    if (paymentStatus?.data) {
-      const status = paymentStatus.data.payment_status;
-      
-      if (status === 'finished' || status === 'confirmed') {
-        setIsPolling(false);
-        onPaymentComplete?.();
-        toast.success('Payment confirmed successfully!');
-      } else if (status === 'failed' || status === 'expired' || status === 'refunded') {
-        setIsPolling(false);
-        onPaymentFailed?.(status);
-        if (status === 'expired') {
-          toast.error('Payment expired. Please try again.');
-        } else {
-          toast.error(`Payment ${status}. Please try again.`);
-        }
-      }
-    }
-  }, [paymentStatus, onPaymentComplete, onPaymentFailed]);
 
   const copyToClipboard = async (text: string, label: string) => {
     try {
@@ -101,10 +66,15 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'pending':
       case 'waiting': return 'text-yellow-600 bg-yellow-100';
+      case 'processing':
       case 'confirming': return 'text-blue-600 bg-blue-100';
+      case 'paid': 
       case 'confirmed': 
       case 'finished': return 'text-green-600 bg-green-100';
+      case 'cancelled':
+      case 'Payment_failed':
       case 'failed': 
       case 'expired': 
       case 'refunded': return 'text-red-600 bg-red-100';
@@ -115,10 +85,15 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
 
   const getStatusIcon = (status: string) => {
     switch (status) {
+      case 'pending':
       case 'waiting': return Clock;
+      case 'processing':
       case 'confirming': return RefreshCw;
+      case 'paid':
       case 'confirmed': 
       case 'finished': return CheckCircle;
+      case 'cancelled':
+      case 'Payment_failed':
       case 'failed': 
       case 'expired': 
       case 'refunded': return AlertCircle;
@@ -127,7 +102,7 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
     }
   };
 
-  const currentStatus = paymentStatus?.data?.payment_status || paymentData.payment_status;
+  const currentStatus = orderStatus || paymentData.payment_status;
   const StatusIcon = getStatusIcon(currentStatus);
 
   return (
@@ -146,7 +121,7 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
       <div className="flex items-center justify-center gap-3">
         <div className={`flex items-center gap-2 px-3 py-2 rounded-full ${getStatusColor(currentStatus)}`}>
           <StatusIcon className="w-4 h-4" />
-          <span className="text-sm font-medium capitalize">{currentStatus.replace('_', ' ')}</span>
+          <span className="text-sm font-medium capitalize">{currentStatus?.replace('_', ' ')}</span>
         </div>
         {timeLeft > 0 && (
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
@@ -220,24 +195,22 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
       </div>
 
       {/* Progress */}
-      {paymentStatus?.data && (
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Received</span>
-            <span className="text-foreground font-medium">
-              {paymentStatus.data.amount_received} / {paymentData.pay_amount} {paymentData.pay_currency.toUpperCase()}
-            </span>
-          </div>
-          <div className="w-full bg-muted rounded-full h-2">
-            <div 
-              className="bg-primary h-2 rounded-full transition-all duration-300"
-              style={{ 
-                width: `${Math.min((paymentStatus.data.amount_received / paymentData.pay_amount) * 100, 100)}%` 
-              }}
-            />
-          </div>
+      {/* <div className="space-y-2">
+        <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">Received</span>
+          <span className="text-foreground font-medium">
+            {paymentData.amount_received} / {paymentData.pay_amount} {paymentData.pay_currency.toUpperCase()}
+          </span>
         </div>
-      )}
+        <div className="w-full bg-muted rounded-full h-2">
+          <div 
+            className="bg-primary h-2 rounded-full transition-all duration-300"
+            style={{ 
+              width: `${Math.min((paymentData.amount_received / paymentData.pay_amount) * 100, 100)}%` 
+            }}
+          />
+        </div>
+      </div> */}
 
       {/* Instructions */}
       <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
@@ -255,8 +228,9 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => refetchStatus()}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+          onClick={onRefreshStatus}
+          disabled={!onRefreshStatus}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
         >
           <RefreshCw className="w-4 h-4" />
           Check Status

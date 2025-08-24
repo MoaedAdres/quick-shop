@@ -580,6 +580,7 @@ export type UseFetchDataParams<TData = any, _ = any, TSelected = any> = {
   queryFn: () => Promise<TData>;
   enableCondition?: boolean;
   refetchOnMount?: boolean;
+  refetchInterval?: number | false;
   retry?: number;
   onSuccessFn?: (data: TSelected) => void;
   onErrorFn?: (errorMessage: string) => void;

@@ -8,6 +8,7 @@ export const useFetchData = <TData = any, TError = any, TSelected = TData>({
   queryFn,
   enableCondition = true,
   refetchOnMount,
+  refetchInterval,
   selectFn,
   onErrorFn,
   onSuccessFn,
@@ -18,6 +19,7 @@ export const useFetchData = <TData = any, TError = any, TSelected = TData>({
     queryFn,
     refetchOnWindowFocus: false,
     refetchOnMount: refetchOnMount ?? true,
+    refetchInterval: refetchInterval,
     retry: retry ?? 1,
     enabled: enableCondition,
 
