@@ -44,6 +44,7 @@ import type {
   AddressesResponse,
   CreateAddressResponse,
   CreateAddressPayload,
+  UserProfileResponse,
 } from "@/Types/types";
 
 // Query Keys
@@ -95,6 +96,10 @@ export const queryKeys = {
     paymentStatus: (paymentId: string) =>
       ["crypto", "payment-status", paymentId] as const,
     currencies: ["crypto", "currencies"] as const,
+  },
+  user: {
+    all: ["user"] as const,
+    profile: ["user", "profile"] as const,
   },
 };
 
@@ -567,12 +572,23 @@ export const useCreateAddress = () => {
   });
 };
 
+export const useGetUserProfile = () => {
+  return useFetchData<UserProfileResponse>({
+    queryKey: queryKeys.user.profile,
+    queryFn: async () => {
+      const response = await backApis.getUserProfile();
+      return response.data;
+    },
+  });
+};
+
 export const useSetUserCountry = () => {
   return useMutateData<{ message: string }, { country: string }>({
     mutationFn: async (payload) => {
       const response = await backApis.setUserCountry(payload);
       return response.data;
     },
-    displaySuccess: false,
+    invalidateKeys: [{ queryKey: queryKeys.user.profile }],
+    displaySuccess: true,
   });
 };
