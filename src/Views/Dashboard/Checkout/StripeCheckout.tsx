@@ -23,6 +23,12 @@ const StripeCheckout = () => {
   const [orderIds, setOrderIds] = useState<string[]>([]);
   const [isPaymentSessionRestored, setIsPaymentSessionRestored] =
     useState(false);
+  const [storedTotals, setStoredTotals] = useState<{
+    subtotal: number;
+    shipping: number;
+    tax: number;
+    total: number;
+  } | null>(null);
   const createStripeOrderMutation = useCreateStripeOrder();
 
   useEffect(() => {
@@ -33,6 +39,7 @@ const StripeCheckout = () => {
     // Check for payment session in query parameters
     const clientSecret = searchParams.get("client_secret");
     const orderIdsParam = searchParams.get("order_ids");
+    const totalsParam = searchParams.get("totals");
 
     if (storedPreview && storedAddress) {
       setShippingPreview(JSON.parse(storedPreview));
@@ -43,6 +50,11 @@ const StripeCheckout = () => {
         setStripeClientSecret(clientSecret);
         setOrderIds(JSON.parse(orderIdsParam));
         setIsPaymentSessionRestored(true);
+        
+        // Restore stored totals if available
+        if (totalsParam) {
+          setStoredTotals(JSON.parse(totalsParam));
+        }
       }
     } else {
       // If no shipping data, redirect back to shipping
@@ -78,10 +90,15 @@ const StripeCheckout = () => {
       setStripeClientSecret(clientSecret);
       setOrderIds(orderIds);
 
+      // Calculate and store totals
+      const totals = calculateCartTotals();
+      setStoredTotals(totals);
+
       // Store the payment session data in query parameters
       setSearchParams({
         client_secret: clientSecret,
         order_ids: JSON.stringify(orderIds),
+        totals: JSON.stringify(totals),
       });
     } catch (error) {
       console.error("Failed to create Stripe order:", error);
@@ -104,6 +121,16 @@ const StripeCheckout = () => {
     const total = subtotal + shipping + tax;
 
     return { subtotal, shipping, tax, total };
+  };
+
+  const getTotals = () => {
+    // If we have stored totals (from page refresh), use those
+    if (storedTotals) {
+      return storedTotals;
+    }
+    
+    // Otherwise calculate from current cart data
+    return calculateCartTotals();
   };
 
   const handlePaymentSuccess = () => {
@@ -133,6 +160,7 @@ const StripeCheckout = () => {
     // setStripeClientSecret(null);
     // setOrderIds([]);
     // setIsPaymentSessionRestored(false);
+    setStoredTotals(null);
 
     // Navigate to home page since user can't change payment method
     navigate("/dashboard/home");
@@ -203,7 +231,7 @@ const StripeCheckout = () => {
     );
   }
 
-  const totals = calculateCartTotals();
+  const totals = getTotals();
 
   return (
     <RFlex className="flex-col h-full pb-20">

@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import { 
   PaymentElement, 
@@ -8,6 +7,7 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import { icons } from "@/Constants/icons";
+import { stripePromise } from "@/Config/stripe";
 import type { 
   ShippingAddress, 
   CartItem 
@@ -136,24 +136,6 @@ const StripePayment = ({
   onError,
   onCancel,
 }: StripePaymentProps) => {
-  const [stripePromise, setStripePromise] = useState<any>(null);
-
-  useEffect(() => {
-    const initStripe = async () => {
-      const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-      setStripePromise(stripe);
-    };
-    initStripe();
-  }, []);
-
-  if (!stripePromise) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <i className={`${icons.spinner} text-2xl text-primary animate-spin`} />
-      </div>
-    );
-  }
-
   return (
     <Elements
       stripe={stripePromise}
