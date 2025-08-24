@@ -10,7 +10,6 @@ import AddressManagement from "@/components/ui/address-management";
 import {
   useGetOrders,
   useSetUserCountry,
-  useGetUserProfile,
 } from "@/Api/queriesAndMutations";
 import CountrySelector from "@/components/ui/country-selector";
 import type { AliExpressCountry } from "@/Constants/aliexpressCountries";
@@ -19,28 +18,25 @@ import { toast } from "sonner";
 
 const Profile = () => {
   const { t } = useTranslation();
-  const { user, logout } = useAuthStore();
+  const { user, profile, logout, updateProfile } = useAuthStore();
   const navigate = useNavigate();
 
   // Fetch recent orders (limit to 3 most recent)
   const { data: orders, isLoading: ordersLoading } = useGetOrders();
   const recentOrders = orders?.slice(0, 3) || [];
 
-  // Fetch user profile
-  const { data: userProfile, isLoading: profileLoading } = useGetUserProfile();
-
   // Country selection state
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const setUserCountryMutation = useSetUserCountry();
 
   // Use profile data if available, fallback to Telegram user data
-  const displayName = userProfile?.data
-    ? `${userProfile.data.firstname} ${userProfile.data.lastname || ""}`.trim()
+  const displayName = profile
+    ? `${profile.firstname} ${profile.lastname || ""}`.trim()
     : user
     ? `${user.first_name} ${user.last_name || ""}`.trim()
     : mockUser.name;
   const avatar =
-    userProfile?.data?.picture_url || user?.photo_url || mockUser.avatar;
+    profile?.picture_url || user?.photo_url || mockUser.avatar;
   const email = user?.username ? `@${user.username}` : mockUser.email;
 
   const handleLogout = () => {
@@ -55,6 +51,15 @@ const Profile = () => {
 
     try {
       await setUserCountryMutation.mutateAsync({ country: selectedCountry });
+      
+      // Update the profile in the store with the new country
+      if (profile) {
+        updateProfile({
+          ...profile,
+          country: selectedCountry,
+        });
+      }
+      
       toast.success(
         "Country updated successfully! This will improve your browsing experience."
       );
@@ -69,10 +74,10 @@ const Profile = () => {
 
   // Set selected country when profile loads
   React.useEffect(() => {
-    if (userProfile?.data?.country) {
-      setSelectedCountry(userProfile.data.country);
+    if (profile?.country) {
+      setSelectedCountry(profile.country);
     }
-  }, [userProfile]);
+  }, [profile]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -190,66 +195,60 @@ const Profile = () => {
               </h3>
             </div>
 
-            {profileLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {/* Current Country Display */}
-                {userProfile?.data?.country && (
-                  <div className="bg-muted/50 rounded-lg p-3 mb-4">
-                    <div className="flex items-center gap-2">
-                      <i
-                        className={`${icons.location} text-sm text-muted-foreground`}
-                      />
-                      <span className="text-sm text-muted-foreground">
-                        Current Country:
-                      </span>
-                      <span className="text-sm font-medium text-foreground">
-                        {getCountryByCode(userProfile.data.country)?.name ||
-                          userProfile.data.country}
-                      </span>
-                    </div>
+            <div className="space-y-4">
+              {/* Current Country Display */}
+              {profile?.country && (
+                <div className="bg-muted/50 rounded-lg p-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <i
+                      className={`${icons.location} text-sm text-muted-foreground`}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      Current Country:
+                    </span>
+                    <span className="text-sm font-medium text-foreground">
+                      {getCountryByCode(profile.country)?.name ||
+                        profile.country}
+                    </span>
                   </div>
-                )}
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Select Your Country
-                  </label>
-                  <CountrySelector
-                    selectedCountry={selectedCountry}
-                    onCountrySelect={handleCountrySelect}
-                    placeholder="Choose your country for better product recommendations"
-                  />
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Setting your country helps us provide better product
-                    recommendations, shipping estimates, and localized content
-                    for AliExpress products.
-                  </p>
                 </div>
+              )}
 
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleCountryUpdate}
-                  disabled={
-                    setUserCountryMutation.isPending || !selectedCountry
-                  }
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-                >
-                  {setUserCountryMutation.isPending ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  ) : (
-                    <i className={`${icons.location} text-lg`} />
-                  )}
-                  {setUserCountryMutation.isPending
-                    ? "Updating..."
-                    : "Update Country Settings"}
-                </motion.button>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Select Your Country
+                </label>
+                <CountrySelector
+                  selectedCountry={selectedCountry}
+                  onCountrySelect={handleCountrySelect}
+                  placeholder="Choose your country for better product recommendations"
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Setting your country helps us provide better product
+                  recommendations, shipping estimates, and localized content
+                  for AliExpress products.
+                </p>
               </div>
-            )}
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleCountryUpdate}
+                disabled={
+                  setUserCountryMutation.isPending || !selectedCountry
+                }
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+              >
+                {setUserCountryMutation.isPending ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : (
+                  <i className={`${icons.location} text-lg`} />
+                )}
+                {setUserCountryMutation.isPending
+                  ? "Updating..."
+                  : "Update Country Settings"}
+              </motion.button>
+            </div>
           </motion.div>
 
           {/* Settings Menu */}
