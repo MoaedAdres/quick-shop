@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { mockUser } from "@/data/mock-data";
@@ -18,7 +18,7 @@ import { toast } from "sonner";
 
 const Profile = () => {
   const { t } = useTranslation();
-  const { user, profile, logout, updateProfile } = useAuthStore();
+  const { user, profile, logout, updateCountry } = useAuthStore();
   const navigate = useNavigate();
 
   // Fetch recent orders (limit to 3 most recent)
@@ -52,19 +52,15 @@ const Profile = () => {
     try {
       await setUserCountryMutation.mutateAsync({ country: selectedCountry });
       
-      // Update the profile in the store with the new country
-      if (profile) {
-        updateProfile({
-          ...profile,
-          country: selectedCountry,
-        });
-      }
+      // Use the optimized country update function
+      updateCountry(selectedCountry);
       
       toast.success(
         "Country updated successfully! This will improve your browsing experience."
       );
     } catch (error) {
       console.error("Failed to update country:", error);
+      toast.error("Failed to update country. Please try again.");
     }
   };
 
@@ -472,4 +468,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default memo(Profile);

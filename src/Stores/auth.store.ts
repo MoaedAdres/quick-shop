@@ -21,6 +21,7 @@ interface AuthState {
   setIsAdmin: (isAdmin: boolean) => void;
   fetchProfile: () => Promise<void>;
   updateProfile: (updatedProfile: UserProfileResponse["data"]) => void;
+  updateCountry: (country: string) => void;
 }
 
 const initState: AuthState = {
@@ -38,6 +39,7 @@ const initState: AuthState = {
   setIsAdmin: () => {},
   fetchProfile: async () => {},
   updateProfile: () => {},
+  updateCountry: () => {},
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -171,6 +173,18 @@ export const useAuthStore = create<AuthState>()(
             profile: updatedProfile,
             isAdmin: updatedProfile.is_admin || false,
           });
+        },
+
+        updateCountry: (country: string) => {
+          const currentProfile = get().profile;
+          if (currentProfile && currentProfile.country !== country) {
+            set((state) => ({
+              profile: state.profile ? {
+                ...state.profile,
+                country: country,
+              } : null,
+            }));
+          }
         },
       }),
       { name: "auth-devtools" }
