@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { mockUser } from "@/data/mock-data";
@@ -5,19 +6,78 @@ import RFlex from "@/RComponents/RFlex";
 import { useAuthStore } from "@/Stores/auth.store";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import AddressManagement from "@/components/ui/address-management";
+import {
+  useGetOrders,
+  useSetUserCountry,
+} from "@/Api/queriesAndMutations";
+import CountrySelector from "@/components/ui/country-selector";
+import type { AliExpressCountry } from "@/Constants/aliexpressCountries";
+import { getCountryByCode } from "@/Constants/aliexpressCountries";
+import { toast } from "sonner";
 
 const Profile = () => {
   const { t } = useTranslation();
-  const { user, logout, isAdmin, setIsAdmin } = useAuthStore();
+  const { user, profile, logout, updateProfile } = useAuthStore();
   const navigate = useNavigate();
-  // Use Telegram user data if available
-  const displayName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : mockUser.name;
-  const avatar = user?.photo_url || mockUser.avatar;
+
+  // Fetch recent orders (limit to 3 most recent)
+  const { data: orders, isLoading: ordersLoading } = useGetOrders();
+  const recentOrders = orders?.slice(0, 3) || [];
+
+  // Country selection state
+  const [selectedCountry, setSelectedCountry] = useState<string>("");
+  const setUserCountryMutation = useSetUserCountry();
+
+  // Use profile data if available, fallback to Telegram user data
+  const displayName = profile
+    ? `${profile.firstname} ${profile.lastname || ""}`.trim()
+    : user
+    ? `${user.first_name} ${user.last_name || ""}`.trim()
+    : mockUser.name;
+  const avatar =
+    profile?.picture_url || user?.photo_url || mockUser.avatar;
   const email = user?.username ? `@${user.username}` : mockUser.email;
 
   const handleLogout = () => {
     logout();
   };
+
+  const handleCountryUpdate = async () => {
+    if (!selectedCountry) {
+      toast.error("Please select a country");
+      return;
+    }
+
+    try {
+      await setUserCountryMutation.mutateAsync({ country: selectedCountry });
+      
+      // Update the profile in the store with the new country
+      if (profile) {
+        updateProfile({
+          ...profile,
+          country: selectedCountry,
+        });
+      }
+      
+      toast.success(
+        "Country updated successfully! This will improve your browsing experience."
+      );
+    } catch (error) {
+      console.error("Failed to update country:", error);
+    }
+  };
+
+  const handleCountrySelect = (country: AliExpressCountry) => {
+    setSelectedCountry(country.code);
+  };
+
+  // Set selected country when profile loads
+  React.useEffect(() => {
+    if (profile?.country) {
+      setSelectedCountry(profile.country);
+    }
+  }, [profile]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -27,31 +87,6 @@ const Profile = () => {
     });
   };
 
-  // Mock order history
-  const mockOrders = [
-    {
-      id: "order-1",
-      status: "delivered" as const,
-      total: 89.99,
-      items: 2,
-      date: "2024-01-15T10:00:00Z",
-    },
-    {
-      id: "order-2",
-      status: "shipped" as const,
-      total: 124.99,
-      items: 3,
-      date: "2024-01-20T10:00:00Z",
-    },
-    {
-      id: "order-3",
-      status: "processing" as const,
-      total: 59.99,
-      items: 1,
-      date: "2024-01-25T10:00:00Z",
-    },
-  ];
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "delivered":
@@ -60,6 +95,14 @@ const Profile = () => {
         return "text-blue-500";
       case "processing":
         return "text-yellow-500";
+      case "paid":
+        return "text-green-600";
+      case "pending":
+        return "text-orange-500";
+      case "payment_failed":
+        return "text-red-500";
+      case "cancelled":
+        return "text-red-500";
       default:
         return "text-muted-foreground";
     }
@@ -73,6 +116,14 @@ const Profile = () => {
         return icons.truck;
       case "processing":
         return icons.spinner;
+      case "payment_failed":
+        return icons.close;
+      case "paid":
+        return icons.check;
+      case "pending":
+        return icons.clock;
+      case "cancelled":
+        return icons.close;
       default:
         return icons.clock;
     }
@@ -106,13 +157,15 @@ const Profile = () => {
                 </h2>
                 <p className="text-muted-foreground">{email}</p>
                 {user?.language_code && (
-                  <p className="text-sm text-muted-foreground">{user.language_code}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {user.language_code}
+                  </p>
                 )}
               </div>
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-4">
+            {/* <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary">12</div>
                 <div className="text-xs text-muted-foreground">Orders</div>
@@ -125,11 +178,81 @@ const Profile = () => {
                 <div className="text-2xl font-bold text-primary">4.8</div>
                 <div className="text-xs text-muted-foreground">Rating</div>
               </div>
+            </div> */}
+          </motion.div>
+
+          {/* Country Settings */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-card rounded-lg p-6 border border-border"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <i className={`${icons.location} text-lg text-blue-600`} />
+              <h3 className="text-lg font-semibold text-foreground">
+                Country Settings
+              </h3>
+            </div>
+
+            <div className="space-y-4">
+              {/* Current Country Display */}
+              {profile?.country && (
+                <div className="bg-muted/50 rounded-lg p-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <i
+                      className={`${icons.location} text-sm text-muted-foreground`}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      Current Country:
+                    </span>
+                    <span className="text-sm font-medium text-foreground">
+                      {getCountryByCode(profile.country)?.name ||
+                        profile.country}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Select Your Country
+                </label>
+                <CountrySelector
+                  selectedCountry={selectedCountry}
+                  onCountrySelect={handleCountrySelect}
+                  placeholder="Choose your country for better product recommendations"
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Setting your country helps us provide better product
+                  recommendations, shipping estimates, and localized content
+                  for AliExpress products.
+                </p>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleCountryUpdate}
+                disabled={
+                  setUserCountryMutation.isPending || !selectedCountry
+                }
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+              >
+                {setUserCountryMutation.isPending ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : (
+                  <i className={`${icons.location} text-lg`} />
+                )}
+                {setUserCountryMutation.isPending
+                  ? "Updating..."
+                  : "Update Country Settings"}
+              </motion.button>
             </div>
           </motion.div>
 
           {/* Settings Menu */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
@@ -184,7 +307,7 @@ const Profile = () => {
                 <i className={`${icons.chevronRight} text-muted-foreground`} />
               </motion.button>
             </div>
-          </motion.div>
+          </motion.div> */}
 
           {/* Order History */}
           <motion.div
@@ -204,40 +327,82 @@ const Profile = () => {
                 {t("view-all")}
               </motion.button>
             </div>
-            
-            <div className="divide-y divide-border">
-              {mockOrders.map((order) => (
-                <motion.div
-                  key={order.id}
-                  whileHover={{ backgroundColor: "var(--muted)" }}
-                  className="p-4 flex items-center justify-between"
+
+            {ordersLoading ? (
+              <div className="p-8 flex items-center justify-center">
+                <i
+                  className={`${icons.spinner} text-2xl text-primary animate-spin`}
+                />
+              </div>
+            ) : recentOrders.length > 0 ? (
+              <div className="divide-y divide-border">
+                {recentOrders.map((order) => (
+                  <motion.div
+                    key={order.id}
+                    whileHover={{ backgroundColor: "var(--muted)" }}
+                    className="p-4 flex items-center justify-between cursor-pointer"
+                    onClick={() => navigate(`/dashboard/orders/${order.id}`)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <i
+                        className={`${getStatusIcon(
+                          order.status?.toLocaleLowerCase()
+                        )} text-lg ${getStatusColor(
+                          order.status?.toLocaleLowerCase()
+                        )}`}
+                      />
+                      <div>
+                        <div className="font-medium text-foreground">
+                          Order #{order.id}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {order.product_total} items •{" "}
+                          {formatDate(order.created_at)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold text-foreground">
+                        ${order.total_price.toFixed(2)}
+                      </div>
+                      <div
+                        className={`text-sm capitalize ${getStatusColor(
+                          order.status?.toLocaleLowerCase()
+                        )}`}
+                      >
+                        {order.status}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center">
+                <p className="text-muted-foreground">No orders yet</p>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate("/dashboard")}
+                  className="mt-2 text-primary text-sm font-medium"
                 >
-                  <div className="flex items-center gap-3">
-                    <i className={`${getStatusIcon(order.status)} text-lg ${getStatusColor(order.status)}`} />
-                    <div>
-                      <div className="font-medium text-foreground">
-                        Order #{order.id.split('-')[1]}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {order.items} items • {formatDate(order.date)}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-semibold text-foreground">
-                      ${order.total}
-                    </div>
-                    <div className={`text-sm capitalize ${getStatusColor(order.status)}`}>
-                      {order.status}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                  Start Shopping
+                </motion.button>
+              </div>
+            )}
+          </motion.div>
+
+          {/* Address Management */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-card rounded-lg border border-border p-6"
+          >
+            <AddressManagement />
           </motion.div>
 
           {/* Admin Toggle (For Testing) */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
@@ -245,10 +410,16 @@ const Profile = () => {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <i className={`${icons.settings} text-lg text-muted-foreground`} />
+                <i
+                  className={`${icons.settings} text-lg text-muted-foreground`}
+                />
                 <div>
-                  <span className="text-foreground font-medium">Admin Mode</span>
-                  <p className="text-sm text-muted-foreground">Toggle admin access for testing</p>
+                  <span className="text-foreground font-medium">
+                    Admin Mode
+                  </span>
+                  <p className="text-sm text-muted-foreground">
+                    Toggle admin access for testing
+                  </p>
                 </div>
               </div>
               <motion.button
@@ -256,7 +427,7 @@ const Profile = () => {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsAdmin(!isAdmin)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  isAdmin ? 'bg-blue-600' : 'bg-gray-300'
+                  isAdmin ? "bg-blue-600" : "bg-gray-300"
                 }`}
               >
                 <motion.div
@@ -275,11 +446,12 @@ const Profile = () => {
                 className="mt-3 pt-3 border-t border-border"
               >
                 <p className="text-sm text-green-600 font-medium">
-                  ✅ Admin mode is active. You can access the admin dashboard from the bottom navigation.
+                  ✅ Admin mode is active. You can access the admin dashboard
+                  from the bottom navigation.
                 </p>
               </motion.div>
             )}
-          </motion.div>
+          </motion.div> */}
 
           {/* Logout Button */}
           <motion.button
@@ -300,4 +472,4 @@ const Profile = () => {
   );
 };
 
-export default Profile; 
+export default Profile;

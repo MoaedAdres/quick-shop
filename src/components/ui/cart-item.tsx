@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { icons } from "@/Constants/icons";
 import { useDeleteCartItem } from "@/Api/queriesAndMutations";
 import type { CartItem as CartItemType } from "@/Types/types";
@@ -12,6 +13,7 @@ interface CartItemProps {
 
 const CartItem = ({ item, className = "" }: CartItemProps) => {
   const deleteCartItemMutation = useDeleteCartItem();
+  const navigate = useNavigate();
 
   // Simple inline SVG placeholder (gray background with image icon text)
   const fallbackImage: string =
@@ -26,6 +28,18 @@ const CartItem = ({ item, className = "" }: CartItemProps) => {
 
   const handleRemove = () => {
     deleteCartItemMutation.mutate(item.id);
+  };
+
+  const handleProductClick = () => {
+    const supplierCode = item.product.supplier.code;
+    const productId = item.product.product_id;
+    
+    if (supplierCode === "printify") {
+      navigate(`/dashboard/printify-product/${productId}`);
+    } else {
+      // Default to AliExpress or other suppliers
+      navigate(`/dashboard/product/${productId}`);
+    }
   };
 
   const formatPrice = (price: string) => {
@@ -83,7 +97,11 @@ const CartItem = ({ item, className = "" }: CartItemProps) => {
 
         {/* Product Info */}
         <div className="flex-1">
-          <h3 className="font-medium text-sm text-foreground line-clamp-2 mb-1">
+          <h3 
+            className="font-medium text-sm text-foreground line-clamp-2 mb-1 cursor-pointer hover:text-primary transition-colors"
+            onClick={handleProductClick}
+            title="Click to view product details"
+          >
             {item.product.name}
           </h3>
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">

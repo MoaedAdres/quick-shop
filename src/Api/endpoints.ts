@@ -12,6 +12,7 @@ import type {
   TappingSettingsPayload,
   CryptoPaymentPayload,
   PaginationParams,
+  CreateAddressPayload,
 } from "@/Types/types";
 
 export const backApis = {
@@ -72,6 +73,14 @@ export const backApis = {
   // TODO: Add user profile endpoints when you provide them
   // getUserProfile: () => get("user/profile"),
   // updateUserProfile: (payload: UpdateProfilePayload) => put("user/profile", payload),
+
+  // ------------------------------ User Addresses ---------------------------------------------
+  getUserAddresses: () => get("users/addresses"),
+  createAddress: (payload: CreateAddressPayload) => post("users/addresses", payload),
+
+  // ------------------------------ User Settings ---------------------------------------------
+  getUserProfile: () => get("users/profile"),
+  setUserCountry: (payload: { country: string }) => post("users/country", payload),
 
   // ------------------------------ Orders ---------------------------------------------
   getOrders: (status?: string) => get("orders", { params: { status } }),

@@ -250,7 +250,7 @@ const TapToEarn: React.FC = () => {
     !isTappingEnabled || remainingTaps < 1 || processTapMutation.isPending;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-purple-900 via-blue-900 to-black text-white p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-purple-900 via-blue-900 to-black text-white p-4 pb-15">
       {/* Header Stats */}
       <div className="flex items-center justify-between w-full max-w-md mb-4">
         <div className="flex items-center gap-2 bg-black/30 rounded-full px-4 py-2 backdrop-blur-sm">

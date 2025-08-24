@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { icons } from "@/Constants/icons";
 import type { Product } from "@/Types/types";
 
 interface ProductCardProps {
@@ -59,7 +58,7 @@ const ProductCard = ({
         )}
 
         {/* Quick Actions */}
-        <div className="absolute top-1 right-1 flex flex-col gap-1">
+        {/* <div className="absolute top-1 right-1 flex flex-col gap-1">
           <button
             className="w-6 h-6 bg-white/90 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-colors"
             onClick={(e) => {
@@ -69,7 +68,7 @@ const ProductCard = ({
           >
             <i className={`${icons.heart} text-[10px] text-gray-600`} />
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Product Info */}
@@ -95,7 +94,7 @@ const ProductCard = ({
         </div>
 
         {/* Rating and Reviews */}
-        <div className="flex items-center justify-between">
+        {/* <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
             <div className="flex">
               {[...Array(5)].map((_, i) => (
@@ -109,7 +108,7 @@ const ProductCard = ({
             </div>
             <span className="text-[10px] text-muted-foreground">(4.5)</span>
           </div>
-        </div>
+        </div> */}
       </div>
     </motion.div>
   );

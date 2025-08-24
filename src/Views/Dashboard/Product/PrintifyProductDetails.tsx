@@ -90,7 +90,7 @@ const PrintifyProductDetails = () => {
   // Handle quantity change
   const handleQuantityChange = (delta: number) => {
     const newQuantity = quantity + delta;
-    if (newQuantity >= 1 && newQuantity <= 10) {
+    if (newQuantity >= 1 && newQuantity <= 100) {
       setQuantity(newQuantity);
     }
   };
@@ -549,7 +549,7 @@ const PrintifyProductDetails = () => {
                     </span>
                     <button
                       onClick={() => handleQuantityChange(1)}
-                      disabled={quantity >= 10}
+                      disabled={quantity >= 100}
                       className="w-8 h-8 rounded-full bg-muted flex items-center justify-center disabled:opacity-50"
                     >
                       <i className={icons.add} />

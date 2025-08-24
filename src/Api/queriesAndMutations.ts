@@ -41,6 +41,10 @@ import type {
   SupportedCurrency,
   TappingStatusResponse,
   PaginationParams,
+  AddressesResponse,
+  CreateAddressResponse,
+  CreateAddressPayload,
+  UserProfileResponse,
 } from "@/Types/types";
 
 // Query Keys
@@ -92,6 +96,10 @@ export const queryKeys = {
     paymentStatus: (paymentId: string) =>
       ["crypto", "payment-status", paymentId] as const,
     currencies: ["crypto", "currencies"] as const,
+  },
+  user: {
+    all: ["user"] as const,
+    profile: ["user", "profile"] as const,
   },
 };
 
@@ -290,10 +298,27 @@ export const useCreateStripeOrder = () => {
     { payment_method: "stripe"; delivery_address: ShippingAddress }
   >({
     mutationFn: async (payload) => {
-      const response = await backApis.createStripeOrder(payload);
-      return response.data;
+      try {
+        const response = await backApis.createStripeOrder(payload);
+        return response.data;
+      } catch (error: any) {
+        // Handle 406 error with product information
+        if (error?.response?.status === 406 && error?.response?.data) {
+          throw {
+            status: 406,
+            productInfo: error.response.data,
+            message: "Product availability issue"
+          };
+        }
+        throw error;
+      }
     },
+    invalidateKeys: [
+      { queryKey: queryKeys.cart.all },
+      { queryKey: queryKeys.orders.list() },
+    ],
     displaySuccess: false,
+    dontShowError: true,
   });
 };
 
@@ -368,6 +393,7 @@ export const useShippingPreview = () => {
       const response = await backApis.shippingPreview(address);
       return response?.data;
     },
+    dontShowError: true,
   });
 };
 
@@ -383,13 +409,19 @@ export const useGetOrders = (status?: string) => {
   });
 };
 
-export const useGetOrderDetails = (orderId: number) => {
+export const useGetOrderDetails = (
+  orderId: number,
+  refetchInterval?: number | false,
+  enableCondition: boolean = true
+) => {
   return useFetchData<OrderDetailsResponse, Error, Order>({
     queryKey: queryKeys.orders.details(orderId),
     queryFn: async () => {
       const response = await backApis.getOrderById(orderId);
       return response?.data?.data;
     },
+    enableCondition,
+    refetchInterval,
   });
 };
 
@@ -464,7 +496,7 @@ export const useUpdateReferralSettings = () => {
       return response.data;
     },
     invalidateKeys: [{ queryKey: queryKeys.admin.referralSettings }],
-    displaySuccess: true,
+    displaySuccess: false,
   });
 };
 
@@ -485,7 +517,7 @@ export const useUpdateTappingSettings = () => {
       return response.data;
     },
     invalidateKeys: [{ queryKey: queryKeys.admin.tappingSettings }],
-    displaySuccess: true,
+    displaySuccess: false,
   });
 };
 
@@ -494,10 +526,27 @@ export const useUpdateTappingSettings = () => {
 export const useCreateCryptoOrder = () => {
   return useMutateData<CryptoPaymentResponse, CryptoPaymentPayload>({
     mutationFn: async (payload) => {
-      const response = await backApis.createCryptoOrder(payload);
-      return response.data;
+      try {
+        const response = await backApis.createCryptoOrder(payload);
+        return response.data;
+      } catch (error: any) {
+        // Handle 406 error with product information
+        if (error?.response?.status === 406 && error?.response?.data) {
+          throw {
+            status: 406,
+            productInfo: error.response.data,
+            message: "Product availability issue"
+          };
+        }
+        throw error;
+      }
     },
+    invalidateKeys: [
+      { queryKey: queryKeys.cart.all },
+      { queryKey: queryKeys.orders.list() },
+    ],
     displaySuccess: false, // We'll handle success display manually
+    dontShowError: true,
   });
 };
 
@@ -523,5 +572,50 @@ export const useGetSupportedCurrencies = () => {
       const response = await backApis.getSupportedCurrencies();
       return response.data;
     },
+  });
+};
+
+// ------------------------------ Address Management Queries & Mutations ---------------------------------------------
+
+export const useGetUserAddresses = () => {
+  return useFetchData<AddressesResponse>({
+    queryKey: ["user-addresses"],
+    queryFn: async () => {
+      const response = await backApis.getUserAddresses();
+      return response.data;
+    },
+  });
+};
+
+export const useCreateAddress = () => {
+  return useMutateData<CreateAddressResponse, CreateAddressPayload>({
+    mutationFn: async (payload) => {
+      const response = await backApis.createAddress(payload);
+      return response.data;
+    },
+    invalidateKeys: [{ queryKey: ["user-addresses"] }],
+    displaySuccess: false,
+    dontShowError: true,
+  });
+};
+
+export const useGetUserProfile = () => {
+  return useFetchData<UserProfileResponse>({
+    queryKey: queryKeys.user.profile,
+    queryFn: async () => {
+      const response = await backApis.getUserProfile();
+      return response.data;
+    },
+  });
+};
+
+export const useSetUserCountry = () => {
+  return useMutateData<{ message: string }, { country: string }>({
+    mutationFn: async (payload) => {
+      const response = await backApis.setUserCountry(payload);
+      return response.data;
+    },
+    invalidateKeys: [{ queryKey: queryKeys.user.profile }],
+    displaySuccess: false,
   });
 };

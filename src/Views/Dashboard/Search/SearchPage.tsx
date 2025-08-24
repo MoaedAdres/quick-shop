@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import {
@@ -18,7 +18,6 @@ const SearchPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
   const navigate = useNavigate();
-  const fetchingRef = useRef(false);
 
   // React Query hooks
   const categoriesQuery = useGetCategories();
@@ -71,7 +70,7 @@ const SearchPage = () => {
 
   // Trigger fetch when last element comes into view
   useEffect(() => {
-    if (!inView || fetchingRef.current) return;
+    if (!inView) return;
 
     if (searchQuery.trim() && !selectedCategory) {
       // Handle search infinite scroll
@@ -80,10 +79,7 @@ const SearchPage = () => {
         !searchProductsQuery.isFetchingNextPage &&
         !searchProductsQuery.isLoading
       ) {
-        fetchingRef.current = true;
-        searchProductsQuery.fetchNextPage().finally(() => {
-          fetchingRef.current = false;
-        });
+        searchProductsQuery.fetchNextPage();
       }
     } else if (selectedCategory) {
       // Handle category infinite scroll
@@ -92,10 +88,7 @@ const SearchPage = () => {
         !categoryProductsQuery.isFetchingNextPage &&
         !categoryProductsQuery.isLoading
       ) {
-        fetchingRef.current = true;
-        categoryProductsQuery.fetchNextPage().finally(() => {
-          fetchingRef.current = false;
-        });
+        categoryProductsQuery.fetchNextPage();
       }
     }
   }, [inView]); // Only depend on inView to prevent multiple triggers

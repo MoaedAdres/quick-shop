@@ -20,10 +20,54 @@ export const dashboardRoutes: RouteObject[] = [
     {
       id: "checkout",
       path: "checkout",
-      lazy: async () => {
-        const module = await import("@/Views/Dashboard/Checkout/Checkout");
-        return { element: <module.default /> };
-      },
+      children: [
+        {
+          id: "checkout-shipping",
+          path: "shipping",
+          lazy: async () => {
+            const module = await import("@/Views/Dashboard/Checkout/Shipping");
+            return { element: <module.default /> };
+          },
+        },
+        {
+          id: "checkout-payment",
+          path: "payment",
+          children: [
+            {
+              id: "checkout-payment-method",
+              index: true,
+              lazy: async () => {
+                const module = await import("@/Views/Dashboard/Checkout/PaymentMethod");
+                return { element: <module.default /> };
+              },
+            },
+            {
+              id: "checkout-stripe",
+              path: "stripe",
+              lazy: async () => {
+                const module = await import("@/Views/Dashboard/Checkout/StripeCheckout");
+                return { element: <module.default /> };
+              },
+            },
+            {
+              id: "checkout-crypto",
+              path: "crypto",
+              lazy: async () => {
+                const module = await import("@/Views/Dashboard/Checkout/CryptoCheckout");
+                return { element: <module.default /> };
+              },
+            },
+          ],
+        },
+        {
+          id: "checkout-legacy",
+          path: "",
+          lazy: async () => {
+            const module = await import("@/Views/Dashboard/Checkout/Checkout");
+            return { element: <module.default /> };
+          },
+        },
+      ],
     },
   {
     id: "cart",

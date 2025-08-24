@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Search, Star } from 'lucide-react';
-import { useGetSupportedCurrencies } from '@/Api/queriesAndMutations';
-import type { SupportedCurrency } from '@/Types/types';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown, Star } from "lucide-react";
+// import { useGetSupportedCurrencies } from "@/Api/queriesAndMutations";
+import type { SupportedCurrency } from "@/Types/types";
 
 interface CryptoCurrencySelectorProps {
   selectedCurrency?: string;
@@ -13,18 +13,19 @@ interface CryptoCurrencySelectorProps {
 const CryptoCurrencySelector: React.FC<CryptoCurrencySelectorProps> = ({
   selectedCurrency,
   onCurrencySelect,
-  className = '',
+  className = "",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: currenciesResponse, isLoading } = useGetSupportedCurrencies();
-  const currencies = currenciesResponse?.data || [];
-
+  // const { data: currenciesResponse, isLoading } = useGetSupportedCurrencies();
+  const currencies: SupportedCurrency[] = [];
+  const isLoading = false;
   // Filter currencies based on search term
-  const filteredCurrencies = currencies.filter(currency =>
-    currency.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    currency.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCurrencies = currencies.filter(
+    (currency) =>
+      currency.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      currency.symbol.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Sort currencies: popular first, then alphabetically
@@ -34,23 +35,54 @@ const CryptoCurrencySelector: React.FC<CryptoCurrencySelectorProps> = ({
     return a.name.localeCompare(b.name);
   });
 
-  const selectedCurrencyData = currencies.find(c => c.id === selectedCurrency);
+  const selectedCurrencyData = currencies.find(
+    (c) => c.id === selectedCurrency
+  );
 
   const handleCurrencySelect = (currency: SupportedCurrency) => {
     onCurrencySelect(currency);
     setIsOpen(false);
-    setSearchTerm('');
+    setSearchTerm("");
   };
 
   // Default popular currencies if API doesn't return any
   const defaultCurrencies: SupportedCurrency[] = [
-    { id: 'usdttrc20', name: 'Tether TRC20', symbol: 'USDT', network: 'TRX', is_popular: true, logo_url: '' },
-    { id: 'btc', name: 'Bitcoin', symbol: 'BTC', network: 'BTC', is_popular: true, logo_url: '' },
-    { id: 'eth', name: 'Ethereum', symbol: 'ETH', network: 'ETH', is_popular: true, logo_url: '' },
-    { id: 'usdterc20', name: 'Tether ERC20', symbol: 'USDT', network: 'ETH', is_popular: true, logo_url: '' },
+    {
+      id: "usdttrc20",
+      name: "Tether TRC20",
+      symbol: "USDT",
+      network: "TRX",
+      is_popular: true,
+      logo_url: "",
+    },
+    {
+      id: "btc",
+      name: "Bitcoin",
+      symbol: "BTC",
+      network: "BTC",
+      is_popular: true,
+      logo_url: "",
+    },
+    {
+      id: "eth",
+      name: "Ethereum",
+      symbol: "ETH",
+      network: "ETH",
+      is_popular: true,
+      logo_url: "",
+    },
+    {
+      id: "usdterc20",
+      name: "Tether ERC20",
+      symbol: "USDT",
+      network: "ETH",
+      is_popular: true,
+      logo_url: "",
+    },
   ];
 
-  const displayCurrencies = currencies.length > 0 ? sortedCurrencies : defaultCurrencies;
+  const displayCurrencies =
+    currencies.length > 0 ? sortedCurrencies : defaultCurrencies;
 
   return (
     <div className={`relative ${className}`}>
@@ -65,8 +97,8 @@ const CryptoCurrencySelector: React.FC<CryptoCurrencySelectorProps> = ({
           {selectedCurrencyData ? (
             <>
               {selectedCurrencyData.logo_url && (
-                <img 
-                  src={selectedCurrencyData.logo_url} 
+                <img
+                  src={selectedCurrencyData.logo_url}
                   alt={selectedCurrencyData.name}
                   className="w-6 h-6 rounded-full"
                 />
@@ -87,7 +119,11 @@ const CryptoCurrencySelector: React.FC<CryptoCurrencySelectorProps> = ({
             <div className="text-muted-foreground">Select a cryptocurrency</div>
           )}
         </div>
-        <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          className={`w-5 h-5 text-muted-foreground transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
       </motion.button>
 
       {/* Dropdown */}
@@ -101,7 +137,7 @@ const CryptoCurrencySelector: React.FC<CryptoCurrencySelectorProps> = ({
             className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-lg shadow-lg z-50 max-h-80 overflow-hidden"
           >
             {/* Search */}
-            <div className="p-3 border-b border-border">
+            {/* <div className="p-3 border-b border-border">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
@@ -112,7 +148,7 @@ const CryptoCurrencySelector: React.FC<CryptoCurrencySelectorProps> = ({
                   className="w-full pl-10 pr-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Currency List */}
             <div className="max-h-60 overflow-y-auto">
@@ -130,13 +166,13 @@ const CryptoCurrencySelector: React.FC<CryptoCurrencySelectorProps> = ({
                   {displayCurrencies.map((currency) => (
                     <motion.button
                       key={currency.id}
-                      whileHover={{ backgroundColor: 'var(--muted)' }}
+                      whileHover={{ backgroundColor: "var(--muted)" }}
                       onClick={() => handleCurrencySelect(currency)}
                       className="w-full flex items-center gap-3 px-3 py-3 text-left hover:bg-muted transition-colors"
                     >
                       {currency.logo_url && (
-                        <img 
-                          src={currency.logo_url} 
+                        <img
+                          src={currency.logo_url}
                           alt={currency.name}
                           className="w-8 h-8 rounded-full"
                         />
@@ -171,10 +207,7 @@ const CryptoCurrencySelector: React.FC<CryptoCurrencySelectorProps> = ({
 
       {/* Overlay */}
       {isOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
-        />
+        <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
       )}
     </div>
   );

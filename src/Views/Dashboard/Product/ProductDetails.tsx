@@ -297,7 +297,7 @@ const ProductDetails = () => {
                         price: sku.offer_sale_price,
                       })
                     }
-                    className={`p-3 rounded-lg border text-sm ${
+                    className={`p-3 rounded-lg border text-sm w-fit ${
                       selectedSku?.sku_id === sku.sku_id
                         ? "border-primary bg-primary/10 text-primary"
                         : "border-border text-muted-foreground"
@@ -355,7 +355,7 @@ const ProductDetails = () => {
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={() => handleQuantityChange(1)}
-                  disabled={quantity >= 10}
+                  disabled={quantity >= 100}
                   className="w-8 h-8 rounded-full bg-muted flex items-center justify-center disabled:opacity-50"
                 >
                   <i className={icons.add} />

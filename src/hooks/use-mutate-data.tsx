@@ -47,6 +47,7 @@ export const useMutateData = <TData = any, TVariables = any, TError = any>(
       }
     },
     onError: (error: TError, variables: TVariables) => {
+      if (options.dontShowError) return;
       console.log("in onError mutation", error);
       // Display error message
       if ((error as any).status_code == 400) {
