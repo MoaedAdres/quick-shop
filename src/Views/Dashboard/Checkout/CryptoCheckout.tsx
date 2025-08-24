@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Wallet } from "lucide-react";
 import { icons } from "@/Constants/icons";
 import { useCreateCryptoOrder } from "@/Api/queriesAndMutations";
@@ -17,6 +17,7 @@ import { toast } from "sonner";
 
 const CryptoCheckout = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [shippingPreview, setShippingPreview] =
     useState<ShippingPreviewSuccess | null>(null);
   const [shippingAddress, setShippingAddress] =
@@ -34,14 +35,31 @@ const CryptoCheckout = () => {
     const storedPreview = localStorage.getItem("checkout_shipping_preview");
     const storedAddress = localStorage.getItem("checkout_shipping_address");
 
+    // Check for payment session in query parameters
+    const paymentDataParam = searchParams.get("payment_data");
+    const orderIdsParam = searchParams.get("order_ids");
+    const selectedCurrencyParam = searchParams.get("selected_currency");
+
     if (storedPreview && storedAddress) {
       setShippingPreview(JSON.parse(storedPreview));
       setShippingAddress(JSON.parse(storedAddress));
+
+      // Check if we have a stored payment session (for page refresh handling)
+      if (paymentDataParam && orderIdsParam) {
+        setCryptoPaymentData(JSON.parse(paymentDataParam));
+        setOrderIds(JSON.parse(orderIdsParam));
+
+        // Restore selected currency if available
+        if (selectedCurrencyParam) {
+          const currency = JSON.parse(selectedCurrencyParam);
+          setSelectedCryptoCurrency(currency);
+        }
+      }
     } else {
       // If no shipping data, redirect back to shipping
       navigate("/dashboard/checkout/shipping");
     }
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
   const handleCryptoOrderCreate = async () => {
     if (!shippingAddress || !selectedCryptoCurrency) return;
@@ -53,8 +71,19 @@ const CryptoCheckout = () => {
         delivery_address: shippingAddress,
       });
 
-      setCryptoPaymentData(result.data);
-      setOrderIds([result.data.order_id]);
+      const paymentData = result.data;
+      const orderIds = [result.data.order_id];
+
+      setCryptoPaymentData(paymentData);
+      setOrderIds(orderIds);
+
+      // Store the payment session data in query parameters
+      setSearchParams({
+        payment_data: JSON.stringify(paymentData),
+        order_ids: JSON.stringify(orderIds),
+        selected_currency: JSON.stringify(selectedCryptoCurrency),
+      });
+
       toast.success("Crypto payment session created successfully!");
     } catch (error) {
       console.error("Failed to create crypto order:", error);
@@ -63,10 +92,13 @@ const CryptoCheckout = () => {
   };
 
   const handlePaymentComplete = () => {
-    // Clear checkout data from localStorage
+    // Clear all checkout data from localStorage
     localStorage.removeItem("checkout_shipping_preview");
     localStorage.removeItem("checkout_shipping_address");
     localStorage.removeItem("checkout_payment_method");
+
+    // Clear query parameters
+    setSearchParams({});
 
     toast.success(`Payment successful! Your order has been placed.`);
     navigate("/dashboard/orders");
@@ -134,28 +166,6 @@ const CryptoCheckout = () => {
                     onCurrencySelect={setSelectedCryptoCurrency}
                   />
                 </div>
-
-                {selectedCryptoCurrency && (
-                  <motion.button
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleCryptoOrderCreate}
-                    disabled={createCryptoOrderMutation.isPending}
-                    className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-4 rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors font-semibold"
-                  >
-                    {createCryptoOrderMutation.isPending ? (
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    ) : (
-                      <Wallet className="w-5 h-5" />
-                    )}
-                    {createCryptoOrderMutation.isPending
-                      ? "Creating Payment..."
-                      : "Create Crypto Payment"}
-                  </motion.button>
-                )}
-
                 {/* Selected Currency Info */}
                 {selectedCryptoCurrency && (
                   <motion.div
@@ -179,6 +189,26 @@ const CryptoCheckout = () => {
                       </div>
                     </div>
                   </motion.div>
+                )}
+                {selectedCryptoCurrency && (
+                  <motion.button
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleCryptoOrderCreate}
+                    disabled={createCryptoOrderMutation.isPending}
+                    className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-4 rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors font-semibold"
+                  >
+                    {createCryptoOrderMutation.isPending ? (
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    ) : (
+                      <Wallet className="w-5 h-5" />
+                    )}
+                    {createCryptoOrderMutation.isPending
+                      ? "Creating Payment..."
+                      : "Create Crypto Payment"}
+                  </motion.button>
                 )}
               </div>
             </motion.div>

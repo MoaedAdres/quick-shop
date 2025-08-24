@@ -42,7 +42,7 @@ const CustomNavItem = ({
 
 const BottomNavbar = () => {
   const { isAuthenticated, isAdmin } = useAuthStore();
-  const { data: cartData } = useGetCart(isAuthenticated);
+  const { data: cartData } = useGetCart(true);
   const cartItemCount =
     cartData?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 

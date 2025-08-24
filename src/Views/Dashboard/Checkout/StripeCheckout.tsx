@@ -175,7 +175,7 @@ const StripeCheckout = () => {
     );
   }
 
-  if (error || !cartData || !cartData.items || cartData.items.length === 0) {
+  if (error) {
     // If we have a restored payment session, we can still proceed even with empty cart
     if (isPaymentSessionRestored && stripeClientSecret) {
       // Continue with the restored session
