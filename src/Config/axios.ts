@@ -5,7 +5,7 @@ const API_BASE_URL = "https://hashbel.io/api/v1/"; // TODO: Replace with actual 
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 60000, // Increased to 60 seconds
   headers: {
     "Content-Type": "application/json",
   },
