@@ -32,14 +32,23 @@ const StripeCheckout = () => {
   const [productError, setProductError] = useState<{
     message: string;
     data: {
-      id: number;
-      name: string;
-      price: string;
-      supplier: { name: string; code: string };
-      product_id: string;
-      sku_id: string;
-      sku_attr: string;
-      image_url: string;
+      unshippable_products: Array<{
+        product: {
+          id: number;
+          product: {
+            id: number;
+            name: string;
+            price: string;
+            supplier: { name: string; code: string };
+            product_id: string;
+            sku_id: string;
+            sku_attr: string;
+            image_url: string;
+          };
+          quantity: number;
+        };
+        reason: string;
+      }>;
     };
   } | null>(null);
   const createStripeOrderMutation = useCreateStripeOrder();
@@ -321,30 +330,36 @@ const StripeCheckout = () => {
               </div>
               
                              {/* Product Error Display */}
-               <div className="bg-muted/50 rounded-lg p-4 mb-6">
-                 <div className="flex items-start gap-4">
-                   <img
-                     src={productError.data.image_url}
-                     alt={productError.data.name}
-                     className="w-16 h-16 object-cover rounded-lg"
-                     onError={(e) => {
-                       e.currentTarget.src = "https://via.placeholder.com/64x64?text=No+Image";
-                     }}
-                   />
-                   <div className="flex-1 min-w-0">
-                     <h4 className="font-medium text-foreground mb-1 line-clamp-2">
-                       {productError.data.name}
-                     </h4>
-                     <div className="text-sm text-muted-foreground space-y-1">
-                       <p>Price: ${productError.data.price}</p>
-                       <p>Product ID: {productError.data.product_id}</p>
-                       <p>SKU: {productError.data.sku_id}</p>
-                       {productError.data.sku_attr && (
-                         <p>Attributes: {productError.data.sku_attr}</p>
-                       )}
+               <div className="space-y-4 mb-6">
+                 {productError.data.unshippable_products.map((item, index) => (
+                   <div key={index} className="bg-muted/50 rounded-lg p-4">
+                     <div className="flex items-start gap-4">
+                       <img
+                         src={item.product.product.image_url}
+                         alt={item.product.product.name}
+                         className="w-16 h-16 object-cover rounded-lg"
+                         onError={(e) => {
+                           e.currentTarget.src = "https://via.placeholder.com/64x64?text=No+Image";
+                         }}
+                       />
+                       <div className="flex-1 min-w-0">
+                         <h4 className="font-medium text-foreground mb-1 line-clamp-2">
+                           {item.product.product.name}
+                         </h4>
+                         <div className="text-sm text-muted-foreground space-y-1">
+                           <p>Price: ${item.product.product.price}</p>
+                           <p>Quantity: {item.product.quantity}</p>
+                           <p>Product ID: {item.product.product.product_id}</p>
+                           <p>SKU: {item.product.product.sku_id}</p>
+                           {item.product.product.sku_attr && (
+                             <p>Attributes: {item.product.product.sku_attr}</p>
+                           )}
+                           <p className="text-red-500 font-medium">Reason: {item.reason}</p>
+                         </div>
+                       </div>
                      </div>
                    </div>
-                 </div>
+                 ))}
                </div>
               
               <div className="flex gap-3">

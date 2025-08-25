@@ -566,7 +566,7 @@ export const useGetCryptoPaymentStatus = (
 };
 
 export const useGetSupportedCurrencies = () => {
-  return useFetchData<{ data: SupportedCurrency[] }>({
+  return useFetchData<{ data: { currencies: SupportedCurrency[] } }>({
     queryKey: queryKeys.crypto.currencies,
     queryFn: async () => {
       const response = await backApis.getSupportedCurrencies();
