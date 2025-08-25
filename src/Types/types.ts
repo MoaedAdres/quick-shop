@@ -885,12 +885,29 @@ export interface CryptoPaymentStatus {
 }
 
 export interface SupportedCurrency {
-  id: string;
+  id: number;
+  code: string;
   name: string;
-  symbol: string;
-  network: string;
-  is_popular: boolean;
+  enable: boolean;
+  wallet_regex: string;
+  priority: number;
+  extra_id_exists: boolean;
+  extra_id_regex: string | null;
   logo_url: string;
+  track: boolean;
+  cg_id: string;
+  is_maxlimit: boolean;
+  network: string | null;
+  smart_contract: string | null;
+  network_precision: string | null;
+  explorer_link_hash: string | null;
+  precision: number;
+  ticker: string | null;
+  is_defi: boolean;
+  is_popular: boolean;
+  is_stable: boolean;
+  available_for_to_conversion: boolean;
+  trust_wallet_id: string | null;
   min_amount?: string;
   max_amount?: string;
   test_wallet?: string;

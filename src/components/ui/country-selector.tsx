@@ -94,7 +94,6 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-3 py-2 text-sm  rounded-md bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                  autoFocus
                 />
               </div>
             </div>
