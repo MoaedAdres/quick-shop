@@ -139,7 +139,7 @@ const CryptoCheckout = () => {
       toast.success("Crypto payment session created successfully!");
     } catch (error: any) {
       console.error("Failed to create crypto order:", error);
-      
+
       // Handle 406 error with product information
       if (error?.status === 406 && error?.productInfo) {
         setProductError(error.productInfo);
@@ -190,7 +190,7 @@ const CryptoCheckout = () => {
       <div className="bg-card border-b border-border p-4">
         <div className="flex items-center gap-3">
           <motion.button
-            onClick={() => navigate("/dashboard/home")}
+            onClick={() => navigate(-1)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center"
@@ -221,40 +221,43 @@ const CryptoCheckout = () => {
                   One or more products in your cart are no longer available
                 </p>
               </div>
-              
-                             {/* Product Error Display */}
-               <div className="space-y-4 mb-6">
-                 {productError.data.unshippable_products.map((item, index) => (
-                   <div key={index} className="bg-muted/50 rounded-lg p-4">
-                     <div className="flex items-start gap-4">
-                       <img
-                         src={item.product.product.image_url}
-                         alt={item.product.product.name}
-                         className="w-16 h-16 object-cover rounded-lg"
-                         onError={(e) => {
-                           e.currentTarget.src = "https://via.placeholder.com/64x64?text=No+Image";
-                         }}
-                       />
-                       <div className="flex-1 min-w-0">
-                         <h4 className="font-medium text-foreground mb-1 line-clamp-2">
-                           {item.product.product.name}
-                         </h4>
-                         <div className="text-sm text-muted-foreground space-y-1">
-                           <p>Price: ${item.product.product.price}</p>
-                           <p>Quantity: {item.product.quantity}</p>
-                           <p>Product ID: {item.product.product.product_id}</p>
-                           <p>SKU: {item.product.product.sku_id}</p>
-                           {item.product.product.sku_attr && (
-                             <p>Attributes: {item.product.product.sku_attr}</p>
-                           )}
-                           <p className="text-red-500 font-medium">Reason: {item.reason}</p>
-                         </div>
-                       </div>
-                     </div>
-                   </div>
-                 ))}
-               </div>
-              
+
+              {/* Product Error Display */}
+              <div className="space-y-4 mb-6">
+                {productError.data.unshippable_products.map((item, index) => (
+                  <div key={index} className="bg-muted/50 rounded-lg p-4">
+                    <div className="flex items-start gap-4">
+                      <img
+                        src={item.product.product.image_url}
+                        alt={item.product.product.name}
+                        className="w-16 h-16 object-cover rounded-lg"
+                        onError={(e) => {
+                          e.currentTarget.src =
+                            "https://via.placeholder.com/64x64?text=No+Image";
+                        }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-foreground mb-1 line-clamp-2">
+                          {item.product.product.name}
+                        </h4>
+                        <div className="text-sm text-muted-foreground space-y-1">
+                          <p>Price: ${item.product.product.price}</p>
+                          <p>Quantity: {item.product.quantity}</p>
+                          <p>Product ID: {item.product.product.product_id}</p>
+                          <p>SKU: {item.product.product.sku_id}</p>
+                          {item.product.product.sku_attr && (
+                            <p>Attributes: {item.product.product.sku_attr}</p>
+                          )}
+                          <p className="text-red-500 font-medium">
+                            Reason: {item.reason}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
               <div className="flex gap-3">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -294,14 +297,14 @@ const CryptoCheckout = () => {
                   <label className="block text-sm font-medium text-foreground mb-2">
                     Choose your preferred cryptocurrency
                   </label>
-                                     <CryptoCurrencySelector
-                     selectedCurrency={selectedCryptoCurrency?.code}
-                     onCurrencySelect={setSelectedCryptoCurrency}
-                   />
+                  <CryptoCurrencySelector
+                    selectedCurrency={selectedCryptoCurrency?.code}
+                    onCurrencySelect={setSelectedCryptoCurrency}
+                  />
                 </div>
 
                 {/* Selected Currency Info */}
-                {selectedCryptoCurrency && (
+                {/* {selectedCryptoCurrency && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -317,13 +320,13 @@ const CryptoCheckout = () => {
                         <div className="font-medium text-foreground">
                           {selectedCryptoCurrency.name}
                         </div>
-                                                 <div className="text-sm text-muted-foreground">
-                           {selectedCryptoCurrency.code.toUpperCase()}
-                         </div>
+                        <div className="text-sm text-muted-foreground">
+                          {selectedCryptoCurrency.code.toUpperCase()}
+                        </div>
                       </div>
                     </div>
                   </motion.div>
-                )}
+                )} */}
                 {selectedCryptoCurrency && (
                   <motion.button
                     initial={{ opacity: 0, y: 10 }}

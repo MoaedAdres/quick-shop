@@ -1,4 +1,3 @@
-import { useAuthStore } from "@/Stores/auth.store";
 import { Navigate } from "react-router-dom";
 
 const RedirectRoute = () => {

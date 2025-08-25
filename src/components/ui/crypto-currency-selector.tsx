@@ -15,6 +15,23 @@ const CryptoCurrencySelector: React.FC<CryptoCurrencySelectorProps> = ({
   onCurrencySelect,
   className = "",
 }) => {
+  // Helper function to get gradient colors based on currency
+  const getCurrencyGradient = (code: string) => {
+    const gradients = [
+      "from-blue-500 to-purple-500",
+      "from-green-500 to-teal-500", 
+      "from-orange-500 to-red-500",
+      "from-purple-500 to-pink-500",
+      "from-yellow-500 to-orange-500",
+      "from-indigo-500 to-blue-500",
+      "from-emerald-500 to-green-500",
+      "from-rose-500 to-pink-500"
+    ];
+    
+    // Use the first character of the code to determine gradient
+    const index = code.charCodeAt(0) % gradients.length;
+    return gradients[index];
+  };
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -169,13 +186,11 @@ const CryptoCurrencySelector: React.FC<CryptoCurrencySelectorProps> = ({
         <div className="flex items-center gap-3">
           {selectedCurrencyData ? (
             <>
-              {selectedCurrencyData.logo_url && (
-                <img
-                  src={selectedCurrencyData.logo_url}
-                  alt={selectedCurrencyData.name}
-                  className="w-6 h-6 rounded-full"
-                />
-              )}
+              <div className={`w-6 h-6 bg-gradient-to-r ${getCurrencyGradient(selectedCurrencyData.code)} rounded-full flex items-center justify-center`}>
+                <span className="text-xs font-bold text-white">
+                  {selectedCurrencyData.code.charAt(0)}
+                </span>
+              </div>
               <div className="text-left">
                 <div className="font-medium text-foreground">
                   {selectedCurrencyData.code}
@@ -256,13 +271,11 @@ const CryptoCurrencySelector: React.FC<CryptoCurrencySelectorProps> = ({
                       onClick={() => handleCurrencySelect(currency)}
                       className="w-full flex items-center gap-3 px-3 py-3 text-left hover:bg-muted transition-colors"
                     >
-                      {currency.logo_url && (
-                        <img
-                          src={currency.logo_url}
-                          alt={currency.name}
-                          className="w-8 h-8 rounded-full"
-                        />
-                      )}
+                      <div className={`w-8 h-8 bg-gradient-to-r ${getCurrencyGradient(currency.code)} rounded-full flex items-center justify-center`}>
+                        <span className="text-xs font-bold text-white">
+                          {currency.code.charAt(0)}
+                        </span>
+                      </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-foreground">
