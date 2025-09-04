@@ -52,6 +52,8 @@ export interface Product {
   sale_price_currency: string;
   original_price: string;
   original_price_currency: string;
+  original_price_target?: string;
+  original_price_target_currency?: string;
   discount: number | string;
   created_at?: string;
   updated_at?: string;
@@ -252,10 +254,10 @@ export interface ProductsResponse {
 
 export interface SearchProductsResponse {
   data: {
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: Product[];
+    page_size: number;
+    total_products: number;
+    page: string;
+    products: Product[];
   };
   message: string | null;
 }
