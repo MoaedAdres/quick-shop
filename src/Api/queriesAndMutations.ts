@@ -5,6 +5,8 @@ import { useMutateData } from "@/hooks/use-mutate-data";
 import type {
   ProductsResponse,
   CategoriesResponse,
+  Category,
+  CategoryProductsResponse,
   ProductDetailsResponse,
   SearchProductsResponse,
   SearchParams,
@@ -45,6 +47,7 @@ import type {
   CreateAddressResponse,
   CreateAddressPayload,
   UserProfileResponse,
+  BulkUploadResponse,
 } from "@/Types/types";
 
 // Query Keys
@@ -129,13 +132,16 @@ export const useGetRecommendedProductsInfinite = (
       });
       return response.data;
     },
-    selectFn: (data) => data.pages.flatMap((page) => page.data.products),
+    selectFn: (data) => data.pages.flatMap((page) => page.data.results),
     initialPageParam: 1,
     getNextPageParam: (lastPage: ProductsResponse) => {
-      if (lastPage?.data?.total_products <= lastPage?.data?.page_size) {
+      if (!lastPage?.data?.next) {
         return undefined;
       }
-      return lastPage?.data?.page + 1;
+      // Extract page number from next URL or increment current page
+      const url = new URL(lastPage.data.next);
+      const nextPage = url.searchParams.get('page');
+      return nextPage ? parseInt(nextPage) : undefined;
     },
   });
 };
@@ -177,13 +183,16 @@ export const useSearchProducts = (
       return response.data;
     },
     enableCondition: enabled,
-    selectFn: (data) => data.pages.flatMap((page) => page.data.products),
+    selectFn: (data) => data.pages.flatMap((page) => page.data.results),
     initialPageParam: 1,
     getNextPageParam: (lastPage: SearchProductsResponse) => {
-      if (lastPage?.data?.total_products <= lastPage?.data?.page_size) {
+      if (!lastPage?.data?.next) {
         return undefined;
       }
-      return Number(lastPage?.data?.page) + 1;
+      // Extract page number from next URL or increment current page
+      const url = new URL(lastPage.data.next);
+      const nextPage = url.searchParams.get('page');
+      return nextPage ? parseInt(nextPage) : undefined;
     },
   });
 };
@@ -213,12 +222,13 @@ export const useGetPrintifyProductDetails = (productId: string) => {
 // ------------------------------ Categories Queries ---------------------------------------------
 
 export const useGetCategories = () => {
-  return useFetchData<CategoriesResponse>({
+  return useFetchData<CategoriesResponse, unknown, Category[]>({
     queryKey: queryKeys.categories.all,
     queryFn: async () => {
       const response = await backApis.getCategories();
       return response.data;
     },
+    selectFn: (data) => data.data.results,
   });
 };
 
@@ -227,7 +237,7 @@ export const useGetCategoryProducts = (
   pageSize: number,
   enabled: boolean
 ) => {
-  return useInfiniteData<ProductsResponse, unknown, Product[]>({
+  return useInfiniteData<CategoryProductsResponse, unknown, Product[]>({
     queryKey: queryKeys.categories.products(categoryId, {
       page: 1,
       page_size: pageSize || 20,
@@ -242,11 +252,15 @@ export const useGetCategoryProducts = (
     enableCondition: enabled,
     selectFn: (data) => data.pages.flatMap((page) => page.data.products),
     initialPageParam: 1,
-    getNextPageParam: (lastPage: ProductsResponse) => {
-      if (lastPage?.data?.total_products <= lastPage?.data?.page_size) {
+    getNextPageParam: (lastPage: CategoryProductsResponse) => {
+      const currentPage = parseInt(lastPage?.data?.page || "1");
+      const totalProducts = lastPage?.data?.total_products || 0;
+      const pageSize = lastPage?.data?.page_size || 20;
+      
+      if (currentPage * pageSize >= totalProducts) {
         return undefined;
       }
-      return Number(lastPage?.data?.page) + 1;
+      return currentPage + 1;
     },
   });
 };
@@ -617,5 +631,18 @@ export const useSetUserCountry = () => {
     },
     invalidateKeys: [{ queryKey: queryKeys.user.profile }],
     displaySuccess: false,
+  });
+};
+
+// ------------------------------ Bulk Upload Mutations ---------------------------------------------
+
+export const useBulkUploadProducts = () => {
+  return useMutateData<BulkUploadResponse, File>({
+    mutationFn: async (file: File) => {
+      const response = await backApis.uploadBulkProducts(file);
+      return response.data; // response.data is the BulkUploadResponse
+    },
+    displaySuccess: false, // We'll handle success display manually in the component
+    dontShowError: true, // We'll handle error display manually in the component
   });
 };

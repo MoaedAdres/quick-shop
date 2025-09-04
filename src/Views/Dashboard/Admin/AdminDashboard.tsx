@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Users, ShoppingBag, Gift, Coins, Save, RefreshCw } from "lucide-react";
+import { Users, ShoppingBag, Gift, Coins, Save, RefreshCw, Upload } from "lucide-react";
 import {
   useGetRecentOrders,
   useGetRecentUsers,
@@ -11,6 +11,7 @@ import {
 } from "@/Api/queriesAndMutations";
 import { toast } from "sonner";
 import RFlex from "@/RComponents/RFlex";
+import BulkUploadModal from "@/components/ui/bulk-upload-modal";
 
 const AdminDashboard = () => {
   // API hooks
@@ -43,6 +44,9 @@ const AdminDashboard = () => {
     reward_amount: "10",
     daily_tap_limit: "100",
   });
+
+  // Bulk upload modal state
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   // Update form states when data loads
   React.useEffect(() => {
@@ -240,12 +244,41 @@ const AdminDashboard = () => {
             </motion.div>
           </div>
 
+          {/* Quick Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="bg-card rounded-lg border border-border p-4"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <Upload className="w-5 h-5 text-green-600" />
+              <h2 className="text-lg font-semibold text-foreground">
+                Product Management
+              </h2>
+            </div>
+            <div className="flex items-center gap-4">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setIsUploadModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <Upload className="w-4 h-4" />
+                Upload Products
+              </motion.button>
+              <p className="text-sm text-muted-foreground">
+                Upload Excel files to add or update products in bulk
+              </p>
+            </div>
+          </motion.div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Recent Orders */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
+              transition={{ delay: 0.6 }}
               className="bg-card rounded-lg border border-border p-4"
             >
               <div className="flex items-center gap-3 mb-4">
@@ -310,7 +343,7 @@ const AdminDashboard = () => {
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
+              transition={{ delay: 0.7 }}
               className="bg-card rounded-lg border border-border p-4"
             >
               <div className="flex items-center gap-3 mb-4">
@@ -369,7 +402,7 @@ const AdminDashboard = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
+              transition={{ delay: 0.8 }}
               className="bg-card rounded-lg border border-border p-4"
             >
               <div className="flex items-center gap-3 mb-4">
@@ -439,7 +472,7 @@ const AdminDashboard = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
+              transition={{ delay: 0.9 }}
               className="bg-card rounded-lg border border-border p-4"
             >
               <div className="flex items-center gap-3 mb-4">
@@ -603,6 +636,12 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Bulk Upload Modal */}
+      <BulkUploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+      />
     </RFlex>
   );
 };

@@ -35,11 +35,11 @@ export type RSearchInputProps = {
 
 // Product Types
 export interface Product {
-  title: string;
+  id?: number;
   product_id: string | number;
+  title: string;
   main_image: string;
-  small_images?: string[];
-  category?: {
+  category: string | {
     id: number;
     name: string;
   };
@@ -47,13 +47,14 @@ export interface Product {
     id: number;
     name: string;
   };
+  small_images?: string[];
   sale_price: string;
   sale_price_currency: string;
   original_price: string;
   original_price_currency: string;
-  original_price_target?: string;
-  original_price_target_currency?: string;
-  discount: string;
+  discount: number | string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Printify Product Types
@@ -234,39 +235,48 @@ export interface ProductDetails {
 
 // Category Types
 export interface Category {
-  id: number;
   name: string;
-  sub_categories: SubCategory[];
-}
-
-export interface SubCategory {
-  id: number;
-  name: string;
+  category_id: string;
 }
 
 // API Response Types
 export interface ProductsResponse {
   data: {
-    page: number;
-    page_size: number;
-    total_products: number;
-    products: Product[];
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: Product[];
   };
   message: string | null;
 }
 
 export interface SearchProductsResponse {
   data: {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: Product[];
+  };
+  message: string | null;
+}
+
+export interface CategoryProductsResponse {
+  data: {
     page_size: number;
     total_products: number;
-    page: number;
+    page: string;
     products: Product[];
   };
   message: string | null;
 }
 
 export interface CategoriesResponse {
-  data: Category[];
+  data: {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: Category[];
+  };
   message: string | null;
 }
 
@@ -422,6 +432,15 @@ export interface UserProfile {
 export interface UserProfileResponse {
   data: UserProfile;
   message: string | null;
+}
+
+// Bulk Upload Types
+export interface BulkUploadResponse {
+  message: string;
+  data: {
+    created_count: number;
+    updated_count: number;
+  };
 }
 
 export interface Address {
