@@ -99,6 +99,15 @@ export const backApis = {
   getTappingSettings: () => get("admin-dashboard/tapping/settings"),
   updateTappingSettings: (payload: TappingSettingsPayload) =>
     put("admin-dashboard/tapping/settings", payload),
+  uploadBulkProducts: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return post("admin-dashboard/products/add-bulk", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 
   // ------------------------------ Crypto Payments (NOWPayments) ---------------------------------------------
   createCryptoOrder: (payload: CryptoPaymentPayload) => post("orders", payload),

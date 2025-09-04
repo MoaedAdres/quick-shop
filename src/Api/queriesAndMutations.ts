@@ -47,6 +47,7 @@ import type {
   CreateAddressResponse,
   CreateAddressPayload,
   UserProfileResponse,
+  BulkUploadResponse,
 } from "@/Types/types";
 
 // Query Keys
@@ -630,5 +631,18 @@ export const useSetUserCountry = () => {
     },
     invalidateKeys: [{ queryKey: queryKeys.user.profile }],
     displaySuccess: false,
+  });
+};
+
+// ------------------------------ Bulk Upload Mutations ---------------------------------------------
+
+export const useBulkUploadProducts = () => {
+  return useMutateData<BulkUploadResponse, File>({
+    mutationFn: async (file: File) => {
+      const response = await backApis.uploadBulkProducts(file);
+      return response.data; // response.data is the BulkUploadResponse
+    },
+    displaySuccess: false, // We'll handle success display manually in the component
+    dontShowError: true, // We'll handle error display manually in the component
   });
 };

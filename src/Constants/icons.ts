@@ -75,4 +75,6 @@ export const icons = {
   coins: "fa-solid fa-coins",
   gamepad: "fa-solid fa-gamepad",
   dashboard: "fa-solid fa-chart-line",
+  file: "fa-solid fa-file",
+  upload: "fa-solid fa-upload",
 } as const;

@@ -434,6 +434,15 @@ export interface UserProfileResponse {
   message: string | null;
 }
 
+// Bulk Upload Types
+export interface BulkUploadResponse {
+  message: string;
+  data: {
+    created_count: number;
+    updated_count: number;
+  };
+}
+
 export interface Address {
   id: string;
   type: "home" | "work" | "other";
