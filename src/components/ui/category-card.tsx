@@ -13,7 +13,7 @@ const CategoryCard = ({
   onClick,
   className = "",
 }: CategoryCardProps) => {
-  const { name, category_id } = category;
+  const { name } = category;
 
   const handleClick = () => {
     if (onClick) {
