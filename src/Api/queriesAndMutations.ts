@@ -129,13 +129,16 @@ export const useGetRecommendedProductsInfinite = (
       });
       return response.data;
     },
-    selectFn: (data) => data.pages.flatMap((page) => page.data.products),
+    selectFn: (data) => data.pages.flatMap((page) => page.data.results),
     initialPageParam: 1,
     getNextPageParam: (lastPage: ProductsResponse) => {
-      if (lastPage?.data?.total_products <= lastPage?.data?.page_size) {
+      if (!lastPage?.data?.next) {
         return undefined;
       }
-      return lastPage?.data?.page + 1;
+      // Extract page number from next URL or increment current page
+      const url = new URL(lastPage.data.next);
+      const nextPage = url.searchParams.get('page');
+      return nextPage ? parseInt(nextPage) : undefined;
     },
   });
 };
@@ -177,13 +180,16 @@ export const useSearchProducts = (
       return response.data;
     },
     enableCondition: enabled,
-    selectFn: (data) => data.pages.flatMap((page) => page.data.products),
+    selectFn: (data) => data.pages.flatMap((page) => page.data.results),
     initialPageParam: 1,
     getNextPageParam: (lastPage: SearchProductsResponse) => {
-      if (lastPage?.data?.total_products <= lastPage?.data?.page_size) {
+      if (!lastPage?.data?.next) {
         return undefined;
       }
-      return Number(lastPage?.data?.page) + 1;
+      // Extract page number from next URL or increment current page
+      const url = new URL(lastPage.data.next);
+      const nextPage = url.searchParams.get('page');
+      return nextPage ? parseInt(nextPage) : undefined;
     },
   });
 };
@@ -240,13 +246,16 @@ export const useGetCategoryProducts = (
       return response.data;
     },
     enableCondition: enabled,
-    selectFn: (data) => data.pages.flatMap((page) => page.data.products),
+    selectFn: (data) => data.pages.flatMap((page) => page.data.results),
     initialPageParam: 1,
     getNextPageParam: (lastPage: ProductsResponse) => {
-      if (lastPage?.data?.total_products <= lastPage?.data?.page_size) {
+      if (!lastPage?.data?.next) {
         return undefined;
       }
-      return Number(lastPage?.data?.page) + 1;
+      // Extract page number from next URL or increment current page
+      const url = new URL(lastPage.data.next);
+      const nextPage = url.searchParams.get('page');
+      return nextPage ? parseInt(nextPage) : undefined;
     },
   });
 };

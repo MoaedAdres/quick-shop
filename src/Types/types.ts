@@ -35,25 +35,18 @@ export type RSearchInputProps = {
 
 // Product Types
 export interface Product {
+  id: number;
+  product_id: string;
   title: string;
-  product_id: string | number;
   main_image: string;
-  small_images?: string[];
-  category?: {
-    id: number;
-    name: string;
-  };
-  second_level_category?: {
-    id: number;
-    name: string;
-  };
+  category: string;
   sale_price: string;
   sale_price_currency: string;
   original_price: string;
   original_price_currency: string;
-  original_price_target?: string;
-  original_price_target_currency?: string;
-  discount: string;
+  discount: number;
+  created_at: string;
+  updated_at: string;
 }
 
 // Printify Product Types
@@ -247,20 +240,20 @@ export interface SubCategory {
 // API Response Types
 export interface ProductsResponse {
   data: {
-    page: number;
-    page_size: number;
-    total_products: number;
-    products: Product[];
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: Product[];
   };
   message: string | null;
 }
 
 export interface SearchProductsResponse {
   data: {
-    page_size: number;
-    total_products: number;
-    page: number;
-    products: Product[];
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: Product[];
   };
   message: string | null;
 }
