@@ -3,58 +3,84 @@ import type { Product, Category, HeroBanner, User } from "@/Types/types";
 // Mock Categories
 export const mockCategories: Category[] = [
   {
-    id: 1,
-    name: "Electronics",
-    sub_categories: [
-      { id: 1, name: "Smartphones" },
-      { id: 2, name: "Laptops" },
-      { id: 3, name: "Accessories" },
-    ],
+    name: "Home Improvement",
+    category_id: "13",
   },
   {
-    id: 2,
-    name: "Apparel",
-    sub_categories: [
-      { id: 4, name: "Men's Clothing" },
-      { id: 5, name: "Women's Clothing" },
-      { id: 6, name: "Kids' Clothing" },
-    ],
+    name: "Home & Garden",
+    category_id: "15",
   },
   {
-    id: 3,
-    name: "Home & Decor",
-    sub_categories: [
-      { id: 7, name: "Furniture" },
-      { id: 8, name: "Kitchen" },
-      { id: 9, name: "Lighting" },
-    ],
+    name: "Sports & Entertainment",
+    category_id: "18",
   },
   {
-    id: 4,
-    name: "Beauty",
-    sub_categories: [
-      { id: 10, name: "Skincare" },
-      { id: 11, name: "Makeup" },
-      { id: 12, name: "Haircare" },
-    ],
+    name: "Office & School Supplies",
+    category_id: "21",
   },
   {
-    id: 5,
-    name: "Sports",
-    sub_categories: [
-      { id: 13, name: "Fitness" },
-      { id: 14, name: "Outdoor" },
-      { id: 15, name: "Team Sports" },
-    ],
+    name: "Toys & Hobbies",
+    category_id: "26",
   },
   {
-    id: 6,
-    name: "Books",
-    sub_categories: [
-      { id: 16, name: "Fiction" },
-      { id: 17, name: "Non-Fiction" },
-      { id: 18, name: "Educational" },
-    ],
+    name: "Security & Protection",
+    category_id: "30",
+  },
+  {
+    name: "Automobiles, Parts & Accessories",
+    category_id: "34",
+  },
+  {
+    name: "Jewelry & Accessories",
+    category_id: "36",
+  },
+  {
+    name: "Lights & Lighting",
+    category_id: "39",
+  },
+  {
+    name: "Consumer Electronics",
+    category_id: "44",
+  },
+  {
+    name: "Beauty & Health",
+    category_id: "66",
+  },
+  {
+    name: "Weddings & Events",
+    category_id: "320",
+  },
+  {
+    name: "Shoes",
+    category_id: "322",
+  },
+  {
+    name: "Electronic Components & Supplies",
+    category_id: "502",
+  },
+  {
+    name: "Phones & Telecommunications",
+    category_id: "509",
+  },
+  {
+    name: "Mother & Kids",
+    category_id: "1501",
+  },
+  {
+    name: "Furniture",
+    category_id: "1503",
+  },
+  {
+    name: "Watches",
+    category_id: "1511",
+  },
+  {
+    name: "Luggage & Bags",
+    category_id: "1524",
+  },
+  {
+    name: "Women's Clothing",
+    category_id: "200000345",
   },
 ];
 

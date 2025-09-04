@@ -37,9 +37,9 @@ const SearchPage = () => {
 
   // Category products query - only enabled when a category is selected
   const categoryProductsQuery = useGetCategoryProducts(
-    selectedCategory?.id,
+    selectedCategory?.category_id,
     20,
-    !!selectedCategory?.id
+    !!selectedCategory?.category_id
   );
 
   const handleSearch = (query: string) => {
@@ -123,7 +123,8 @@ const SearchPage = () => {
     };
   };
 
-  const categories = categoriesQuery.data?.data;
+  const categories = categoriesQuery.data;
+  console.log("categories", categories);
   const displayData = getDisplayData();
 
   return (
@@ -164,7 +165,7 @@ const SearchPage = () => {
               <div className="grid grid-cols-2 gap-4">
                 {categories.map((category) => (
                   <motion.div
-                    key={category.id}
+                    key={category.category_id}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >

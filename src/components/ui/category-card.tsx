@@ -13,7 +13,7 @@ const CategoryCard = ({
   onClick,
   className = "",
 }: CategoryCardProps) => {
-  const { name, sub_categories } = category;
+  const { name, category_id } = category;
 
   const handleClick = () => {
     if (onClick) {
@@ -48,11 +48,6 @@ const CategoryCard = ({
         <h3 className="font-medium text-sm text-foreground mb-1 line-clamp-1">
           {name}
         </h3>
-
-        {/* Sub-categories Count */}
-        <p className="text-xs text-muted-foreground">
-          {sub_categories?.length || 0} sub-categories
-        </p>
       </div>
     </motion.div>
   );

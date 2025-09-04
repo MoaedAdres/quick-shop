@@ -5,6 +5,8 @@ import { useMutateData } from "@/hooks/use-mutate-data";
 import type {
   ProductsResponse,
   CategoriesResponse,
+  Category,
+  CategoryProductsResponse,
   ProductDetailsResponse,
   SearchProductsResponse,
   SearchParams,
@@ -219,12 +221,13 @@ export const useGetPrintifyProductDetails = (productId: string) => {
 // ------------------------------ Categories Queries ---------------------------------------------
 
 export const useGetCategories = () => {
-  return useFetchData<CategoriesResponse>({
+  return useFetchData<CategoriesResponse, unknown, Category[]>({
     queryKey: queryKeys.categories.all,
     queryFn: async () => {
       const response = await backApis.getCategories();
       return response.data;
     },
+    selectFn: (data) => data.data.results,
   });
 };
 
@@ -233,7 +236,7 @@ export const useGetCategoryProducts = (
   pageSize: number,
   enabled: boolean
 ) => {
-  return useInfiniteData<ProductsResponse, unknown, Product[]>({
+  return useInfiniteData<CategoryProductsResponse, unknown, Product[]>({
     queryKey: queryKeys.categories.products(categoryId, {
       page: 1,
       page_size: pageSize || 20,
@@ -246,16 +249,17 @@ export const useGetCategoryProducts = (
       return response.data;
     },
     enableCondition: enabled,
-    selectFn: (data) => data.pages.flatMap((page) => page.data.results),
+    selectFn: (data) => data.pages.flatMap((page) => page.data.products),
     initialPageParam: 1,
-    getNextPageParam: (lastPage: ProductsResponse) => {
-      if (!lastPage?.data?.next) {
+    getNextPageParam: (lastPage: CategoryProductsResponse) => {
+      const currentPage = parseInt(lastPage?.data?.page || "1");
+      const totalProducts = lastPage?.data?.total_products || 0;
+      const pageSize = lastPage?.data?.page_size || 20;
+      
+      if (currentPage * pageSize >= totalProducts) {
         return undefined;
       }
-      // Extract page number from next URL or increment current page
-      const url = new URL(lastPage.data.next);
-      const nextPage = url.searchParams.get('page');
-      return nextPage ? parseInt(nextPage) : undefined;
+      return currentPage + 1;
     },
   });
 };

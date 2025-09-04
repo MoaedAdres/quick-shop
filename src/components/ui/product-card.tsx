@@ -51,9 +51,9 @@ const ProductCard = ({
         />
 
         {/* Discount Badge */}
-        {discount && discount > 0 && (
+        {discount && (
           <div className="absolute top-1 left-1 bg-red-500 text-white text-[10px] font-semibold px-1 py-0.5 rounded">
-            {discount}%
+            {typeof discount === 'number' ? `${discount}%` : discount}
           </div>
         )}
 
