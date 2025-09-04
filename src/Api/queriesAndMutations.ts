@@ -183,16 +183,19 @@ export const useSearchProducts = (
       return response.data;
     },
     enableCondition: enabled,
-    selectFn: (data) => data.pages.flatMap((page) => page.data.results),
+    selectFn: (data) => data.pages.flatMap((page) => page.data.products),
     initialPageParam: 1,
     getNextPageParam: (lastPage: SearchProductsResponse) => {
-      if (!lastPage?.data?.next) {
+      const currentPage = parseInt(lastPage.data.page);
+      const totalProducts = lastPage.data.total_products;
+      const pageSize = lastPage.data.page_size;
+      const totalPages = Math.ceil(totalProducts / pageSize);
+      
+      if (currentPage >= totalPages) {
         return undefined;
       }
-      // Extract page number from next URL or increment current page
-      const url = new URL(lastPage.data.next);
-      const nextPage = url.searchParams.get('page');
-      return nextPage ? parseInt(nextPage) : undefined;
+      
+      return currentPage + 1;
     },
   });
 };
