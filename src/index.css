@@ -178,3 +178,31 @@ html[data-theme="dark"] {
     background-color: var(--sidebar-primary-hover);
   }
 }
+
+/* Force CategoryCard to fit container height in swiper */
+.swiper-slide .bg-card {
+  height: 100% !important;
+  max-height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.swiper-slide .bg-card > div:first-child {
+  flex: 1 !important;
+  display: flex !important;
+  align-items: stretch !important;
+}
+
+.swiper-slide .bg-card img {
+  width: 100% !important;
+  height: calc(100% - 40px) !important;
+  min-height: 240px !important;
+}
+
+/* Mobile swiper specific sizing */
+@media (max-width: 768px) {
+  .swiper-slide .bg-card img {
+    height: calc(100% - 35px) !important;
+    min-height: 180px !important;
+  }
+}

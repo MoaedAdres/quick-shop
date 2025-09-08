@@ -9,17 +9,26 @@ import RFlex from "@/RComponents/RFlex";
 import TopBar from "@/Views/Dashboard/Home/TopBar";
 import ProductCard from "@/components/ui/product-card";
 import PrintifyProductCard from "@/components/ui/printify-product-card";
+import CategoryCard from "@/components/ui/category-card";
 import HeroBanner from "@/components/ui/hero-banner";
 import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
-import type { Product, PrintifyProduct } from "@/Types/types";
+import type { Product, PrintifyProduct, Category } from "@/Types/types";
+import { useNavigate } from "react-router-dom";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination } from "swiper/modules";
 
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
+// Import Swiper styles
+import "swiper/css";
+import "swiper/css/pagination";
+
 const Home = () => {
   const { login, isLoading } = useAuthStore();
   const isAuthenticated = true;
+  const navigate = useNavigate();
 
   // Mock hero banners (you can replace with API data later)
   const mockHeroBanners = [
@@ -46,6 +55,15 @@ const Home = () => {
       image:
         "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=800&h=400&fit=crop&q=80",
     },
+  ];
+
+  // Featured categories for the home page
+  const featuredCategories = [
+    { name: "Jewelry & Accessories", category_id: "36" },
+    { name: "Consumer Electronics", category_id: "44" },
+    { name: "Home Improvement", category_id: "13" },
+    { name: "Sports & Entertainment", category_id: "18" },
+    { name: "Office & School Supplies", category_id: "21" },
   ];
 
   // React Query hooks
@@ -118,6 +136,14 @@ const Home = () => {
     // TODO: Navigate to product details
   };
 
+  const handleCategoryClick = (category: Category) => {
+    navigate(`/dashboard/search?category=${category.category_id}`);
+  };
+
+  const handleViewAllCategories = () => {
+    navigate("/dashboard/search");
+  };
+
   const handleLogin = async () => {
     try {
       await login();
@@ -144,25 +170,25 @@ const Home = () => {
             <HeroBanner banners={mockHeroBanners} className="h-full" />
           </div>
 
-          {/* Loading State */}
-          {(recommendedProductsQuery.isLoading ||
-            printifyProductsQuery.isLoading) && (
-            <div className="flex items-center justify-center py-8">
-              <i className={`${icons.spinner} text-2xl text-primary`} />
-              <span className="ml-2 text-muted-foreground">Loading...</span>
+          {/* Selected Products - AliExpress (Future: will be replaced with selected products API) */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">
+                Selected Products
+              </h2>
             </div>
-          )}
 
-          {/* Recommended Products - AliExpress */}
-          {products.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">
-                  Recommended by AliExpress
-                </h2>
+            {recommendedProductsQuery.isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <i
+                  className={`${icons.spinner} text-2xl text-primary animate-spin`}
+                />
+                <span className="ml-2 text-muted-foreground">
+                  Loading selected products...
+                </span>
               </div>
-
-              {/* Horizontal Scrollable Products */}
+            ) : products.length > 0 ? (
+              /* Horizontal Scrollable Products */
               <div className="relative">
                 <div className="flex gap-4 overflow-x-auto pb-4 scroll-smooth">
                   {products.map((product: Product, index: number) => (
@@ -195,19 +221,226 @@ const Home = () => {
                   )}
                 </div>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="flex items-center justify-center py-8">
+                <span className="text-muted-foreground">
+                  No selected products available
+                </span>
+              </div>
+            )}
+          </div>
 
-          {/* Recommended Products - Printify */}
-          {printifyProducts.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">
-                  Recommended by Printify
-                </h2>
+          {/* Categories Section */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">
+                Shop by Category
+              </h2>
+            </div>
+
+            {/* Mobile Layout - Stack vertically */}
+            <div className="block md:hidden space-y-4 shadow-lg rounded-xl p-4">
+              {/* Featured Category Swiper */}
+              <div className="relative">
+                <Swiper
+                  slidesPerView={1}
+                  spaceBetween={16}
+                  autoplay={{
+                    delay: 4000,
+                    disableOnInteraction: false,
+                  }}
+                  pagination={{
+                    clickable: true,
+                    dynamicBullets: true,
+                  }}
+                  modules={[Autoplay, Pagination]}
+                  className="h-64 rounded-lg overflow-hidden"
+                >
+                  {featuredCategories.map((category: Category) => (
+                    <SwiperSlide key={category.category_id}>
+                      <div
+                        className="h-full w-full cursor-pointer overflow-hidden"
+                        onClick={() => handleCategoryClick(category)}
+                      >
+                        <div className="h-full w-full">
+                          <CategoryCard
+                            category={category}
+                            classNameImage="m-0"
+                            classNameName="mb-6"
+                          />
+                        </div>
+                      </div>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+
+                {/* Custom Pagination Styles */}
+                <style>{`
+                  .swiper-pagination-bullet {
+                    background: rgba(255, 255, 255, 0.5) !important;
+                    opacity: 1 !important;
+                  }
+                  .swiper-pagination-bullet-active {
+                    background: var(--primary) !important;
+                  }
+                `}</style>
               </div>
 
-              {/* Horizontal Scrollable Products */}
+              {/* Category Grid - 2 columns on mobile */}
+              <div className="grid grid-cols-2 gap-3">
+                {featuredCategories.slice(0, 4).map((category) => (
+                  <div
+                    key={category.category_id}
+                    onClick={() => handleCategoryClick(category)}
+                  >
+                    <CategoryCard category={category} />
+                  </div>
+                ))}
+              </div>
+
+              {/* View All button - Full width */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className="bg-gradient-to-br from-primary to-primary/80 rounded-lg p-4 flex items-center justify-center cursor-pointer"
+                onClick={handleViewAllCategories}
+              >
+                <div className="text-center text-white">
+                  <i className={`${icons.arrowRight} text-lg mr-2`} />
+                  <span className="text-sm font-semibold">
+                    View All Categories
+                  </span>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Desktop Layout - Side by side */}
+            <div className="hidden md:flex gap-6 shadow-lg rounded-xl p-4">
+              {/* Left side - Category swiper (60% of space) */}
+              <div className="w-3/5">
+                <div className="relative">
+                  <Swiper
+                    slidesPerView={1}
+                    spaceBetween={16}
+                    autoplay={{
+                      delay: 4000,
+                      disableOnInteraction: false,
+                    }}
+                    pagination={{
+                      clickable: true,
+                      dynamicBullets: true,
+                    }}
+                    modules={[Autoplay, Pagination]}
+                    className="h-96 rounded-lg overflow-hidden"
+                  >
+                    {featuredCategories.map((category: Category) => (
+                      <SwiperSlide key={category.category_id}>
+                        <div
+                          className="h-full w-full cursor-pointer overflow-hidden"
+                          onClick={() => handleCategoryClick(category)}
+                        >
+                          <div className="h-full w-full">
+                            <CategoryCard
+                              category={category}
+                              classNameImage="m-0"
+                              classNameName="mb-6"
+                            />
+                          </div>
+                        </div>
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+
+                  {/* Custom Pagination Styles */}
+                  <style>{`
+                    .swiper-pagination-bullet {
+                      background: rgba(255, 255, 255, 0.5) !important;
+                      opacity: 1 !important;
+                    }
+                    .swiper-pagination-bullet-active {
+                      background: var(--primary) !important;
+                    }
+                  `}</style>
+                </div>
+              </div>
+
+              {/* Right side - Featured categories grid (40% of space) */}
+              <div className="w-2/5">
+                <div className="grid grid-cols-3 gap-3 h-96">
+                  {/* First row */}
+                  <div
+                    onClick={() => handleCategoryClick(featuredCategories[0])}
+                  >
+                    <CategoryCard category={featuredCategories[0]} />
+                  </div>
+                  <div
+                    onClick={() => handleCategoryClick(featuredCategories[1])}
+                  >
+                    <CategoryCard category={featuredCategories[1]} />
+                  </div>
+                  <div
+                    onClick={() => handleCategoryClick(featuredCategories[2])}
+                  >
+                    <CategoryCard category={featuredCategories[2]} />
+                  </div>
+
+                  {/* Second row */}
+                  <div
+                    onClick={() => handleCategoryClick(featuredCategories[3])}
+                  >
+                    <CategoryCard category={featuredCategories[3]} />
+                  </div>
+                  <div
+                    onClick={() => handleCategoryClick(featuredCategories[4])}
+                  >
+                    <CategoryCard category={featuredCategories[4]} />
+                  </div>
+
+                  {/* View All button */}
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="bg-card border-2 border-dashed border-primary/30 hover:border-primary/60 rounded-lg p-1 cursor-pointer transition-all duration-200 h-full flex flex-col group"
+                    onClick={handleViewAllCategories}
+                  >
+                    <div className="flex-1 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors">
+                          <i
+                            className={`${icons.arrowRight} text-xl text-primary`}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-2 text-center">
+                      <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                        View All
+                      </span>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recommended Products - Printify */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">
+                Recommended by Printify
+              </h2>
+            </div>
+
+            {printifyProductsQuery.isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <i
+                  className={`${icons.spinner} text-2xl text-primary animate-spin`}
+                />
+                <span className="ml-2 text-muted-foreground">
+                  Loading Printify products...
+                </span>
+              </div>
+            ) : printifyProducts.length > 0 ? (
+              /* Horizontal Scrollable Products */
               <div className="relative">
                 <div className="flex gap-4 overflow-x-auto pb-4 scroll-smooth">
                   {printifyProducts.map(
@@ -241,24 +474,86 @@ const Home = () => {
                   )}
                 </div>
               </div>
+            ) : (
+              <div className="flex items-center justify-center py-8">
+                <span className="text-muted-foreground">
+                  No Printify products available
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Recommended Products - Grid Layout */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">
+                Recommended Products
+              </h2>
             </div>
-          )}
+
+            {recommendedProductsQuery.isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <i
+                  className={`${icons.spinner} text-2xl text-primary animate-spin`}
+                />
+                <span className="ml-2 text-muted-foreground">
+                  Loading recommended products...
+                </span>
+              </div>
+            ) : products.length > 0 ? (
+              <>
+                {/* Grid Layout - 3 rows, 5 columns */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  {products
+                    .slice(0, 15)
+                    .map((product: Product, index: number) => (
+                      <div
+                        key={product.product_id}
+                        ref={
+                          index === products.slice(0, 15).length - 1
+                            ? lastElementRef
+                            : null
+                        }
+                      >
+                        <ProductCard
+                          product={product}
+                          onClick={() => handleProductClick(product)}
+                        />
+                      </div>
+                    ))}
+                </div>
+
+                {/* Load more button for grid */}
+                {products.length > 15 && (
+                  <div className="flex justify-center mt-6">
+                    <Button
+                      variant="outline"
+                      onClick={() => recommendedProductsQuery.fetchNextPage()}
+                      disabled={recommendedProductsQuery.isFetchingNextPage}
+                    >
+                      {recommendedProductsQuery.isFetchingNextPage ? (
+                        <>
+                          <i className={`${icons.spinner} animate-spin mr-2`} />
+                          Loading...
+                        </>
+                      ) : (
+                        "Load More"
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex items-center justify-center py-8">
+                <span className="text-muted-foreground">
+                  No recommended products available
+                </span>
+              </div>
+            )}
+          </div>
 
           {/* Promotional Banners */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white"
-            >
-              <div className="flex items-center gap-3">
-                <i className={`${icons.truck} text-2xl`} />
-                <div>
-                  <h3 className="font-semibold">Free Shipping</h3>
-                  <p className="text-sm opacity-90">On orders over $50</p>
-                </div>
-              </div>
-            </motion.div> */}
-
             <motion.div
               whileHover={{ scale: 1.02 }}
               className="bg-card border border-border/20 rounded-lg p-6 text-white"
