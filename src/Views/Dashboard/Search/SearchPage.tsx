@@ -11,13 +11,14 @@ import RSearchInput from "@/RComponents/RSearchInput";
 import CategoryCard from "@/components/ui/category-card";
 import ProductCard from "@/components/ui/product-card";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useInView } from "react-intersection-observer";
 
 const SearchPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // React Query hooks
   const categoriesQuery = useGetCategories();
@@ -45,11 +46,17 @@ const SearchPage = () => {
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     setSelectedCategory(null); // Clear category when searching
+    // Clear URL parameters when searching
+    if (query.trim()) {
+      navigate(location.pathname, { replace: true });
+    }
   };
 
   const handleCategoryClick = (category: any) => {
     setSelectedCategory(category);
     setSearchQuery(""); // Clear search when selecting category
+    // Update URL with category parameter
+    navigate(`${location.pathname}?category=${category.category_id}`, { replace: true });
   };
 
   const handleProductClick = (product: any) => {
@@ -122,6 +129,23 @@ const SearchPage = () => {
       hasNextPage: false,
     };
   };
+
+  // Handle URL parameters on mount and location change
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const categoryId = searchParams.get('category');
+    
+    if (categoryId && categoriesQuery.data) {
+      // Find the category by ID
+      const category = categoriesQuery.data.find(
+        (cat: any) => cat.category_id === categoryId
+      );
+      if (category) {
+        setSelectedCategory(category);
+        setSearchQuery(""); // Clear search when category is selected from URL
+      }
+    }
+  }, [location.search, categoriesQuery.data]);
 
   const categories = categoriesQuery.data;
   console.log("categories", categories);
@@ -199,6 +223,8 @@ const SearchPage = () => {
                   onClick={() => {
                     setSearchQuery("");
                     setSelectedCategory(null);
+                    // Clear URL parameters
+                    navigate(location.pathname, { replace: true });
                   }}
                   className="text-xs"
                 >
