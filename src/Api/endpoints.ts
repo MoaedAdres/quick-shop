@@ -20,6 +20,9 @@ export const backApis = {
   getRecommendedProducts: (params: RecommendedProductsParams) =>
     get("products/aliexpress/recommended", { params }),
 
+  getSelectedProducts: (params?: PaginationParams) =>
+    get("products/aliexpress/selected", { params }),
+
   getProductsWithSearch: (params: SearchParams) =>
     get("products/aliexpress/products", { params }),
 

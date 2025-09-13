@@ -252,6 +252,23 @@ export interface ProductsResponse {
   message: string | null;
 }
 
+// New recommended products response (no pagination)
+export interface RecommendedProductsResponse {
+  data: Product[];
+  message: string | null;
+}
+
+// Selected products response (with pagination)
+export interface SelectedProductsResponse {
+  data: {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: Product[];
+  };
+  message: string | null;
+}
+
 export interface SearchProductsResponse {
   data: {
     page_size: number;
@@ -301,7 +318,7 @@ export interface SearchParams extends PaginationParams {
   cat_id?: number;
 }
 
-export interface RecommendedProductsParams extends PaginationParams {
+export interface RecommendedProductsParams {
   type: string;
 }
 

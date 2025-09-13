@@ -3,7 +3,8 @@ import { useFetchData } from "@/hooks/use-fetch-data";
 import { useInfiniteData } from "@/hooks/use-infinit-data";
 import { useMutateData } from "@/hooks/use-mutate-data";
 import type {
-  ProductsResponse,
+  RecommendedProductsResponse,
+  SelectedProductsResponse,
   CategoriesResponse,
   Category,
   CategoryProductsResponse,
@@ -56,6 +57,7 @@ export const queryKeys = {
     all: ["products"] as const,
     recommended: (params: RecommendedProductsParams) =>
       ["products", "recommended", params] as const,
+    selected: (params?: { page_size?: number }) => ["products", "selected", params] as const,
     search: (params: SearchParams) => ["products", "search", params] as const,
     details: (productId: string | number) =>
       ["products", "details", productId] as const,
@@ -111,30 +113,29 @@ export const queryKeys = {
 export const useGetRecommendedProducts = (
   params: RecommendedProductsParams
 ) => {
-  return useFetchData<ProductsResponse>({
+  return useFetchData<RecommendedProductsResponse, unknown, Product[]>({
     queryKey: queryKeys.products.recommended(params),
     queryFn: async () => {
       const response = await backApis.getRecommendedProducts(params);
       return response.data;
     },
+    selectFn: (data) => data.data,
   });
 };
 
-export const useGetRecommendedProductsInfinite = (
-  params: Omit<RecommendedProductsParams, "page">
-) => {
-  return useInfiniteData<ProductsResponse, unknown, Product[]>({
-    queryKey: queryKeys.products.recommended({ ...params, page: 1 }),
+export const useGetSelectedProductsInfinite = (params?: { page_size?: number }) => {
+  return useInfiniteData<SelectedProductsResponse, unknown, Product[]>({
+    queryKey: queryKeys.products.selected(params),
     queryFn: async ({ pageParam }: { pageParam?: unknown }) => {
-      const response = await backApis.getRecommendedProducts({
-        ...params,
+      const response = await backApis.getSelectedProducts({
         page: (pageParam as number) ?? 1,
+        page_size: params?.page_size ?? 20,
       });
       return response.data;
     },
     selectFn: (data) => data.pages.flatMap((page) => page.data.results),
     initialPageParam: 1,
-    getNextPageParam: (lastPage: ProductsResponse) => {
+    getNextPageParam: (lastPage: SelectedProductsResponse) => {
       if (!lastPage?.data?.next) {
         return undefined;
       }
