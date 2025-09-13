@@ -252,6 +252,23 @@ export interface ProductsResponse {
   message: string | null;
 }
 
+// New recommended products response (no pagination)
+export interface RecommendedProductsResponse {
+  data: Product[];
+  message: string | null;
+}
+
+// Selected products response (with pagination)
+export interface SelectedProductsResponse {
+  data: {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: Product[];
+  };
+  message: string | null;
+}
+
 export interface SearchProductsResponse {
   data: {
     page_size: number;
@@ -301,7 +318,7 @@ export interface SearchParams extends PaginationParams {
   cat_id?: number;
 }
 
-export interface RecommendedProductsParams extends PaginationParams {
+export interface RecommendedProductsParams {
   type: string;
 }
 
@@ -678,6 +695,7 @@ export interface TelegramLoginResponse {
       lastname: string;
       picture_url: string;
       referral_code: string;
+      is_referred: boolean;
     };
     access_token: string;
     refresh_token: string;
@@ -932,4 +950,20 @@ export interface SupportedCurrency {
   min_amount?: string;
   max_amount?: string;
   test_wallet?: string;
+}
+
+// Referral Types
+export interface SetReferralCodePayload {
+  code: string;
+}
+
+export interface ReferralData {
+  referral_code: string;
+  balance: string;
+  given_referrals: any[];
+}
+
+export interface ReferralResponse {
+  data: ReferralData;
+  message: string | null;
 }

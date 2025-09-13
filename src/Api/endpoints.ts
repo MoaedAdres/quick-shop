@@ -13,12 +13,16 @@ import type {
   CryptoPaymentPayload,
   PaginationParams,
   CreateAddressPayload,
+  SetReferralCodePayload,
 } from "@/Types/types";
 
 export const backApis = {
   // ------------------------------ Products ---------------------------------------------
   getRecommendedProducts: (params: RecommendedProductsParams) =>
     get("products/aliexpress/recommended", { params }),
+
+  getSelectedProducts: (params?: PaginationParams) =>
+    get("products/aliexpress/selected", { params }),
 
   getProductsWithSearch: (params: SearchParams) =>
     get("products/aliexpress/products", { params }),
@@ -114,4 +118,9 @@ export const backApis = {
   getCryptoPaymentStatus: (paymentId: string) =>
     get(`payments/crypto/${paymentId}/status`),
   getSupportedCurrencies: () => get("payments/nowpayments/currencies"),
+
+  // ------------------------------ Referrals ---------------------------------------------
+  setReferralCode: (payload: SetReferralCodePayload) =>
+    put("referrals", payload),
+  getReferralData: () => get("referrals/me"),
 };

@@ -2,7 +2,8 @@ import { motion } from "framer-motion";
 import { icons } from "@/Constants/icons";
 import { useAuthStore } from "@/Stores/auth.store";
 import {
-  useGetRecommendedProductsInfinite,
+  useGetRecommendedProducts,
+  useGetSelectedProductsInfinite,
   useGetPrintifyProductsInfinite,
 } from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
@@ -67,17 +68,20 @@ const Home = () => {
   ];
 
   // React Query hooks
-  const recommendedProductsQuery = useGetRecommendedProductsInfinite({
-    page_size: 20,
+  const recommendedProductsQuery = useGetRecommendedProducts({
     type: "GLOBAL_TOPSELLERS",
+  });
+
+  const selectedProductsQuery = useGetSelectedProductsInfinite({
+    page_size: 20,
   });
 
   const printifyProductsQuery = useGetPrintifyProductsInfinite({
     page_size: 20,
   });
 
-  // Intersection Observer for infinite scroll - AliExpress
-  const { ref: lastElementRef, inView: aliexpressInView } = useInView({
+  // Intersection Observer for infinite scroll - Selected Products
+  const { ref: lastSelectedElementRef, inView: selectedInView } = useInView({
     threshold: 0,
     rootMargin: "100px",
   });
@@ -88,21 +92,21 @@ const Home = () => {
     rootMargin: "100px",
   });
 
-  // Trigger fetch when last element comes into view - AliExpress
+  // Trigger fetch when last element comes into view - Selected Products
   useEffect(() => {
     if (
-      aliexpressInView &&
-      recommendedProductsQuery.hasNextPage &&
-      !recommendedProductsQuery.isFetchingNextPage
+      selectedInView &&
+      selectedProductsQuery.hasNextPage &&
+      !selectedProductsQuery.isFetchingNextPage
     ) {
-      recommendedProductsQuery.fetchNextPage();
+      selectedProductsQuery.fetchNextPage();
     }
   }, [
-    aliexpressInView,
-    recommendedProductsQuery.hasNextPage,
-    recommendedProductsQuery.isFetchingNextPage,
-    recommendedProductsQuery.fetchNextPage,
-    recommendedProductsQuery,
+    selectedInView,
+    selectedProductsQuery.hasNextPage,
+    selectedProductsQuery.isFetchingNextPage,
+    selectedProductsQuery.fetchNextPage,
+    selectedProductsQuery,
   ]);
 
   // Trigger fetch when last element comes into view - Printify
@@ -154,7 +158,8 @@ const Home = () => {
   };
 
   // Get the appropriate data - products is already the flattened array from selectFn
-  const products = recommendedProductsQuery.data || [];
+  const recommendedProducts = recommendedProductsQuery.data || [];
+  const selectedProducts = selectedProductsQuery.data || [];
   const printifyProducts = printifyProductsQuery.data || [];
 
   return (
@@ -170,7 +175,7 @@ const Home = () => {
             <HeroBanner banners={mockHeroBanners} className="h-full" />
           </div>
 
-          {/* Selected Products - AliExpress (Future: will be replaced with selected products API) */}
+          {/* Selected Products - AliExpress */}
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">
@@ -178,7 +183,7 @@ const Home = () => {
               </h2>
             </div>
 
-            {recommendedProductsQuery.isLoading ? (
+            {selectedProductsQuery.isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <i
                   className={`${icons.spinner} text-2xl text-primary animate-spin`}
@@ -187,16 +192,16 @@ const Home = () => {
                   Loading selected products...
                 </span>
               </div>
-            ) : products.length > 0 ? (
+            ) : selectedProducts.length > 0 ? (
               /* Horizontal Scrollable Products */
               <div className="relative">
                 <div className="flex gap-4 overflow-x-auto pb-4 scroll-smooth">
-                  {products.map((product: Product, index: number) => (
+                  {selectedProducts.map((product: Product, index: number) => (
                     <div
                       key={product.product_id}
                       className="flex-shrink-0 w-48 md:w-56"
                       ref={
-                        index === products.length - 1 ? lastElementRef : null
+                        index === selectedProducts.length - 1 ? lastSelectedElementRef : null
                       }
                     >
                       <ProductCard
@@ -207,7 +212,7 @@ const Home = () => {
                   ))}
 
                   {/* Loading more indicator */}
-                  {recommendedProductsQuery.isFetchingNextPage && (
+                  {selectedProductsQuery.isFetchingNextPage && (
                     <div className="flex-shrink-0 w-48 md:w-56 flex items-center justify-center">
                       <div className="flex flex-col items-center gap-2">
                         <i
@@ -500,20 +505,15 @@ const Home = () => {
                   Loading recommended products...
                 </span>
               </div>
-            ) : products.length > 0 ? (
+            ) : recommendedProducts.length > 0 ? (
               <>
                 {/* Grid Layout - 3 rows, 5 columns */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                  {products
+                  {recommendedProducts
                     .slice(0, 15)
-                    .map((product: Product, index: number) => (
+                    .map((product: Product) => (
                       <div
                         key={product.product_id}
-                        ref={
-                          index === products.slice(0, 15).length - 1
-                            ? lastElementRef
-                            : null
-                        }
                       >
                         <ProductCard
                           product={product}
@@ -522,26 +522,6 @@ const Home = () => {
                       </div>
                     ))}
                 </div>
-
-                {/* Load more button for grid */}
-                {products.length > 15 && (
-                  <div className="flex justify-center mt-6">
-                    <Button
-                      variant="outline"
-                      onClick={() => recommendedProductsQuery.fetchNextPage()}
-                      disabled={recommendedProductsQuery.isFetchingNextPage}
-                    >
-                      {recommendedProductsQuery.isFetchingNextPage ? (
-                        <>
-                          <i className={`${icons.spinner} animate-spin mr-2`} />
-                          Loading...
-                        </>
-                      ) : (
-                        "Load More"
-                      )}
-                    </Button>
-                  </div>
-                )}
               </>
             ) : (
               <div className="flex items-center justify-center py-8">
@@ -553,7 +533,7 @@ const Home = () => {
           </div>
 
           {/* Promotional Banners */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <motion.div
               whileHover={{ scale: 1.02 }}
               className="bg-card border border-border/20 rounded-lg p-6 text-white"
@@ -568,7 +548,7 @@ const Home = () => {
                 </div>
               </div>
             </motion.div>
-          </div>
+          </div> */}
         </div>
       </div>
 
