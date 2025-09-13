@@ -45,8 +45,7 @@ const Profile = () => {
   const setUserCountryMutation = useSetUserCountry();
 
   // Referral hooks and state
-  const { data: referralData, isLoading: referralLoading } =
-    useGetReferralData();
+  const { data: referralData } = useGetReferralData();
   const setReferralCodeMutation = useSetReferralCode();
   const [referralCode, setReferralCode] = useState<string>("");
 
