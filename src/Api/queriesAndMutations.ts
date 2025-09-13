@@ -49,6 +49,9 @@ import type {
   CreateAddressPayload,
   UserProfileResponse,
   BulkUploadResponse,
+  SetReferralCodePayload,
+  ReferralResponse,
+  ReferralData,
 } from "@/Types/types";
 
 // Query Keys
@@ -105,6 +108,9 @@ export const queryKeys = {
   user: {
     all: ["user"] as const,
     profile: ["user", "profile"] as const,
+  },
+  referrals: {
+    data: ["referrals", "data"] as const,
   },
 };
 
@@ -648,5 +654,29 @@ export const useBulkUploadProducts = () => {
     },
     displaySuccess: false, // We'll handle success display manually in the component
     dontShowError: true, // We'll handle error display manually in the component
+  });
+};
+
+// ------------------------------ Referral Queries & Mutations ---------------------------------------------
+
+export const useGetReferralData = () => {
+  return useFetchData<ReferralResponse, unknown, ReferralData>({
+    queryKey: queryKeys.referrals.data,
+    queryFn: async () => {
+      const response = await backApis.getReferralData();
+      return response.data;
+    },
+    selectFn: (data) => data.data,
+  });
+};
+
+export const useSetReferralCode = () => {
+  return useMutateData<ReferralResponse, SetReferralCodePayload>({
+    mutationFn: async (payload) => {
+      const response = await backApis.setReferralCode(payload);
+      return response.data;
+    },
+    invalidateKeys: [{ queryKey: queryKeys.referrals.data }],
+    displaySuccess: false,
   });
 };

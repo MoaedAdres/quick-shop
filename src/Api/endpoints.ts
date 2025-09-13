@@ -13,6 +13,7 @@ import type {
   CryptoPaymentPayload,
   PaginationParams,
   CreateAddressPayload,
+  SetReferralCodePayload,
 } from "@/Types/types";
 
 export const backApis = {
@@ -117,4 +118,9 @@ export const backApis = {
   getCryptoPaymentStatus: (paymentId: string) =>
     get(`payments/crypto/${paymentId}/status`),
   getSupportedCurrencies: () => get("payments/nowpayments/currencies"),
+
+  // ------------------------------ Referrals ---------------------------------------------
+  setReferralCode: (payload: SetReferralCodePayload) =>
+    put("referrals", payload),
+  getReferralData: () => get("referrals/me"),
 };

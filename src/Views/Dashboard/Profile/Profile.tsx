@@ -11,6 +11,8 @@ import {
   useGetOrders,
   useSetUserCountry,
   useGetUserProfile,
+  useGetReferralData,
+  useSetReferralCode,
 } from "@/Api/queriesAndMutations";
 import CountrySelector from "@/components/ui/country-selector";
 import type { AliExpressCountry } from "@/Constants/aliexpressCountries";
@@ -19,7 +21,7 @@ import { toast } from "sonner";
 
 const Profile = () => {
   const { t } = useTranslation();
-  const { user, profile, logout } = useAuthStore();
+  const { user, profile, logout, isReferred, setIsReferred } = useAuthStore();
   const navigate = useNavigate();
 
   // Fetch profile data using the hook
@@ -41,6 +43,12 @@ const Profile = () => {
     userCountry ?? ""
   );
   const setUserCountryMutation = useSetUserCountry();
+
+  // Referral hooks and state
+  const { data: referralData, isLoading: referralLoading } =
+    useGetReferralData();
+  const setReferralCodeMutation = useSetReferralCode();
+  const [referralCode, setReferralCode] = useState<string>("");
 
   // Use profile data if available, fallback to Telegram user data
   const displayName = profile
@@ -70,12 +78,27 @@ const Profile = () => {
       );
     } catch (error) {
       console.error("Failed to update country:", error);
-      toast.error("Failed to update country. Please try again.");
     }
   };
 
   const handleCountrySelect = (country: AliExpressCountry) => {
     setSelectedCountry(country.code);
+  };
+
+  const handleReferralCodeSubmit = async () => {
+    if (!referralCode.trim()) {
+      toast.error("Please enter a referral code");
+      return;
+    }
+
+    try {
+      await setReferralCodeMutation.mutateAsync({ code: referralCode.trim() });
+      setIsReferred(true);
+      setReferralCode("");
+      toast.success("Referral code submitted successfully!");
+    } catch (error) {
+      console.error("Failed to submit referral code:", error);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -246,6 +269,114 @@ const Profile = () => {
               </motion.button>
             </div>
           </motion.div>
+
+          {/* Referral Code Input - Only show if user is not referred */}
+          {!isReferred && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="bg-card rounded-lg p-6 border border-border"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <i className={`${icons.gift} text-lg text-green-600`} />
+                <h3 className="text-lg font-semibold text-foreground">
+                  Enter Referral Code
+                </h3>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Referral Code
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={referralCode}
+                      onChange={(e) =>
+                        setReferralCode(e.target.value.toUpperCase())
+                      }
+                      placeholder="Enter referral code"
+                      className="flex-1 px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      maxLength={8}
+                    />
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleReferralCodeSubmit}
+                      disabled={
+                        setReferralCodeMutation.isPending ||
+                        !referralCode.trim()
+                      }
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                    >
+                      {setReferralCodeMutation.isPending ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      ) : (
+                        "Submit"
+                      )}
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Referral Balance Display - Only show if user is referred */}
+          {referralData && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="bg-card rounded-lg p-6 border border-border"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <i className={`${icons.gift} text-lg text-green-600`} />
+                <h3 className="text-lg font-semibold text-foreground">
+                  Referral Rewards
+                </h3>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-muted/50 rounded-lg p-4 text-center">
+                    <div className="text-2xl font-bold text-green-600">
+                      ${referralData.balance}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Balance</div>
+                  </div>
+                  <div className="bg-muted/50 rounded-lg p-4 text-center">
+                    <div className="text-2xl font-bold text-primary">
+                      {referralData.given_referrals.length}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Referrals
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-muted/50 rounded-lg p-3">
+                  <div className="flex items-center gap-2">
+                    <i
+                      className={`${icons.gift} text-sm text-muted-foreground`}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      Your Referral Code:
+                    </span>
+                    <span className="text-sm font-mono font-medium text-foreground">
+                      {referralData.referral_code}
+                    </span>
+                  </div>
+                </div>
+
+                <p className="text-xs text-muted-foreground">
+                  Share your referral code with friends to earn rewards when
+                  they make their first purchase!
+                </p>
+              </div>
+            </motion.div>
+          )}
 
           {/* Settings Menu */}
           {/* <motion.div

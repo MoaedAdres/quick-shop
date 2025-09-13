@@ -59,12 +59,20 @@ export const useMutateData = <TData = any, TVariables = any, TError = any>(
           }
         );
       } else {
-        toast.error((error as any)?.message || "An error occurred");
+        toast.error(
+          (error as any)?.response?.data?.message ??
+            ((error as any)?.message || "An error occurred")
+        );
       }
 
       // Call custom onError function
       if (options.onErrorFn) {
-        options.onErrorFn((error as any)?.message ?? "Error", variables);
+        options.onErrorFn(
+          (error as any)?.response?.data?.message ??
+            (error as any)?.message ??
+            "Error",
+          variables
+        );
       }
     },
   });

@@ -16,11 +16,13 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   isAdmin: boolean;
+  isReferred: boolean;
   login: () => Promise<void>;
   logout: () => void;
   setIsAdmin: (isAdmin: boolean) => void;
   updateProfile: (updatedProfile: UserProfileResponse["data"]) => void;
   setUserCountry: (country: string) => void;
+  setIsReferred: (isReferred: boolean) => void;
 }
 
 const initState: AuthState = {
@@ -33,11 +35,13 @@ const initState: AuthState = {
   isAuthenticated: false,
   isLoading: false,
   isAdmin: false,
+  isReferred: false,
   login: async () => {},
   logout: () => {},
   setIsAdmin: () => {},
   updateProfile: () => {},
   setUserCountry: () => {},
+  setIsReferred: () => {},
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -95,6 +99,7 @@ export const useAuthStore = create<AuthState>()(
               isAuthenticated: true,
               token: loginResponse.data.access_token,
               refreshToken: loginResponse.data.refresh_token,
+              isReferred: loginResponse.data.user.is_referred,
               isLoading: false,
             });
 
@@ -137,6 +142,7 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             isLoading: false,
             isAdmin: false,
+            isReferred: false,
           });
           if (get().isTelegramApp) {
             telegramService.close();
@@ -158,6 +164,10 @@ export const useAuthStore = create<AuthState>()(
         setUserCountry: (country: string) => {
           set({ userCountry: country });
         },
+
+        setIsReferred: (isReferred: boolean) => {
+          set({ isReferred });
+        },
       }),
       { name: "auth-devtools" }
     ),
@@ -172,6 +182,7 @@ export const useAuthStore = create<AuthState>()(
         isTelegramApp: state.isTelegramApp,
         isAuthenticated: state.isAuthenticated,
         isAdmin: state.isAdmin,
+        isReferred: state.isReferred,
       }),
     }
   )

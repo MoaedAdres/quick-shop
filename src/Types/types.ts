@@ -695,6 +695,7 @@ export interface TelegramLoginResponse {
       lastname: string;
       picture_url: string;
       referral_code: string;
+      is_referred: boolean;
     };
     access_token: string;
     refresh_token: string;
@@ -949,4 +950,20 @@ export interface SupportedCurrency {
   min_amount?: string;
   max_amount?: string;
   test_wallet?: string;
+}
+
+// Referral Types
+export interface SetReferralCodePayload {
+  code: string;
+}
+
+export interface ReferralData {
+  referral_code: string;
+  balance: string;
+  given_referrals: any[];
+}
+
+export interface ReferralResponse {
+  data: ReferralData;
+  message: string | null;
 }
