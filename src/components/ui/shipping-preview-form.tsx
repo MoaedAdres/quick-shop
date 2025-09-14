@@ -65,11 +65,11 @@ const ShippingPreviewForm = ({
       order_comment: "",
     };
     setFormData(shippingAddress);
-    
+
     // Extract country code from the selected address
     const countryCode = getCountryCodeByName(address.country);
     setSelectedCountryCode(countryCode || "");
-    
+
     setShowSavedAddresses(false);
   };
 
@@ -87,27 +87,27 @@ const ShippingPreviewForm = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Show validation errors if they exist
     setShowValidationErrors(true);
-    
+
     // Validate that a country is selected
     if (!selectedCountryCode || !formData.country) {
       toast.error("Please select a country to continue");
       return;
     }
-    
+
     try {
       // Create API payload with country code instead of name
       const apiPayload = {
         ...formData,
         country: selectedCountryCode, // Use country code for API
       };
-      
+
       const result = await shippingPreviewMutation.mutateAsync(apiPayload);
       console.log("result", result);
       onSuccess?.(result);
-      setShippingAddress?.(formData); // Keep original formData for display
+      setShippingAddress?.({ ...formData, country: selectedCountryCode }); // Keep original formData for display
     } catch (error) {
       console.error("Failed to get shipping preview:", error);
       onError?.(error as unknown as ShippingPreviewError);
@@ -122,13 +122,13 @@ const ShippingPreviewForm = ({
   };
 
   const handleCountrySelect = (country: AliExpressCountry) => {
-    setFormData((prev) => ({ 
-      ...prev, 
+    setFormData((prev) => ({
+      ...prev,
       country: country.name, // Keep name for display
-      phone_country: country.phone_code || "+1" // Auto-populate phone code
+      phone_country: country.phone_code || "+1", // Auto-populate phone code
     }));
     setSelectedCountryCode(country.code); // Store code for API
-    
+
     // Clear validation error when country is selected
     if (showValidationErrors) {
       setShowValidationErrors(false);
@@ -136,7 +136,7 @@ const ShippingPreviewForm = ({
   };
 
   const getCountryCodeByName = (countryName: string): string | undefined => {
-    const country = ALIEXPRESS_COUNTRIES.find(c => c.name === countryName);
+    const country = ALIEXPRESS_COUNTRIES.find((c) => c.name === countryName);
     return country?.code;
   };
 
@@ -240,12 +240,18 @@ const ShippingPreviewForm = ({
               Country
             </label>
             <CountrySelector
-              selectedCountry={formData.country ? getCountryCodeByName(formData.country) : undefined}
+              selectedCountry={
+                formData.country
+                  ? getCountryCodeByName(formData.country)
+                  : undefined
+              }
               onCountrySelect={handleCountrySelect}
               placeholder="Select your country"
             />
             {showValidationErrors && !formData.country && (
-              <p className="text-xs text-red-500 mt-1">Please select a country</p>
+              <p className="text-xs text-red-500 mt-1">
+                Please select a country
+              </p>
             )}
           </div>
 
@@ -493,7 +499,9 @@ const ShippingPreviewForm = ({
                                   {address.phone_country} {address.mobile_no}
                                 </span>
                                 <span>•</span>
-                                <span className="w-min">{address.contact_person}</span>
+                                <span className="w-min">
+                                  {address.contact_person}
+                                </span>
                               </div>
                             </div>
                           </div>

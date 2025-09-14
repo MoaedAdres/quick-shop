@@ -57,11 +57,11 @@ const CryptoCheckout = () => {
   const createCryptoOrderMutation = useCreateCryptoOrder();
   console.log("orderIds", orderIds);
   // Get order details with automatic polling when we have order IDs and are polling
-  const { data: orderDetails, refetch: refetchOrder } = useGetOrderDetails(
-    orderIds.length > 0 ? Number(orderIds[0]) : 0,
-    isPollingOrder ? 5000 : false, // Poll every 10 seconds when polling is enabled
-    orderIds?.length > 0
-  );
+  // const { data: orderDetails, refetch: refetchOrder } = useGetOrderDetails(
+  //   orderIds.length > 0 ? Number(orderIds[0]) : 0,
+  //   isPollingOrder ? 5000 : false, // Poll every 10 seconds when polling is enabled
+  //   orderIds?.length > 0
+  // );
 
   useEffect(() => {
     // Load data from localStorage
@@ -96,21 +96,21 @@ const CryptoCheckout = () => {
   }, [navigate, searchParams]);
 
   // Handle order status changes
-  useEffect(() => {
-    if (orderDetails && isPollingOrder) {
-      const status = orderDetails.status;
+  // useEffect(() => {
+  //   if (orderDetails && isPollingOrder) {
+  //     const status = orderDetails.status;
 
-      if (status === "paid") {
-        setIsPollingOrder(false);
-        handlePaymentComplete();
-        toast.success("Payment confirmed successfully!");
-      } else if (status === "cancelled" || status === "Payment_failed") {
-        setIsPollingOrder(false);
-        handlePaymentFailed(status);
-        toast.error(`Payment ${status}. Please try again.`);
-      }
-    }
-  }, [orderDetails, isPollingOrder]);
+  //     if (status === "paid") {
+  //       setIsPollingOrder(false);
+  //       handlePaymentComplete();
+  //       toast.success("Payment confirmed successfully!");
+  //     } else if (status === "cancelled" || status === "Payment_failed") {
+  //       setIsPollingOrder(false);
+  //       handlePaymentFailed(status);
+  //       toast.error(`Payment ${status}. Please try again.`);
+  //     }
+  //   }
+  // }, [orderDetails, isPollingOrder]);
 
   const handleCryptoOrderCreate = async () => {
     if (!shippingAddress || !selectedCryptoCurrency) return;
@@ -130,11 +130,14 @@ const CryptoCheckout = () => {
       setIsPollingOrder(true); // Start polling for order status
 
       // Store the payment session data in query parameters
-      setSearchParams({
-        payment_data: JSON.stringify(paymentData),
-        order_ids: JSON.stringify(orderIds),
-        selected_currency: JSON.stringify(selectedCryptoCurrency),
-      });
+      setSearchParams(
+        {
+          payment_data: JSON.stringify(paymentData),
+          order_ids: JSON.stringify(orderIds),
+          selected_currency: JSON.stringify(selectedCryptoCurrency),
+        },
+        { replace: true }
+      );
 
       toast.success("Crypto payment session created successfully!");
     } catch (error: any) {
@@ -358,9 +361,9 @@ const CryptoCheckout = () => {
                 paymentData={cryptoPaymentData}
                 onPaymentComplete={handlePaymentComplete}
                 onPaymentFailed={handlePaymentFailed}
-                orderStatus={orderDetails?.status}
+                orderStatus={cryptoPaymentData?.payment_status}
                 isPolling={isPollingOrder}
-                onRefreshStatus={refetchOrder}
+                // onRefreshStatus={refetchOrder}
               />
             </motion.div>
           )}
