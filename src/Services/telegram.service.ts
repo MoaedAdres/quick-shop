@@ -52,22 +52,17 @@ class TelegramService {
   setupTheme() {
     if (!this.webApp) return;
     try {
-      const isDark = this.webApp.colorScheme === 'dark';
-      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-      
-      // Only apply Telegram theme colors if they exist and are not the default blue
-      if (this.webApp.themeParams) {
-        const { bg_color, text_color } = this.webApp.themeParams;
-        
-        // Only override background and text colors, preserve your purple theme
-        if (bg_color) document.documentElement.style.setProperty('--background', bg_color);
-        if (text_color) document.documentElement.style.setProperty('--foreground', text_color);
-        
-        // Don't override primary color to preserve your purple theme
-        // if (button_color) document.documentElement.style.setProperty('--primary', button_color);
-        // if (button_text_color) document.documentElement.style.setProperty('--primary-foreground', button_text_color);
-      }
-      console.log('Telegram theme setup completed - preserving purple theme');
+      // const isDark = this.webApp.colorScheme === 'dark';
+      // document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      // if (this.webApp.themeParams) {
+      //   const { bg_color, text_color, button_color, button_text_color } = this.webApp.themeParams;
+      //   if (bg_color) document.documentElement.style.setProperty('--background', bg_color);
+      //   // Skip text_color to use our consistent foreground color from CSS
+      //   // if (text_color) document.documentElement.style.setProperty('--foreground', text_color);
+      //   if (button_color) document.documentElement.style.setProperty('--primary', button_color);
+      //   if (button_text_color) document.documentElement.style.setProperty('--primary-foreground', button_text_color);
+      // }
+      console.log('Telegram theme setup completed');
     } catch (error) {
       console.error('Error setting up Telegram theme:', error);
     }
