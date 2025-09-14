@@ -230,7 +230,7 @@ html[data-theme="dark"] {
   }
 
   /* Hide scrollbars on mobile devices */
-  @media (max-width: 768px) {
+  /* @media (max-width: 768px) {
     *,
     body,
     .overflow-y-auto,
@@ -249,10 +249,10 @@ html[data-theme="dark"] {
       width: 0px !important;
       height: 0px !important;
     }
-  }
+  } */
 
   /* Keep scrollbars visible on tablet and desktop */
-  @media (min-width: 769px) {
+  /* @media (min-width: 769px) {
     *,
     body,
     .overflow-y-auto,
@@ -266,7 +266,7 @@ html[data-theme="dark"] {
       width: 6px !important;
       height: 6px !important;
     }
-  }
+  } */
 }
 
 /* Force CategoryCard to fit container height in swiper */
