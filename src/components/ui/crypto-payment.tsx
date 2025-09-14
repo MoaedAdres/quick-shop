@@ -17,7 +17,7 @@ interface CryptoPaymentProps {
 const CryptoPayment: React.FC<CryptoPaymentProps> = ({
   paymentData,
   orderStatus,
-  onRefreshStatus,
+  // onRefreshStatus,
 }) => {
   const [timeLeft, setTimeLeft] = useState<number>(0);
 

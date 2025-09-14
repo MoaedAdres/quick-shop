@@ -5,7 +5,7 @@ import { Wallet } from "lucide-react";
 import { icons } from "@/Constants/icons";
 import {
   useCreateCryptoOrder,
-  useGetOrderDetails,
+  // useGetOrderDetails,
 } from "@/Api/queriesAndMutations";
 import RFlex from "@/RComponents/RFlex";
 import CryptoPayment from "@/components/ui/crypto-payment";
