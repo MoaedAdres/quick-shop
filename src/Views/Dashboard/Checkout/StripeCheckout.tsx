@@ -19,7 +19,6 @@ const StripeCheckout = () => {
   const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(
     null
   );
-  const [orderIds, setOrderIds] = useState<string[]>([]);
   const [isPaymentSessionRestored, setIsPaymentSessionRestored] =
     useState(false);
   const [storedTotals, setStoredTotals] = useState<{
@@ -59,7 +58,6 @@ const StripeCheckout = () => {
 
     // Check for payment session in query parameters
     const clientSecret = searchParams.get("client_secret");
-    const orderIdsParam = searchParams.get("order_ids");
     const totalsParam = searchParams.get("totals");
 
     if (storedPreview && storedAddress) {
@@ -67,9 +65,8 @@ const StripeCheckout = () => {
       setShippingAddress(JSON.parse(storedAddress));
 
       // Check if we have a stored payment session (for page refresh handling)
-      if (clientSecret && orderIdsParam) {
+      if (clientSecret) {
         setStripeClientSecret(clientSecret);
-        setOrderIds(JSON.parse(orderIdsParam));
         setIsPaymentSessionRestored(true);
 
         // Restore stored totals if available
@@ -106,21 +103,21 @@ const StripeCheckout = () => {
       });
 
       const clientSecret = result.data.client_secret;
-      const orderIds = result.data.order_ids;
 
       setStripeClientSecret(clientSecret);
-      setOrderIds(orderIds);
 
       // Calculate and store totals
       const totals = calculateCartTotals();
       setStoredTotals(totals);
 
       // Store the payment session data in query parameters
-      setSearchParams({
-        client_secret: clientSecret,
-        order_ids: JSON.stringify(orderIds),
-        totals: JSON.stringify(totals),
-      });
+      setSearchParams(
+        {
+          client_secret: clientSecret,
+          totals: JSON.stringify(totals),
+        },
+        { replace: true }
+      );
     } catch (error: any) {
       console.error("Failed to create Stripe order:", error);
 
@@ -145,7 +142,7 @@ const StripeCheckout = () => {
 
     // Get tax rate based on shipping address country (if available)
     // const country = shippingAddress?.country;
-    const tax = 0
+    const tax = 0;
     const total = subtotal + shipping + tax;
 
     return { subtotal, shipping, tax, total };
@@ -162,11 +159,7 @@ const StripeCheckout = () => {
   };
 
   const handlePaymentSuccess = () => {
-    toast.success(
-      `Payment successful! Your order${
-        orderIds.length > 1 ? "s" : ""
-      } has been placed.`
-    );
+    toast.success(`Payment successful! Your order has been placed.`);
     navigate("/dashboard/orders");
   };
 

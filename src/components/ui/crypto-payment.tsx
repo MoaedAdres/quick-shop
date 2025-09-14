@@ -248,11 +248,12 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
           <li>• Payment will be confirmed automatically</li>
           <li>• Do not send from an exchange (use a personal wallet)</li>
           <li>• Make sure you're on the correct network</li>
+          <li>• Go to the Orders Page after Finishing Payment to Check You'r Order</li>
         </ul>
       </div>
 
       {/* Refresh Button */}
-      <div className="flex justify-center">
+      {/* <div className="flex justify-center">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -263,7 +264,7 @@ const CryptoPayment: React.FC<CryptoPaymentProps> = ({
           <RefreshCw className="w-4 h-4" />
           Check Status
         </motion.button>
-      </div>
+      </div> */}
 
       {/* Order Info */}
       <div className="border-t border-border pt-4 text-center text-sm text-muted-foreground">
