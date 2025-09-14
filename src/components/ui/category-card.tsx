@@ -57,7 +57,7 @@ const CategoryCard = ({
       <div className="p-2">
         <h3
           className={cn(
-            "font-medium text-sm text-foreground mb-1 line-clamp-1",
+            "font-medium text-sm text-foreground mb-1 line-clamp-3",
             classNameName
           )}
         >

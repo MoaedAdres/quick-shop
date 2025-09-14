@@ -375,29 +375,29 @@ const Home = () => {
                   <div
                     onClick={() => handleCategoryClick(featuredCategories[0])}
                   >
-                    <CategoryCard category={featuredCategories[0]} />
+                    <CategoryCard className="h-full" category={featuredCategories[0]} />
                   </div>
                   <div
                     onClick={() => handleCategoryClick(featuredCategories[1])}
                   >
-                    <CategoryCard category={featuredCategories[1]} />
+                    <CategoryCard className="h-full" category={featuredCategories[1]} />
                   </div>
                   <div
                     onClick={() => handleCategoryClick(featuredCategories[2])}
                   >
-                    <CategoryCard category={featuredCategories[2]} />
+                    <CategoryCard className="h-full" category={featuredCategories[2]} />
                   </div>
 
                   {/* Second row */}
                   <div
                     onClick={() => handleCategoryClick(featuredCategories[3])}
                   >
-                    <CategoryCard category={featuredCategories[3]} />
+                    <CategoryCard className="h-full" category={featuredCategories[3]} />
                   </div>
                   <div
                     onClick={() => handleCategoryClick(featuredCategories[4])}
                   >
-                    <CategoryCard category={featuredCategories[4]} />
+                    <CategoryCard className="h-full" category={featuredCategories[4]} />
                   </div>
 
                   {/* View All button */}
