@@ -290,7 +290,7 @@ const Profile = () => {
                   <label className="block text-sm font-medium text-foreground mb-2">
                     Referral Code
                   </label>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <input
                       type="text"
                       value={referralCode}
@@ -309,7 +309,7 @@ const Profile = () => {
                         setReferralCodeMutation.isPending ||
                         !referralCode.trim()
                       }
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                      className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                     >
                       {setReferralCodeMutation.isPending ? (
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
