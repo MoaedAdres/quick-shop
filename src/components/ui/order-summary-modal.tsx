@@ -1,6 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { icons } from "@/Constants/icons";
-import { formatTaxRate } from "@/Constants/tax";
 import type {
   ShippingPreviewSuccess,
   ShippingAddress,
@@ -92,29 +91,34 @@ const OrderSummaryModal = ({
                   Shipping Information
                 </h3>
                 <div className="bg-muted/30 rounded-lg p-4 space-y-2">
-                                     <div className="flex items-start gap-2">
-                     <i className={`${icons.user} text-muted-foreground mt-1`} />
-                     <div>
-                       <p className="font-medium text-foreground">
-                         {shippingAddress.full_name}
-                       </p>
-                       <p className="text-sm text-muted-foreground">
-                         {shippingAddress.contact_person}
-                       </p>
-                     </div>
-                   </div>
-                   <div className="flex items-start gap-2">
-                     <i className={`${icons.phone} text-muted-foreground mt-1`} />
-                     <p className="text-sm text-muted-foreground">
-                       {shippingAddress.phone_country} {shippingAddress.mobile_no}
-                     </p>
-                   </div>
-                   <div className="flex items-start gap-2">
-                     <i className={`${icons.location} text-muted-foreground mt-1`} />
-                     <p className="text-sm text-muted-foreground">
-                       {formatAddress(shippingAddress)}
-                     </p>
-                   </div>
+                  <div className="flex items-start gap-2">
+                    <i className={`${icons.user} text-muted-foreground mt-1`} />
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {shippingAddress.full_name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {shippingAddress.contact_person}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <i
+                      className={`${icons.phone} text-muted-foreground mt-1`}
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      {shippingAddress.phone_country}{" "}
+                      {shippingAddress.mobile_no}
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <i
+                      className={`${icons.location} text-muted-foreground mt-1`}
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      {formatAddress(shippingAddress)}
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -163,9 +167,11 @@ const OrderSummaryModal = ({
                       key={index}
                       className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg"
                     >
-                                             <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
-                         <i className={`${icons.shoppingBag} text-muted-foreground`} />
-                       </div>
+                      <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
+                        <i
+                          className={`${icons.shoppingBag} text-muted-foreground`}
+                        />
+                      </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-foreground truncate">
                           {item.product.name}
@@ -176,7 +182,9 @@ const OrderSummaryModal = ({
                       </div>
                       <div className="text-right">
                         <p className="font-medium text-foreground">
-                          {formatPrice(parseFloat(item.product.price) * item.quantity)}
+                          {formatPrice(
+                            parseFloat(item.product.price) * item.quantity
+                          )}
                         </p>
                       </div>
                     </div>
@@ -206,14 +214,14 @@ const OrderSummaryModal = ({
                       {formatPrice(totals.shipping)}
                     </span>
                   </div>
-                                     <div className="flex justify-between items-center">
-                     <span className="text-sm text-muted-foreground">
-                       Tax ({formatTaxRate(shippingAddress.country)})
-                     </span>
-                     <span className="text-foreground">
-                       {formatPrice(totals.tax)}
-                     </span>
-                   </div>
+                  {/* <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      Tax ({formatTaxRate(shippingAddress.country)})
+                    </span>
+                    <span className="text-foreground">
+                      {formatPrice(totals.tax)}
+                    </span>
+                  </div> */}
                   <div className="border-t border-border pt-2">
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-semibold text-foreground">
@@ -263,4 +271,4 @@ const OrderSummaryModal = ({
   );
 };
 
-export default OrderSummaryModal; 
+export default OrderSummaryModal;
