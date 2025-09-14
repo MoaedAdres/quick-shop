@@ -16,7 +16,6 @@ import type {
   UnshippableProduct,
 } from "@/Types/types";
 import { toast } from "sonner";
-import { calculateTax } from "@/Constants/tax";
 
 const Shipping = () => {
   const navigate = useNavigate();
@@ -73,8 +72,8 @@ const Shipping = () => {
     const shipping = shippingPreview?.data.total_shipping_fee ?? 0;
 
     // Get tax rate based on shipping address country (if available)
-    const country = shippingAddress?.country;
-    const tax = calculateTax(subtotal, country);
+    // const country = shippingAddress?.country;
+    const tax = 0
     const total = subtotal + shipping + tax;
 
     return { subtotal, shipping, tax, total };

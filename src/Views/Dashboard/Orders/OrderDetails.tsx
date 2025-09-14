@@ -163,14 +163,6 @@ export default function OrderDetails() {
                   </p>
                   <p>
                     <span className="text-muted-foreground">
-                      Payment Reference:
-                    </span>{" "}
-                    <span className="text-foreground">
-                      {order.payment_reference}
-                    </span>
-                  </p>
-                  <p>
-                    <span className="text-muted-foreground">
                       Payment Status:
                     </span>{" "}
                     <span className="text-foreground">
